@@ -5,13 +5,13 @@ import TaskList from "@/components/TaskList";
 import { useState } from "react";
 
 import {
-  Fab,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   TextField,
+  Box,
 } from "@mui/material";
 
 export default function TasksPage() {
@@ -23,7 +23,7 @@ export default function TasksPage() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    status: "todo",
+    status: "backlog",
     sprint: "",
     users: [] as number[],
   });
@@ -59,7 +59,7 @@ export default function TasksPage() {
       setForm({
         title: "",
         description: "",
-        status: "todo",
+        status: "backlog",
         sprint: "",
         users: [],
       });
@@ -75,33 +75,47 @@ export default function TasksPage() {
   if (isError) return <p>Error fetching tasks</p>;
 
   return (
-    <div>
+    <Box>
       <h1>Tasks</h1>
 
       {/* ✅ BOARD */}
       <TaskList tasks={data || []} />
 
-      {/* ✅ FLOATING BUTTON */}
-      <Fab
-        color="primary"
+      {/* ✅ FLOATING BUTTON (UPDATED) */}
+      <Button
+        variant="contained"
         onClick={handleOpen}
         sx={{
           position: "fixed",
           bottom: 30,
           right: 30,
+          borderRadius: "20px",
+          px: 3,
+          py: 1.2,
+          textTransform: "none",
+          boxShadow: 3,
+          "&:hover": {
+            boxShadow: 6,
+          },
         }}
       >
-        +
-      </Fab>
+        Create Task
+      </Button>
 
       {/* ✅ DIALOG */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle>Create Task</DialogTitle>
 
-        <DialogContent>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            mt: 1,
+          }}
+        >
           <TextField
             fullWidth
-            margin="dense"
             label="Title"
             name="title"
             value={form.title}
@@ -110,7 +124,6 @@ export default function TasksPage() {
 
           <TextField
             fullWidth
-            margin="dense"
             label="Description"
             name="description"
             value={form.description}
@@ -119,7 +132,6 @@ export default function TasksPage() {
 
           <TextField
             fullWidth
-            margin="dense"
             label="Sprint"
             name="sprint"
             value={form.sprint}
@@ -128,7 +140,6 @@ export default function TasksPage() {
 
           <TextField
             fullWidth
-            margin="dense"
             label="User IDs (1,2)"
             onChange={handleUsersChange}
           />
@@ -142,6 +153,6 @@ export default function TasksPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 }

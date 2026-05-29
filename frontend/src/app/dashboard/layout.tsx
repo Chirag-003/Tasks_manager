@@ -10,17 +10,31 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box>
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {/* ✅ HEADER */}
       <Header />
 
-      {/* ✅ MAIN SECTION */}
-      <Box sx={{ display: "flex" }}>
-        {/* ✅ Sidebar */}
+      {/* ✅ MAIN AREA */}
+      <Box
+        sx={{
+          display: "flex",
+          flex: 1,
+          overflow: "hidden", // ✅ prevents outer scroll
+        }}
+      >
+        {/* ✅ SIDEBAR */}
         <Sidebar />
 
-        {/* ✅ Content */}
-        <Box sx={{ flex: 1, p: 2 }}>{children}</Box>
+        {/* ✅ CONTENT */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: "auto", // ✅ only content scrolls if needed
+            p: 2,
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );
