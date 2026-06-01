@@ -1,4 +1,4 @@
-'use client";';
+"use client";
 
 import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
 
@@ -8,12 +8,14 @@ type TaskCardProps = {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "todo":
-      return "default";
     case "backlog":
       return "warning";
+    case "todo":
+      return "default";
     case "in_progress":
       return "primary";
+    case "completed":
+      return "success";
     default:
       return "default";
   }
@@ -21,53 +23,102 @@ const getStatusColor = (status: string) => {
 
 export default function TaskCard({ task }: TaskCardProps) {
   return (
-    <Card sx={{ mb: 2, p: 1, borderRadius: 2 }}>
-      <CardContent>
-        {/* ✅ HEADER */}
+    <Card
+      sx={{
+        mb: 2,
+        borderRadius: 3,
 
+        // ✅ KEY FIXES (IMPORTANT)
+        backgroundColor: "#f4f6f8", // slightly stronger grey
+        border: "1px solid #e0e0e0", // ✅ THIS creates separation
+
+        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+
+        transition: "all 0.2s ease",
+        "&:hover": {
+          boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+          transform: "translateY(-2px)",
+        },
+      }}
+    >
+      <CardContent sx={{ p: 2 }}>
+        {/* ✅ HEADER */}
         <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mb: 1 }}
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 2, // ✅ increased spacing
+          }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+              fontSize: "15px",
+              lineHeight: 1.4,
+              flex: 1,
+            }}
+          >
             {task.title}
           </Typography>
 
-          <Chip label={task.status} color={getStatusColor(task.status)} />
+          <Chip
+            label={task.status}
+            size="small"
+            color={getStatusColor(task.status)}
+            sx={{
+              textTransform: "capitalize",
+              flexShrink: 0,
+            }}
+          />
         </Box>
 
-        {/* ✅ CONTENT (2-column layout) */}
+        {/* ✅ DESCRIPTION */}
+        {task.description && (
+          <Typography
+            variant="body2"
+            sx={{
+              mt: 1,
+              color: "text.secondary",
+              fontSize: "13px",
+              lineHeight: 1.4,
+            }}
+          >
+            {task.description}
+          </Typography>
+        )}
+
+        {/* ✅ META INFO */}
         <Box
           sx={{
-            mt: 1,
+            mt: 2,
             display: "flex",
             justifyContent: "space-between",
+            fontSize: "13px",
+            color: "text.secondary",
           }}
         >
-          {/* LEFT */}
           <Box>
-            <Typography>
-              <b>Sprint:</b> {task.sprint}
+            <Typography sx={{ fontSize: "13px" }}>
+              Sprint: {task.sprint || "—"}
             </Typography>
 
-            <Typography sx={{ mt: 0.5 }}>
-              <b>Users:</b>{" "}
+            <Typography sx={{ fontSize: "13px", mt: 0.5 }}>
+              Users:{" "}
               {!task.users?.length
-                ? "None"
+                ? "—"
                 : task.users.map((u: any) => u.username).join(", ")}
             </Typography>
           </Box>
 
-          {/* RIGHT */}
-          <Box>
-            <Typography>
-              <b>Subtasks:</b> {task.subtasks?.length || 0}
+          <Box textAlign="right">
+            <Typography sx={{ fontSize: "13px" }}>
+              {task.subtasks?.length || 0} subtasks
             </Typography>
 
-            <Typography sx={{ mt: 0.5 }}>
-              <b>Comments:</b> {task.comments?.data?.length || 0}
+            <Typography sx={{ fontSize: "13px", mt: 0.5 }}>
+              {task.comments?.data?.length || 0} comments
             </Typography>
           </Box>
         </Box>

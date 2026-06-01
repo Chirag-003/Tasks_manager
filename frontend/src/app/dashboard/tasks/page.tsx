@@ -2,86 +2,79 @@
 
 import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
 import TaskList from "@/components/TaskList";
-import { useState } from "react";
+import CreateTaskDialog from "@/components/CreateTask";
 
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Box,
-} from "@mui/material";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setStatus } from "@/store/slices/filterSlice";
+
+import { Box, Tabs, Tab, Typography, Button } from "@mui/material";
 
 export default function TasksPage() {
-  const { data, isLoading, isError, refetch } = useGetTasksQuery();
+  const { data, isLoading, isError } = useGetTasksQuery();
   const [createTask] = useCreateTaskMutation();
+
+  const dispatch = useDispatch();
+  const status = useSelector((state: any) => state.filter.status);
 
   const [open, setOpen] = useState(false);
 
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    status: "backlog",
-    sprint: "",
-    users: [] as number[],
-  });
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-  const handleChange = (e: any) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleUsersChange = (e: any) => {
-    const ids = e.target.value
-      .split(",")
-      .map((id: string) => Number(id.trim()))
-      .filter((id: number) => id > 0);
-
-    setForm({
-      ...form,
-      users: ids,
-    });
-  };
-
-  const handleSubmit = async () => {
-    try {
-      await createTask(form).unwrap();
-      alert("✅ Task created");
-      refetch();
-
-      setForm({
-        title: "",
-        description: "",
-        status: "backlog",
-        sprint: "",
-        users: [],
-      });
-
-      handleClose();
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to create task");
-    }
-  };
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching tasks</p>;
 
   return (
-    <Box>
-      <h1>Tasks</h1>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        overflow: "hidden",
+        px: 3,
+        py: 2,
+      }}
+    >
+      <Box sx={{ mb: 1 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          Tasks
+        </Typography>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          Manage and track your tasks
+        </Typography>
+      </Box>
 
-      {/* ✅ BOARD */}
-      <TaskList tasks={data || []} />
+      <Tabs
+        value={status}
+        onChange={(e, newValue) => dispatch(setStatus(newValue))}
+        sx={{ borderBottom: "1px solid #e0e0e0" }}
+      >
+        <Tab label="All" value="all" />
+        <Tab label="Backlog" value="backlog" />
+        <Tab label="Todo" value="todo" />
+        <Tab label="In Progress" value="in_progress" />
+        <Tab label="Completed" value="completed" />
+      </Tabs>
 
-      {/* ✅ FLOATING BUTTON (UPDATED) */}
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          mt: 2,
+          overflowX: "auto",
+          overflowY: "hidden",
+        }}
+      >
+        <TaskList
+          tasks={
+            status === "all"
+              ? data || []
+              : (data || []).filter((task: any) => task.status === status)
+          }
+        />
+      </Box>
+
       <Button
         variant="contained"
         onClick={handleOpen}
@@ -89,70 +82,20 @@ export default function TasksPage() {
           position: "fixed",
           bottom: 30,
           right: 30,
-          borderRadius: "20px",
+          borderRadius: "24px",
           px: 3,
-          py: 1.2,
-          textTransform: "none",
-          boxShadow: 3,
-          "&:hover": {
-            boxShadow: 6,
-          },
         }}
       >
         Create Task
       </Button>
 
-      {/* ✅ DIALOG */}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>Create Task</DialogTitle>
-
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            mt: 1,
-          }}
-        >
-          <TextField
-            fullWidth
-            label="Title"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-          />
-
-          <TextField
-            fullWidth
-            label="Description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-          />
-
-          <TextField
-            fullWidth
-            label="Sprint"
-            name="sprint"
-            value={form.sprint}
-            onChange={handleChange}
-          />
-
-          <TextField
-            fullWidth
-            label="User IDs (1,2)"
-            onChange={handleUsersChange}
-          />
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-
-          <Button variant="contained" onClick={handleSubmit}>
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <CreateTaskDialog
+        open={open}
+        onClose={handleClose}
+        onCreate={async (formData) => {
+          await createTask(formData).unwrap();
+        }}
+      />
     </Box>
   );
 }

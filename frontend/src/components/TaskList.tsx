@@ -1,4 +1,4 @@
-'use client";';
+"use client";
 
 import { Box, Typography } from "@mui/material";
 import TaskCard from "./TaskCard";
@@ -8,70 +8,58 @@ type TaskListProps = {
 };
 
 export default function TaskList({ tasks }: TaskListProps) {
-  // ✅ Group tasks
-  const backlog = tasks.filter((t) => t.status === "backlog");
-  const todo = tasks.filter((t) => t.status === "todo");
-  const inProgress = tasks.filter((t) => t.status === "in_progress");
-  const inReview = tasks.filter((t) => t.status === "in_review");
-  const qa = tasks.filter((t) => t.status === "qa");
-  const completed = tasks.filter((t) => t.status === "completed");
+  const columns = [
+    { key: "backlog", title: "Backlog" },
+    { key: "todo", title: "Todo" },
+    { key: "in_progress", title: "In Progress" },
+    { key: "in_review", title: "In Review" },
+    { key: "qa", title: "QA" },
+    { key: "completed", title: "Completed" },
+  ];
 
   return (
     <Box
-      display="flex"
-      gap={2}
       sx={{
-        mt: 2,
-        overflowX: "auto", // ✅ allows scrolling like real boards
+        display: "flex",
+        gap: 2,
+        height: "100%",
       }}
     >
-      {/* ✅ BACKLOG */}
-      <Box sx={{ minWidth: 250 }}>
-        <Typography variant="h6">Backlog</Typography>
-        {backlog.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </Box>
+      {columns.map((col) => {
+        const colTasks = tasks.filter((t) => t.status === col.key);
 
-      {/* ✅ TODO */}
-      <Box sx={{ minWidth: 250 }}>
-        <Typography variant="h6">Todo</Typography>
-        {todo.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </Box>
+        return (
+          <Box
+            key={col.key}
+            sx={{
+              minWidth: 260,
+              flexShrink: 0,
 
-      {/* ✅ IN PROGRESS */}
-      <Box sx={{ minWidth: 250 }}>
-        <Typography variant="h6">In Progress</Typography>
-        {inProgress.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </Box>
+              display: "flex",
+              flexDirection: "column",
 
-      {/* ✅ IN REVIEW */}
-      <Box sx={{ minWidth: 250 }}>
-        <Typography variant="h6">In Review</Typography>
-        {inReview.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </Box>
+              height: "100%",
+              minHeight: 0,
+            }}
+          >
+            {/* HEADER */}
+            <Typography sx={{ fontWeight: 600, mb: 1 }}>{col.title}</Typography>
 
-      {/* ✅ QA */}
-      <Box sx={{ minWidth: 250 }}>
-        <Typography variant="h6">QA</Typography>
-        {qa.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </Box>
-
-      {/* ✅ COMPLETED */}
-      <Box sx={{ minWidth: 250 }}>
-        <Typography variant="h6">Completed</Typography>
-        {completed.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </Box>
+            {/* TASK AREA */}
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto", // ✅ ONLY vertical scroll
+              }}
+            >
+              {colTasks.map((task) => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </Box>
+          </Box>
+        );
+      })}
     </Box>
   );
 }
