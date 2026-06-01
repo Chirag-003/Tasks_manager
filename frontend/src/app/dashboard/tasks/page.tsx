@@ -2,7 +2,8 @@
 
 import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
 import TaskList from "@/components/TaskList";
-import CreateTaskDialog from "@/components/CreateTask";
+import CreateTaskDialog from "@/components/CreateTaskDialog";
+import DetailedTask from "@/components/DetailedTask";
 
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,12 +19,18 @@ export default function TasksPage() {
   const status = useSelector((state: any) => state.filter.status);
 
   const [open, setOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching tasks</p>;
+
+  const filteredTasks =
+    status === "all"
+      ? data || []
+      : (data || []).filter((t: any) => t.status === status);
 
   return (
     <Box
@@ -33,9 +40,11 @@ export default function TasksPage() {
         height: "100vh",
         overflow: "hidden",
         px: 3,
-        py: 2,
+        py: 1.5,
+        boxSizing: "border-box",
       }}
     >
+      {/* ✅ HEADER */}
       <Box sx={{ mb: 1 }}>
         <Typography variant="h5" sx={{ fontWeight: 600 }}>
           Tasks
@@ -45,6 +54,7 @@ export default function TasksPage() {
         </Typography>
       </Box>
 
+      {/* ✅ TABS */}
       <Tabs
         value={status}
         onChange={(e, newValue) => dispatch(setStatus(newValue))}
@@ -57,24 +67,25 @@ export default function TasksPage() {
         <Tab label="Completed" value="completed" />
       </Tabs>
 
+      {/* ✅ BOARD */}
       <Box
         sx={{
           flex: 1,
           minHeight: 0,
-          mt: 2,
+          mt: 1,
           overflowX: "auto",
           overflowY: "hidden",
         }}
       >
         <TaskList
-          tasks={
-            status === "all"
-              ? data || []
-              : (data || []).filter((task: any) => task.status === status)
-          }
+          tasks={filteredTasks}
+          onTaskClick={(task: any) => {
+            setSelectedTask(task); // ✅ click handling already done
+          }}
         />
       </Box>
 
+      {/* ✅ FLOAT BUTTON */}
       <Button
         variant="contained"
         onClick={handleOpen}
@@ -84,11 +95,13 @@ export default function TasksPage() {
           right: 30,
           borderRadius: "24px",
           px: 3,
+          textTransform: "none",
         }}
       >
         Create Task
       </Button>
 
+      {/* ✅ CREATE DIALOG */}
       <CreateTaskDialog
         open={open}
         onClose={handleClose}
@@ -96,6 +109,10 @@ export default function TasksPage() {
           await createTask(formData).unwrap();
         }}
       />
+
+      {/* ✅ SIDEBAR */}
+      <DetailedTask task={selectedTask} onClose={() => setSelectedTask(null)} />
     </Box>
   );
 }
+``;

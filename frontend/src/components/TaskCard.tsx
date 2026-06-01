@@ -4,6 +4,7 @@ import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
 
 type TaskCardProps = {
   task: any;
+  onClick?: () => void; // ✅ FIX: add onClick prop
 };
 
 const getStatusColor = (status: string) => {
@@ -21,18 +22,20 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export default function TaskCard({ task }: TaskCardProps) {
+export default function TaskCard({ task, onClick }: TaskCardProps) {
   return (
     <Card
+      onClick={onClick} // ✅ FIX: now clickable
       sx={{
         mb: 2,
         borderRadius: 3,
 
-        // ✅ KEY FIXES (IMPORTANT)
-        backgroundColor: "#f4f6f8", // slightly stronger grey
-        border: "1px solid #e0e0e0", // ✅ THIS creates separation
+        backgroundColor: "#f4f6f8",
+        border: "1px solid #e0e0e0",
 
         boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+
+        cursor: "pointer", // ✅ IMPORTANT (shows it’s clickable)
 
         transition: "all 0.2s ease",
         "&:hover": {
@@ -48,7 +51,7 @@ export default function TaskCard({ task }: TaskCardProps) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-start",
-            gap: 2, // ✅ increased spacing
+            gap: 2,
           }}
         >
           <Typography
