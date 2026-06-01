@@ -5,7 +5,7 @@ import TaskCard from "./TaskCard";
 
 type TaskListProps = {
   tasks: any[];
-  onTaskClick: (task: any) => void; // ✅ added
+  onTaskClick: (task: any) => void;
 };
 
 export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
@@ -36,11 +36,14 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
               minWidth: 260,
               flexShrink: 0,
 
+              height: "100%",
               display: "flex",
               flexDirection: "column",
 
-              height: "100%",
-              minHeight: 0,
+              // ✅ WRAPPER CONTROLS HOVER
+              "&:hover .scroll-area::-webkit-scrollbar-thumb": {
+                backgroundColor: "#cbd5e1",
+              },
             }}
           >
             {/* ✅ COLUMN HEADER */}
@@ -54,19 +57,38 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
               {col.title}
             </Typography>
 
-            {/* ✅ TASK AREA */}
+            {/* ✅ SCROLLABLE AREA */}
             <Box
+              className="scroll-area"
               sx={{
                 flex: 1,
                 minHeight: 0,
-                overflowY: "auto", // ✅ vertical scroll only here
+                overflowY: "auto",
+                pr: 1,
+
+                // ✅ SCROLLBAR BASE
+                "&::-webkit-scrollbar": {
+                  width: "8px",
+                },
+
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: "transparent",
+                },
+
+                // ✅ HIDDEN BY DEFAULT
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "transparent",
+                  borderRadius: "10px",
+                  minHeight: "40px",
+                  transition: "background-color 0.2s ease",
+                },
               }}
             >
               {colTasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}
-                  onClick={() => onTaskClick(task)} // ✅ CLICK HANDLING ADDED
+                  onClick={() => onTaskClick(task)}
                 />
               ))}
             </Box>

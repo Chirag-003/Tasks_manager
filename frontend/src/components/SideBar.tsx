@@ -17,14 +17,14 @@ export default function Sidebar() {
     <Box
       sx={{
         width: {
-          xs: 200,
-          sm: 220,
-          md: 240,
+          xs: 150,
+          sm: 150,
+          md: 150,
         },
         minWidth: {
-          xs: 200,
-          sm: 220,
-          md: 240,
+          xs: 150,
+          sm: 150,
+          md: 150,
         },
         height: "100%",
         borderRight: "1px solid #e0e0e0",

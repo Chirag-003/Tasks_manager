@@ -9,7 +9,14 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setStatus } from "@/store/slices/filterSlice";
 
-import { Box, Tabs, Tab, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Tabs,
+  Tab,
+  Typography,
+  Button,
+  Paper, // ✅ IMPORTANT
+} from "@mui/material";
 
 export default function TasksPage() {
   const { data, isLoading, isError } = useGetTasksQuery();
@@ -36,54 +43,83 @@ export default function TasksPage() {
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
-        height: "100vh",
+        height: "100%",
         overflow: "hidden",
-        px: 3,
-        py: 1.5,
-        boxSizing: "border-box",
       }}
     >
-      {/* ✅ HEADER */}
-      <Box sx={{ mb: 1 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          Tasks
-        </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Manage and track your tasks
-        </Typography>
-      </Box>
-
-      {/* ✅ TABS */}
-      <Tabs
-        value={status}
-        onChange={(e, newValue) => dispatch(setStatus(newValue))}
-        sx={{ borderBottom: "1px solid #e0e0e0" }}
-      >
-        <Tab label="All" value="all" />
-        <Tab label="Backlog" value="backlog" />
-        <Tab label="Todo" value="todo" />
-        <Tab label="In Progress" value="in_progress" />
-        <Tab label="Completed" value="completed" />
-      </Tabs>
-
-      {/* ✅ BOARD */}
+      {/* ✅ LEFT SIDE (CONTENT) */}
       <Box
         sx={{
           flex: 1,
-          minHeight: 0,
-          mt: 1,
-          overflowX: "auto",
-          overflowY: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          px: 3,
+          py: 1.5,
+          backgroundColor: "#f8fafc", // ✅ subtle contrast
         }}
       >
-        <TaskList
-          tasks={filteredTasks}
-          onTaskClick={(task: any) => {
-            setSelectedTask(task); // ✅ click handling already done
+        {/* HEADER */}
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Tasks
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            Manage and track your tasks
+          </Typography>
+        </Box>
+
+        {/* TABS */}
+        <Tabs
+          value={status}
+          onChange={(e, newValue) => dispatch(setStatus(newValue))}
+          sx={{ borderBottom: "1px solid #e0e0e0" }}
+        >
+          <Tab label="All" value="all" />
+          <Tab label="Backlog" value="backlog" />
+          <Tab label="Todo" value="todo" />
+          <Tab label="In Progress" value="in_progress" />
+          <Tab label="Completed" value="completed" />
+        </Tabs>
+
+        {/* BOARD */}
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            mt: 1,
+            overflowX: "auto",
+            overflowY: "hidden",
+            pr: selectedTask ? 1 : 0, // ✅ spacing before sidebar
           }}
-        />
+        >
+          <TaskList
+            tasks={filteredTasks}
+            onTaskClick={(task: any) => setSelectedTask(task)}
+          />
+        </Box>
       </Box>
+
+      {/* ✅ RIGHT SIDE (REAL SIDEBAR USING PAPER) */}
+      {selectedTask && (
+        <Paper
+          elevation={4} // ✅ SHADOW → makes it feel like a panel
+          sx={{
+            width: 420,
+            display: "flex",
+            flexDirection: "column",
+            overflowY: "auto",
+
+            ml: 1, // ✅ SPACE from board → VERY IMPORTANT
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <DetailedTask
+            task={selectedTask}
+            onClose={() => setSelectedTask(null)}
+          />
+        </Paper>
+      )}
 
       {/* ✅ FLOAT BUTTON */}
       <Button
@@ -109,10 +145,6 @@ export default function TasksPage() {
           await createTask(formData).unwrap();
         }}
       />
-
-      {/* ✅ SIDEBAR */}
-      <DetailedTask task={selectedTask} onClose={() => setSelectedTask(null)} />
     </Box>
   );
 }
-``;
