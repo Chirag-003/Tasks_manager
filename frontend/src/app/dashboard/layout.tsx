@@ -29,7 +29,7 @@ export default function DashboardLayout({
         <Box
           sx={{
             flex: 1,
-            overflowY: "auto", // ✅ only content scrolls if needed
+            overflowY: "hidden", // ✅ only content scrolls if needed
             p: 2,
           }}
         >

@@ -11,6 +11,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   useAddTaskCommentMutation,
   useCreateSubtaskMutation,
@@ -21,10 +22,12 @@ import CreateSubtaskDialog from "@/components/CreateSubtaskDialog";
 
 type Props = {
   task: any;
-  onClose: () => void;
+  onClose?: () => void; // now optional
 };
 
-export default function DetailedTask({ task, onClose }: Props) {
+export default function DetailedTask({ task }: Props) {
+  const router = useRouter();
+
   const [commentText, setCommentText] = useState("");
 
   const [addComment, { isLoading }] = useAddTaskCommentMutation();
@@ -45,24 +48,20 @@ export default function DetailedTask({ task, onClose }: Props) {
 
     try {
       await deleteTask(task.id).unwrap();
-      onClose();
+      router.push("/dashboard/tasks"); // ✅ go back to list after delete
     } catch (err) {
       console.error("Delete failed", err);
     }
   };
 
-  // ✅ CREATE SUBTASK (NO UI ERROR HERE ✅)
+  // ✅ CREATE SUBTASK
   const handleCreateSubtask = async (data: any) => {
     await createSubtask({
       taskId: task.id,
       data,
     }).unwrap();
 
-    // ✅ OPTIONAL: auto-open subtasks after creation
     setShowSubtasks(true);
-
-    // ✅ OPTIONAL (only if you want parent success later)
-    // showSuccessSnackbar(...)
   };
 
   // ✅ ADD COMMENT
@@ -87,198 +86,212 @@ export default function DetailedTask({ task, onClose }: Props) {
   return (
     <Box
       sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#fff",
+        minHeight: "100vh",
+        backgroundColor: "#f8fafc",
+        py: 3,
       }}
     >
-      {/* ✅ HEADER */}
       <Box
         sx={{
-          p: 2,
-          borderBottom: "1px solid #e5e7eb",
+          maxWidth: "900px",
+          mx: "auto",
+          backgroundColor: "#fff",
+          borderRadius: 2,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: "column",
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {task.title}
-        </Typography>
-
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton onClick={handleDelete} color="error">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-          <IconButton onClick={onClose}>✕</IconButton>
-        </Box>
-      </Box>
-
-      {/* ✅ CONTENT */}
-      <Box sx={{ flex: 1, overflowY: "auto", p: 2 }}>
-        {/* ✅ DETAILS */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          <Row label="Assignee">
-            {!task.users?.length
-              ? "—"
-              : task.users.map((u: any) => u.username).join(", ")}
-          </Row>
-
-          <Row label="Status">
-            <Chip size="small" label={task.status} />
-          </Row>
-
-          <Row label="Sprint">{task.sprint || "—"}</Row>
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* ✅ DESCRIPTION */}
-        <Box>
-          <Typography sx={{ fontSize: 13, color: "text.secondary", mb: 1 }}>
-            Description
-          </Typography>
-
-          <Box
-            sx={{
-              p: 1.5,
-              border: "1px solid #e5e7eb",
-              borderRadius: 2,
-              backgroundColor: "#f9fafb",
-            }}
-          >
-            {task.description || "No description"}
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* ✅ SUBTASKS */}
+        {/* ✅ HEADER */}
         <Box
           sx={{
+            p: 2,
+            borderBottom: "1px solid #e5e7eb",
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
+            gap: 1,
           }}
         >
-          <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-            Subtasks
+          {/* ✅ BACK BUTTON */}
+          <IconButton onClick={() => router.back()}>←</IconButton>
+
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {task.title}
           </Typography>
 
-          <IconButton size="small" onClick={() => setOpenSubtask(true)}>
-            +
-          </IconButton>
+          <Box sx={{ ml: "auto" }}>
+            <IconButton onClick={handleDelete} color="error">
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
         </Box>
 
-        <Typography
-          onClick={() => setShowSubtasks(!showSubtasks)}
-          sx={{
-            fontSize: 13,
-            cursor: "pointer",
-            color: "#1976d2",
-            mt: 0.5,
-            mb: 1,
-          }}
-        >
-          {showSubtasks ? "Hide subtasks ▲" : "See subtasks ▼"}
-        </Typography>
+        {/* ✅ CONTENT */}
+        <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* ✅ DETAILS */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Row label="Assignee">
+              {!task.users?.length
+                ? "—"
+                : task.users.map((u: any) => u.username).join(", ")}
+            </Row>
 
-        {showSubtasks && (
+            <Row label="Status">
+              <Chip size="small" label={task.status} />
+            </Row>
+
+            <Row label="Sprint">{task.sprint || "—"}</Row>
+          </Box>
+
+          <Divider />
+
+          {/* ✅ DESCRIPTION */}
           <Box>
-            {!task.subtasks?.length ? (
-              <Typography sx={{ color: "text.secondary" }}>
-                No subtasks
-              </Typography>
-            ) : (
-              task.subtasks.map((subtask: any) => (
-                <Box
-                  key={subtask.id}
-                  sx={{
-                    p: 1,
-                    border: "1px solid #e5e7eb",
-                    borderRadius: 2,
-                    mb: 1,
-                    backgroundColor: "#fafafa",
-                  }}
-                >
-                  <Typography sx={{ fontSize: 14 }}>{subtask.title}</Typography>
-                </Box>
-              ))
-            )}
+            <Typography sx={{ fontSize: 13, mb: 1, color: "text.secondary" }}>
+              Description
+            </Typography>
+
+            <Box
+              sx={{
+                p: 1.5,
+                border: "1px solid #e5e7eb",
+                borderRadius: 2,
+                backgroundColor: "#f9fafb",
+              }}
+            >
+              {task.description || "No description"}
+            </Box>
           </Box>
-        )}
 
-        <Divider sx={{ my: 2 }} />
+          <Divider />
 
-        {/* ✅ COMMENTS */}
-        <Typography sx={{ fontSize: 13, color: "text.secondary", mb: 1 }}>
-          Comments
-        </Typography>
-
-        {!task.comments?.data?.length ? (
-          <Typography sx={{ color: "text.secondary" }}>No comments</Typography>
-        ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {task.comments.data.map((comment: any) => (
-              <Box
-                key={comment.id}
-                sx={{
-                  p: 1.2,
-                  borderRadius: 2,
-                  backgroundColor: "#f5f7fa",
-                }}
-              >
-                <Typography>{comment.content}</Typography>
-                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                  — {comment.user?.username}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        )}
-      </Box>
-
-      {/* ✅ COMMENT INPUT */}
-      <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Add a comment..."
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAddComment();
-              }
-            }}
-          />
-
+          {/* ✅ SUBTASKS */}
           <Box
-            onClick={handleAddComment}
             sx={{
-              px: 2,
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
-              cursor: "pointer",
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              borderRadius: 1,
-              opacity: isLoading ? 0.6 : 1,
             }}
           >
-            Send
+            <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+              Subtasks
+            </Typography>
+
+            <IconButton size="small" onClick={() => setOpenSubtask(true)}>
+              +
+            </IconButton>
+          </Box>
+
+          <Typography
+            onClick={() => setShowSubtasks(!showSubtasks)}
+            sx={{
+              fontSize: 13,
+              cursor: "pointer",
+              color: "#1976d2",
+            }}
+          >
+            {showSubtasks ? "Hide subtasks ▲" : "See subtasks ▼"}
+          </Typography>
+
+          {showSubtasks && (
+            <Box>
+              {!task.subtasks?.length ? (
+                <Typography sx={{ color: "text.secondary" }}>
+                  No subtasks
+                </Typography>
+              ) : (
+                task.subtasks.map((subtask: any) => (
+                  <Box
+                    key={subtask.id}
+                    sx={{
+                      p: 1,
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 2,
+                      mb: 1,
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    <Typography>{subtask.title}</Typography>
+                  </Box>
+                ))
+              )}
+            </Box>
+          )}
+
+          <Divider />
+
+          {/* ✅ COMMENTS */}
+          <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+            Comments
+          </Typography>
+
+          {!task.comments?.data?.length ? (
+            <Typography sx={{ color: "text.secondary" }}>
+              No comments
+            </Typography>
+          ) : (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {task.comments.data.map((comment: any) => (
+                <Box
+                  key={comment.id}
+                  sx={{
+                    p: 1.2,
+                    borderRadius: 2,
+                    backgroundColor: "#f5f7fa",
+                  }}
+                >
+                  <Typography>{comment.content}</Typography>
+                  <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                    — {comment.user?.username}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+
+        {/* ✅ COMMENT INPUT */}
+        <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Add a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddComment();
+                }
+              }}
+            />
+
+            <Box
+              onClick={handleAddComment}
+              sx={{
+                px: 2,
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                backgroundColor: "#1976d2",
+                color: "#fff",
+                borderRadius: 1,
+                opacity: isLoading ? 0.6 : 1,
+              }}
+            >
+              Send
+            </Box>
           </Box>
         </Box>
-      </Box>
 
-      {/* ✅ DIALOG */}
-      <CreateSubtaskDialog
-        open={openSubtask}
-        onClose={() => setOpenSubtask(false)}
-        onCreate={handleCreateSubtask}
-      />
+        {/* ✅ SUBTASK DIALOG */}
+        <CreateSubtaskDialog
+          open={openSubtask}
+          onClose={() => setOpenSubtask(false)}
+          onCreate={handleCreateSubtask}
+        />
+      </Box>
     </Box>
   );
 }

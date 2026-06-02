@@ -3,13 +3,13 @@
 import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
 import TaskList from "@/components/TaskList";
 import CreateTaskDialog from "@/components/CreateTaskDialog";
-import DetailedTask from "@/components/DetailedTask";
 
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setStatus } from "@/store/slices/filterSlice";
 
-import { Box, Tabs, Tab, Typography, Button, Paper } from "@mui/material";
+import { Box, Tabs, Tab, Typography, Button } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 export default function TasksPage() {
   const { data, isLoading, isError } = useGetTasksQuery();
@@ -18,11 +18,12 @@ export default function TasksPage() {
   const dispatch = useDispatch();
   const status = useSelector((state: any) => state.filter.status);
 
+  const router = useRouter();
+
   const [open, setOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
 
   const handleOpen = (e: any) => {
-    e.currentTarget.blur(); // ✅ prevent focus warning
+    e.currentTarget.blur();
     setOpen(true);
   };
 
@@ -39,121 +40,74 @@ export default function TasksPage() {
   return (
     <Box
       sx={{
+        height: "95%",
+        px: 3,
+        py: 1.5,
+        backgroundColor: "#f8fafc",
         display: "flex",
-        height: "100%",
-        overflow: "hidden",
+        flexDirection: "column",
       }}
     >
-      {/* ✅ LEFT SIDE */}
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          px: 3,
-          py: 1.5,
-          backgroundColor: "#f8fafc",
-        }}
-      >
-        {/* HEADER */}
-        <Box sx={{ mb: 1 }}>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            Tasks
-          </Typography>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            Manage and track your tasks
-          </Typography>
-        </Box>
-
-        {/* TABS */}
-        <Tabs
-          value={status}
-          onChange={(e, newValue) => dispatch(setStatus(newValue))}
-          sx={{ borderBottom: "1px solid #e0e0e0" }}
-        >
-          <Tab label="All" value="all" />
-          <Tab label="Backlog" value="backlog" />
-          <Tab label="Todo" value="todo" />
-          <Tab label="In Progress" value="in_progress" />
-          <Tab label="Completed" value="completed" />
-        </Tabs>
-
-        {/* BOARD */}
-        <Box
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            mt: 1,
-            overflowX: "auto",
-            overflowY: "hidden",
-            pr: selectedTask ? 1 : 0, // ✅ space before sidebar
-          }}
-        >
-          <TaskList
-            tasks={filteredTasks}
-            onTaskClick={(task: any) => setSelectedTask(task)}
-          />
-        </Box>
+      {/* HEADER */}
+      <Box sx={{ mb: 1 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          Tasks
+        </Typography>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          Manage and track your tasks
+        </Typography>
       </Box>
 
-      {/* ✅ RIGHT SIDEBAR */}
-      {selectedTask && (
-        <Paper
-          elevation={4}
-          sx={{
-            width: 420,
-            display: "flex",
-            flexDirection: "column",
-            overflowY: "auto",
-            ml: 1,
-            backgroundColor: "#ffffff",
+      {/* TABS */}
+      <Tabs
+        value={status}
+        onChange={(e, newValue) => dispatch(setStatus(newValue))}
+        sx={{ borderBottom: "1px solid #e0e0e0" }}
+      >
+        <Tab label="All" value="all" />
+        <Tab label="Backlog" value="backlog" />
+        <Tab label="Todo" value="todo" />
+        <Tab label="In Progress" value="in_progress" />
+        <Tab label="Completed" value="completed" />
+      </Tabs>
 
-            // ✅ CONTROL VISIBILITY WITH TRANSFORM
-            transform: selectedTask ? "translateX(0)" : "translateX(100%)",
+      {/* TASK LIST */}
 
-            // ✅ SMOOTH ANIMATION
-            transition: "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
+      <Box
+        sx={{
+          mt: 2,
+          flex: 1, // ✅ take remaining height
+          minHeight: 0, // ✅ CRITICAL
+          overflowX: "auto", // ✅ horizontal scroll here
+          overflowY: "hidden", // ✅ prevent full page vertical scroll
+          display: "flex",
+        }}
+      >
+        <TaskList
+          tasks={filteredTasks}
+          onTaskClick={(task: any) =>
+            router.push(`/dashboard/tasks/${task.id}`)
+          }
+        />
+      </Box>
 
-            // ✅ HIDE WHEN CLOSED (prevents interaction)
-            pointerEvents: selectedTask ? "auto" : "none",
-          }}
-        >
-          <DetailedTask
-            task={selectedTask}
-            onClose={() => setSelectedTask(null)}
-          />
-        </Paper>
-      )}
-
-      {/* ✅ FLOAT BUTTON (UPDATED ✅) */}
+      {/* CREATE BUTTON */}
       <Button
         variant="contained"
         onClick={handleOpen}
         sx={{
           position: "fixed",
           bottom: 30,
-
-          // ✅ DYNAMIC POSITION
-          right: selectedTask ? 460 : 30,
-
+          right: 30,
           borderRadius: "24px",
           px: 3,
           textTransform: "none",
-
-          // ✅ SMOOTH MOVE
-          transition: "right 0.2s ease",
-
-          // ✅ OPTIONAL HOVER POLISH
-          "&:hover": {
-            boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-          },
         }}
       >
         Create Task
       </Button>
 
-      {/* ✅ CREATE TASK DIALOG */}
+      {/* DIALOG */}
       <CreateTaskDialog
         open={open}
         onClose={handleClose}
