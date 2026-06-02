@@ -15,6 +15,11 @@ export const api = createApi({
       providesTags: ["Tasks"],
     }),
 
+    getTasksByID: builder.query<any, number>({
+      query: (taskId) => `/api/task1/${taskId}`,
+      providesTags: ["Tasks"],
+    }),
+
     getUsers: builder.query<any, void>({
       query: () => "/api/users",
       providesTags: ["Users"],
@@ -34,6 +39,14 @@ export const api = createApi({
         body: taskData,
       }),
       invalidatesTags: ["Tasks"], // ✅ AUTO REFRESH TASKS
+    }),
+
+    deleteTask: builder.mutation({
+      query: (taskId) => ({
+        url: `/api/task1/${taskId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Tasks"],
     }),
 
     // ✅ CREATE SUBTASK
@@ -73,6 +86,7 @@ export const {
   useGetUsersQuery,
   useGetSubtasksQuery,
   useCreateTaskMutation,
+  useDeleteTaskMutation,
   useCreateSubtaskMutation,
   useAddTaskCommentMutation,
   useAddSubtaskCommentMutation,

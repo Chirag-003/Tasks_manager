@@ -13,7 +13,7 @@ const getStatusColor = (status: string) => {
       return "warning";
     case "todo":
       return "default";
-    case "in_progress":
+    case "in progress":
       return "primary";
     case "completed":
       return "success";

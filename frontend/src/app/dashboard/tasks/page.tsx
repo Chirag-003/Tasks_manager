@@ -9,14 +9,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setStatus } from "@/store/slices/filterSlice";
 
-import {
-  Box,
-  Tabs,
-  Tab,
-  Typography,
-  Button,
-  Paper, // ✅ IMPORTANT
-} from "@mui/material";
+import { Box, Tabs, Tab, Typography, Button, Paper } from "@mui/material";
 
 export default function TasksPage() {
   const { data, isLoading, isError } = useGetTasksQuery();
@@ -28,7 +21,11 @@ export default function TasksPage() {
   const [open, setOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = (e: any) => {
+    e.currentTarget.blur(); // ✅ prevent focus warning
+    setOpen(true);
+  };
+
   const handleClose = () => setOpen(false);
 
   if (isLoading) return <p>Loading...</p>;
@@ -47,7 +44,7 @@ export default function TasksPage() {
         overflow: "hidden",
       }}
     >
-      {/* ✅ LEFT SIDE (CONTENT) */}
+      {/* ✅ LEFT SIDE */}
       <Box
         sx={{
           flex: 1,
@@ -56,7 +53,7 @@ export default function TasksPage() {
           minWidth: 0,
           px: 3,
           py: 1.5,
-          backgroundColor: "#f8fafc", // ✅ subtle contrast
+          backgroundColor: "#f8fafc",
         }}
       >
         {/* HEADER */}
@@ -90,7 +87,7 @@ export default function TasksPage() {
             mt: 1,
             overflowX: "auto",
             overflowY: "hidden",
-            pr: selectedTask ? 1 : 0, // ✅ spacing before sidebar
+            pr: selectedTask ? 1 : 0, // ✅ space before sidebar
           }}
         >
           <TaskList
@@ -100,18 +97,26 @@ export default function TasksPage() {
         </Box>
       </Box>
 
-      {/* ✅ RIGHT SIDE (REAL SIDEBAR USING PAPER) */}
+      {/* ✅ RIGHT SIDEBAR */}
       {selectedTask && (
         <Paper
-          elevation={4} // ✅ SHADOW → makes it feel like a panel
+          elevation={4}
           sx={{
             width: 420,
             display: "flex",
             flexDirection: "column",
             overflowY: "auto",
-
-            ml: 1, // ✅ SPACE from board → VERY IMPORTANT
+            ml: 1,
             backgroundColor: "#ffffff",
+
+            // ✅ CONTROL VISIBILITY WITH TRANSFORM
+            transform: selectedTask ? "translateX(0)" : "translateX(100%)",
+
+            // ✅ SMOOTH ANIMATION
+            transition: "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
+
+            // ✅ HIDE WHEN CLOSED (prevents interaction)
+            pointerEvents: selectedTask ? "auto" : "none",
           }}
         >
           <DetailedTask
@@ -121,23 +126,34 @@ export default function TasksPage() {
         </Paper>
       )}
 
-      {/* ✅ FLOAT BUTTON */}
+      {/* ✅ FLOAT BUTTON (UPDATED ✅) */}
       <Button
         variant="contained"
         onClick={handleOpen}
         sx={{
           position: "fixed",
           bottom: 30,
-          right: 30,
+
+          // ✅ DYNAMIC POSITION
+          right: selectedTask ? 460 : 30,
+
           borderRadius: "24px",
           px: 3,
           textTransform: "none",
+
+          // ✅ SMOOTH MOVE
+          transition: "right 0.2s ease",
+
+          // ✅ OPTIONAL HOVER POLISH
+          "&:hover": {
+            boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+          },
         }}
       >
         Create Task
       </Button>
 
-      {/* ✅ CREATE DIALOG */}
+      {/* ✅ CREATE TASK DIALOG */}
       <CreateTaskDialog
         open={open}
         onClose={handleClose}

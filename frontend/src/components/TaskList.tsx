@@ -12,8 +12,8 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
   const columns = [
     { key: "backlog", title: "Backlog" },
     { key: "todo", title: "Todo" },
-    { key: "in_progress", title: "In Progress" },
-    { key: "in_review", title: "In Review" },
+    { key: "in progress", title: "In Progress" },
+    { key: "in review", title: "In Review" },
     { key: "qa", title: "QA" },
     { key: "completed", title: "Completed" },
   ];
