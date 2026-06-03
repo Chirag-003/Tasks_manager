@@ -109,6 +109,34 @@ def get_subtasks(db: Session, task_id: int):
     return result
 
 
+def get_subtask_by_id(db: Session, subtask_id: int):
+    subtask = db.query(SubTask).filter(SubTask.id == subtask_id).first()
+
+    if not subtask:
+        raise HTTPException(status_code=404, detail="Subtask not found")
+
+    return {
+        "id": subtask.id,
+        "title": subtask.title,
+        "status": subtask.status.value,
+        "task_id": subtask.task_id,
+        "sprint": subtask.task.sprint,
+        "users": [
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "team_name": user.team_name,
+            }
+            for user in subtask.users
+        ],
+        "comments": {
+            "count": len(subtask.comments),
+            "data": subtask.comments[:1],
+        },
+    }
+
+
 def get_subtasks_by_user(db: Session, user_id: int):
 
     user = db.query(User).filter(User.id == user_id).first()

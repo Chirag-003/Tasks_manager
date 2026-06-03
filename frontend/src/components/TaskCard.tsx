@@ -3,6 +3,7 @@
 import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type TaskCardProps = {
   task: any;
@@ -26,21 +27,26 @@ const getStatusColor = (status: string) => {
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const router = useRouter();
 
   return (
     <Card
-      onClick={onClick}
+      onClick={onClick} // ✅ whole card navigates
       sx={{
         mb: 2,
         borderRadius: 3,
+
         width: "280px",
         minWidth: "280px",
         maxWidth: "280px",
+
         backgroundColor: "#ffffff",
         border: "1px solid #e5e7eb",
         boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+
         cursor: "pointer",
         transition: "all 0.2s ease",
+
         "&:hover": {
           boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           transform: "translateY(-3px)",
@@ -48,7 +54,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
       }}
     >
       <CardContent sx={{ p: 2 }}>
-        {/* HEADER */}
+        {/* ✅ HEADER */}
         <Box
           sx={{
             display: "flex",
@@ -79,7 +85,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           />
         </Box>
 
-        {/* DESCRIPTION */}
+        {/* ✅ DESCRIPTION */}
         {task.description && (
           <Typography
             sx={{
@@ -92,7 +98,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           </Typography>
         )}
 
-        {/* USERS */}
+        {/* ✅ USERS */}
         <Typography
           sx={{
             mt: 2,
@@ -108,11 +114,11 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           </span>
         </Typography>
 
-        {/* SUBTASK ROW */}
+        {/* ✅ SUBTASK ROW */}
         <Box
           onClick={(e) => {
             if (task.subtasks?.length > 0) {
-              e.stopPropagation();
+              e.stopPropagation(); // ✅ stop card navigation
               setExpanded((prev) => !prev);
             }
           }}
@@ -126,6 +132,11 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             borderRadius: 2,
             backgroundColor: "#f1f5f9",
             cursor: task.subtasks?.length > 0 ? "pointer" : "default",
+
+            "&:hover": {
+              backgroundColor:
+                task.subtasks?.length > 0 ? "#e2e8f0" : "#f1f5f9",
+            },
           }}
         >
           <Typography sx={{ fontSize: "13px", fontWeight: 500 }}>
@@ -138,18 +149,19 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             <ExpandMoreIcon
               sx={{
                 fontSize: 18,
-                transition: "transform 0.3s",
+                color: "#64748b",
+                transition: "transform 0.3s ease",
                 transform: expanded ? "rotate(180deg)" : "rotate(0)",
               }}
             />
           )}
         </Box>
 
-        {/* EXPANDABLE LIST */}
+        {/* ✅ EXPANDABLE SUBTASK LIST */}
         {task.subtasks?.length > 0 && (
           <Box
             sx={{
-              maxHeight: expanded ? 500 : 0, // ✅ FIXED
+              maxHeight: expanded ? 500 : 0, // ✅ no clipping
               overflow: "hidden",
               transition: "max-height 0.35s ease",
             }}
@@ -158,6 +170,10 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
               {task.subtasks.map((sub: any) => (
                 <Box
                   key={sub.id}
+                  onClick={(e) => {
+                    e.stopPropagation(); // ✅ prevent card navigation
+                    router.push(`/dashboard/subtasks/${sub.id}`); // ✅ redirect
+                  }}
                   sx={{
                     px: 1.5,
                     py: 0.8,
@@ -166,13 +182,20 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
                     border: "1px solid #e5e7eb",
                     mb: 0.6,
                     overflow: "hidden",
+                    cursor: "pointer",
+
+                    "&:hover": {
+                      backgroundColor: "#eef2f7",
+                    },
                   }}
                 >
                   <Typography
                     title={sub.title}
                     sx={{
                       fontSize: "13px",
-                      whiteSpace: "nowrap",
+                      color: "#334155",
+
+                      whiteSpace: "nowrap", // ✅ one line only
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}

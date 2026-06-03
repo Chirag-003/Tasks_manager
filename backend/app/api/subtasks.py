@@ -26,6 +26,14 @@ def get_subtasks(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/subtasks/{subtask_id}", response_model=SubTaskResponse)
+def get_subtask_by_id(subtask_id: int, db: Session = Depends(get_db)):
+    try:
+        return services_subtask.get_subtask_by_id(db, subtask_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.patch("/subtasks/{subtask_id}", response_model=SubTaskResponse)
 def update_subtask(
     subtask_id: int, subtask: SubTaskUpdate, db: Session = Depends(get_db)

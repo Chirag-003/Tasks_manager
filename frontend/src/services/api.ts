@@ -84,8 +84,8 @@ export const api = createApi({
 export const {
   useGetTasksQuery,
   useGetTaskByIdQuery,
-  useGetUsersQuery,
   useGetSubtasksQuery,
+  useGetUsersQuery,
   useCreateTaskMutation,
   useDeleteTaskMutation,
   useCreateSubtaskMutation,
