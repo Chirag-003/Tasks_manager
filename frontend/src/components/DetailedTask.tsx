@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Typography,
-  Chip,
-  Divider,
-  IconButton,
-  TextField,
-} from "@mui/material";
+import { Box, Typography, Divider, IconButton, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useState } from "react";
@@ -22,24 +15,22 @@ import CreateSubtaskDialog from "@/components/CreateSubtaskDialog";
 
 type Props = {
   task: any;
-  onClose?: () => void; // now optional
 };
 
 export default function DetailedTask({ task }: Props) {
   const router = useRouter();
 
   const [commentText, setCommentText] = useState("");
+  const [showSubtasks, setShowSubtasks] = useState(false);
+  const [openSubtask, setOpenSubtask] = useState(false);
 
   const [addComment, { isLoading }] = useAddTaskCommentMutation();
   const [createSubtask] = useCreateSubtaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
 
-  const [showSubtasks, setShowSubtasks] = useState(false);
-  const [openSubtask, setOpenSubtask] = useState(false);
-
   if (!task) return null;
 
-  // ✅ DELETE TASK
+  // ✅ DELETE
   const handleDelete = async () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this task?",
@@ -48,7 +39,7 @@ export default function DetailedTask({ task }: Props) {
 
     try {
       await deleteTask(task.id).unwrap();
-      router.push("/dashboard/tasks"); // ✅ go back to list after delete
+      router.push("/dashboard/tasks");
     } catch (err) {
       console.error("Delete failed", err);
     }
@@ -79,27 +70,29 @@ export default function DetailedTask({ task }: Props) {
 
       setCommentText("");
     } catch (error) {
-      console.error("Error adding comment:", error);
+      console.error(error);
     }
   };
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        backgroundColor: "#f8fafc",
-        py: 3,
+        height: "100%",
+        display: "flex",
+        overflow: "hidden",
+        backgroundColor: "#edeff0",
+        p: 2, // ✅ spacing from edges
       }}
     >
+      {/* ✅ MAIN CONTENT */}
       <Box
         sx={{
-          maxWidth: "900px",
-          mx: "auto",
+          width: "100%",
           backgroundColor: "#fff",
-          borderRadius: 2,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          borderRadius: 3,
           display: "flex",
           flexDirection: "column",
+          overflow: "hidden",
         }}
       >
         {/* ✅ HEADER */}
@@ -112,7 +105,6 @@ export default function DetailedTask({ task }: Props) {
             gap: 1,
           }}
         >
-          {/* ✅ BACK BUTTON */}
           <IconButton onClick={() => router.back()}>←</IconButton>
 
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -127,7 +119,17 @@ export default function DetailedTask({ task }: Props) {
         </Box>
 
         {/* ✅ CONTENT */}
-        <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box
+          sx={{
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+          }}
+        >
           {/* ✅ DETAILS */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             <Row label="Assignee">
@@ -137,7 +139,9 @@ export default function DetailedTask({ task }: Props) {
             </Row>
 
             <Row label="Status">
-              <Chip size="small" label={task.status} />
+              <Typography sx={{ fontSize: 14, textTransform: "capitalize" }}>
+                {task.status}
+              </Typography>
             </Row>
 
             <Row label="Sprint">{task.sprint || "—"}</Row>
@@ -182,41 +186,48 @@ export default function DetailedTask({ task }: Props) {
             </IconButton>
           </Box>
 
-          <Typography
-            onClick={() => setShowSubtasks(!showSubtasks)}
-            sx={{
-              fontSize: 13,
-              cursor: "pointer",
-              color: "#1976d2",
-            }}
-          >
-            {showSubtasks ? "Hide subtasks ▲" : "See subtasks ▼"}
-          </Typography>
+          <Box>
+            {!task.subtasks?.length ? (
+              <Typography sx={{ color: "text.secondary" }}>
+                No subtasks
+              </Typography>
+            ) : (
+              <>
+                {(showSubtasks ? task.subtasks : task.subtasks.slice(0, 1)).map(
+                  (subtask: any) => (
+                    <Box
+                      key={subtask.id}
+                      sx={{
+                        p: 1,
+                        border: "1px solid #e5e7eb",
+                        borderRadius: 2,
+                        mb: 1,
+                        backgroundColor: "#fafafa",
+                      }}
+                    >
+                      <Typography>{subtask.title}</Typography>
+                    </Box>
+                  ),
+                )}
 
-          {showSubtasks && (
-            <Box>
-              {!task.subtasks?.length ? (
-                <Typography sx={{ color: "text.secondary" }}>
-                  No subtasks
-                </Typography>
-              ) : (
-                task.subtasks.map((subtask: any) => (
-                  <Box
-                    key={subtask.id}
+                {task.subtasks.length > 1 && (
+                  <Typography
+                    onClick={() => setShowSubtasks((prev) => !prev)}
                     sx={{
-                      p: 1,
-                      border: "1px solid #e5e7eb",
-                      borderRadius: 2,
-                      mb: 1,
-                      backgroundColor: "#fafafa",
+                      fontSize: 13,
+                      cursor: "pointer",
+                      color: "#1976d2",
+                      mt: 1,
                     }}
                   >
-                    <Typography>{subtask.title}</Typography>
-                  </Box>
-                ))
-              )}
-            </Box>
-          )}
+                    {showSubtasks
+                      ? "Show less ▲"
+                      : `See ${task.subtasks.length - 1} more ▼`}
+                  </Typography>
+                )}
+              </>
+            )}
+          </Box>
 
           <Divider />
 
@@ -250,7 +261,7 @@ export default function DetailedTask({ task }: Props) {
           )}
         </Box>
 
-        {/* ✅ COMMENT INPUT */}
+        {/* ✅ INPUT */}
         <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
@@ -296,17 +307,22 @@ export default function DetailedTask({ task }: Props) {
   );
 }
 
-/* ✅ ROW */
+/* ✅ ROW (GRID FOR PERFECT ALIGNMENT) */
 function Row({ label, children }: any) {
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "120px 1fr",
+        alignItems: "center",
+        columnGap: 2,
+      }}
+    >
       <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
         {label}
       </Typography>
 
-      <Typography component="div" sx={{ fontSize: 14 }}>
-        {children}
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center" }}>{children}</Box>
     </Box>
   );
 }

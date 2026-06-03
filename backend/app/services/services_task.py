@@ -160,11 +160,11 @@ def get_task(db: Session, task_id: int):
                     "data": subtask.comments[:1],
                 },
             }
-            for subtask in task.subtasks[:1]
+            for subtask in task.subtasks
         ],
         "comments": {
             "count": len(task.comments),
-            "data": task.comments[:1],
+            "data": task.comments,
         },
     }
 

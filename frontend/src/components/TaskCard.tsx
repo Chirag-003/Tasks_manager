@@ -1,10 +1,12 @@
 "use client";
 
 import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState } from "react";
 
 type TaskCardProps = {
   task: any;
-  onClick?: () => void; // ✅ FIX: add onClick prop
+  onClick?: () => void;
 };
 
 const getStatusColor = (status: string) => {
@@ -23,45 +25,44 @@ const getStatusColor = (status: string) => {
 };
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <Card
-      onClick={onClick} // ✅ FIX: now clickable
+      onClick={onClick}
       sx={{
         mb: 2,
         borderRadius: 3,
-        minHeight: 160,
-
-        backgroundColor: "#f4f6f8",
-        border: "1px solid #e0e0e0",
-
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-
-        cursor: "pointer", // ✅ IMPORTANT (shows it’s clickable)
-
+        width: "280px",
+        minWidth: "280px",
+        maxWidth: "280px",
+        backgroundColor: "#ffffff",
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+        cursor: "pointer",
         transition: "all 0.2s ease",
         "&:hover": {
-          boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
-          transform: "translateY(-2px)",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+          transform: "translateY(-3px)",
         },
       }}
     >
       <CardContent sx={{ p: 2 }}>
-        {/* ✅ HEADER */}
+        {/* HEADER */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
             gap: 2,
           }}
         >
           <Typography
-            variant="subtitle1"
             sx={{
               fontWeight: 600,
               fontSize: "15px",
-              lineHeight: 1.4,
+              color: "#111827",
               flex: 1,
+              wordBreak: "break-word",
             }}
           >
             {task.title}
@@ -73,59 +74,116 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             color={getStatusColor(task.status)}
             sx={{
               textTransform: "capitalize",
-              flexShrink: 0,
+              fontSize: "11px",
             }}
           />
         </Box>
 
-        {/* ✅ DESCRIPTION */}
+        {/* DESCRIPTION */}
         {task.description && (
           <Typography
-            variant="body2"
             sx={{
               mt: 1,
-              color: "text.secondary",
               fontSize: "13px",
-              lineHeight: 1.4,
+              color: "#6b7280",
             }}
           >
             {task.description}
           </Typography>
         )}
 
-        {/* ✅ META INFO */}
-        <Box
+        {/* USERS */}
+        <Typography
           sx={{
             mt: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: "13px",
-            color: "text.secondary",
+            fontSize: "12.5px",
+            color: "#6b7280",
           }}
         >
-          <Box>
-            <Typography sx={{ fontSize: "13px" }}>
-              Sprint: {task.sprint || "—"}
-            </Typography>
+          Users:{" "}
+          <span style={{ color: "#111827", wordBreak: "break-word" }}>
+            {!task.users?.length
+              ? "—"
+              : task.users.map((u: any) => u.username).join(", ")}
+          </span>
+        </Typography>
 
-            <Typography sx={{ fontSize: "13px", mt: 0.5 }}>
-              Users:{" "}
-              {!task.users?.length
-                ? "—"
-                : task.users.map((u: any) => u.username).join(", ")}
-            </Typography>
-          </Box>
+        {/* SUBTASK ROW */}
+        <Box
+          onClick={(e) => {
+            if (task.subtasks?.length > 0) {
+              e.stopPropagation();
+              setExpanded((prev) => !prev);
+            }
+          }}
+          sx={{
+            mt: 1.5,
+            px: 1.5,
+            py: 1,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderRadius: 2,
+            backgroundColor: "#f1f5f9",
+            cursor: task.subtasks?.length > 0 ? "pointer" : "default",
+          }}
+        >
+          <Typography sx={{ fontSize: "13px", fontWeight: 500 }}>
+            {task.subtasks?.length > 0
+              ? `Subtasks • ${task.subtasks.length}`
+              : "No subtasks"}
+          </Typography>
 
-          <Box textAlign="right">
-            <Typography sx={{ fontSize: "13px" }}>
-              {task.subtasks?.length || 0} subtasks
-            </Typography>
-
-            <Typography sx={{ fontSize: "13px", mt: 0.5 }}>
-              {task.comments?.data?.length || 0} comments
-            </Typography>
-          </Box>
+          {task.subtasks?.length > 0 && (
+            <ExpandMoreIcon
+              sx={{
+                fontSize: 18,
+                transition: "transform 0.3s",
+                transform: expanded ? "rotate(180deg)" : "rotate(0)",
+              }}
+            />
+          )}
         </Box>
+
+        {/* EXPANDABLE LIST */}
+        {task.subtasks?.length > 0 && (
+          <Box
+            sx={{
+              maxHeight: expanded ? 500 : 0, // ✅ FIXED
+              overflow: "hidden",
+              transition: "max-height 0.35s ease",
+            }}
+          >
+            <Box sx={{ mt: 1 }}>
+              {task.subtasks.map((sub: any) => (
+                <Box
+                  key={sub.id}
+                  sx={{
+                    px: 1.5,
+                    py: 0.8,
+                    borderRadius: 1.5,
+                    backgroundColor: "#f8fafc",
+                    border: "1px solid #e5e7eb",
+                    mb: 0.6,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Typography
+                    title={sub.title}
+                    sx={{
+                      fontSize: "13px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    • {sub.title}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
