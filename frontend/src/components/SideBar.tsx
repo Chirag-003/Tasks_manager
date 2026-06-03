@@ -16,31 +16,36 @@ export default function Sidebar() {
   return (
     <Box
       sx={{
-        width: {
-          xs: 150,
-          sm: 150,
-          md: 150,
-        },
-        minWidth: {
-          xs: 150,
-          sm: 150,
-          md: 150,
-        },
+        width: 200,
+        minWidth: 200,
         height: "100%",
-        borderRight: "1px solid #e0e0e0",
-        p: 2,
-        bgcolor: "#fafafa",
+        borderRight: "1px solid #e5e7eb",
+        px: 2,
+        py: 3,
+        bgcolor: "#ffffff",
       }}
     >
-      {/* ✅ Title */}
-      <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+      {/* ✅ APP TITLE */}
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 4,
+          fontWeight: 700,
+          fontSize: 18,
+          color: "#111827",
+        }}
+      >
         Task App
       </Typography>
 
-      {/* ✅ Menu */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      {/* ✅ MENU */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
         {menuItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            item.label === "Tasks"
+              ? pathname.startsWith("/dashboard/tasks") ||
+                pathname.startsWith("/dashboard/subtasks")
+              : pathname === item.href;
 
           return (
             <Link
@@ -50,26 +55,48 @@ export default function Sidebar() {
             >
               <Box
                 sx={{
-                  px: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+
+                  px: 1.5,
                   py: 1.2,
+
                   borderRadius: 2,
                   cursor: "pointer",
-                  color: "black",
-                  fontSize: 17,
 
-                  // ✅ ACTIVE STYLE
-                  bgcolor: isActive ? "#d2d2d2" : "transparent",
+                  position: "relative",
 
-                  fontWeight: isActive ? 500 : 300,
+                  color: isActive ? "#111827" : "#6b7280",
+                  fontWeight: isActive ? 600 : 400,
+                  fontSize: 14,
 
-                  // ✅ HOVER EFFECT
-                  "&:hover": {
-                    bgcolor: isActive ? "#7979799c" : "#e0e0e0",
-                  },
+                  backgroundColor: isActive ? "#f1f5f9" : "transparent",
 
                   transition: "all 0.2s ease",
+
+                  "&:hover": {
+                    backgroundColor: "#f3f4f6",
+                    color: "#111827",
+                  },
                 }}
               >
+                {/* ✅ LEFT ACTIVE INDICATOR */}
+                {isActive && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      left: 0,
+                      top: 6,
+                      bottom: 6,
+                      width: "3px",
+                      borderRadius: 2,
+                      backgroundColor: "#3b82f6",
+                    }}
+                  />
+                )}
+
+                {/* ✅ LABEL */}
                 {item.label}
               </Box>
             </Link>

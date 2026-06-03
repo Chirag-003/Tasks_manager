@@ -53,16 +53,48 @@ export default function TasksPage() {
         <Typography variant="h5" sx={{ fontWeight: 600 }}>
           Tasks
         </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Manage and track your tasks
-        </Typography>
       </Box>
-
       {/* TABS */}
       <Tabs
         value={status}
         onChange={(e, newValue) => dispatch(setStatus(newValue))}
-        sx={{ borderBottom: "1px solid #e0e0e0" }}
+        sx={{
+          borderBottom: "1px solid #e0e0e0",
+          minHeight: 36,
+
+          "& .MuiTab-root": {
+            textTransform: "none",
+            fontSize: "14px",
+            fontWeight: 500,
+            color: "#6b7280",
+
+            px: 1.5,
+            py: 0.5,
+            minHeight: 40,
+
+            transition: "all 0.2s ease",
+
+            // ✅ MINIMAL HOVER (LESS BOXY)
+            "&:hover": {
+              color: "#111827",
+              backgroundColor: "transparent", // 🔥 remove box feel
+            },
+          },
+
+          // ✅ ACTIVE TAB (clean underline feel)
+          "& .Mui-selected": {
+            color: "#1976d2",
+            backgroundColor: "transparent", // 🔥 no block
+            borderRadius: 2,
+          },
+
+          // ✅ CLEAN INDICATOR (more premium)
+          "& .MuiTabs-indicator": {
+            height: "3px",
+            borderRadius: 2,
+            backgroundColor: "#1976d2",
+          },
+        }}
       >
         <Tab label="All" value="all" />
         <Tab label="Backlog" value="backlog" />
@@ -72,15 +104,31 @@ export default function TasksPage() {
       </Tabs>
 
       {/* TASK LIST */}
-
       <Box
         sx={{
           mt: 2,
-          flex: 1, // ✅ take remaining height
-          minHeight: 0, // ✅ CRITICAL
-          overflowX: "auto", // ✅ horizontal scroll here
-          overflowY: "hidden", // ✅ prevent full page vertical scroll
+          flex: 1,
+          minHeight: 0,
+          overflowX: "auto",
+          overflowY: "hidden",
           display: "flex",
+
+          "&::-webkit-scrollbar": {
+            height: "6px", // ✅ thin scrollbar
+          },
+
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "transparent",
+          },
+
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#cbd5f1", // light grey
+            borderRadius: "8px",
+          },
+
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "#94a3b8", // darker on hover
+          },
         }}
       >
         <TaskList
@@ -90,7 +138,6 @@ export default function TasksPage() {
           }
         />
       </Box>
-
       {/* CREATE BUTTON */}
       <Button
         variant="contained"
@@ -106,7 +153,6 @@ export default function TasksPage() {
       >
         Create Task
       </Button>
-
       {/* DIALOG */}
       <CreateTaskDialog
         open={open}

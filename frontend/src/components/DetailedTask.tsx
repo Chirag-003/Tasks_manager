@@ -81,7 +81,7 @@ export default function DetailedTask({ task }: Props) {
         display: "flex",
         overflow: "hidden",
         backgroundColor: "#edeff0",
-        p: 2, // ✅ spacing from edges
+        p: 2,
       }}
     >
       {/* ✅ MAIN CONTENT */}
@@ -169,7 +169,7 @@ export default function DetailedTask({ task }: Props) {
 
           <Divider />
 
-          {/* ✅ SUBTASKS */}
+          {/* ✅ SUBTASKS HEADER */}
           <Box
             sx={{
               display: "flex",
@@ -186,6 +186,7 @@ export default function DetailedTask({ task }: Props) {
             </IconButton>
           </Box>
 
+          {/* ✅ SUBTASKS LIST */}
           <Box>
             {!task.subtasks?.length ? (
               <Typography sx={{ color: "text.secondary" }}>
@@ -197,19 +198,39 @@ export default function DetailedTask({ task }: Props) {
                   (subtask: any) => (
                     <Box
                       key={subtask.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/dashboard/subtasks/${subtask.id}`);
+                      }}
                       sx={{
                         p: 1,
                         border: "1px solid #e5e7eb",
                         borderRadius: 2,
                         mb: 1,
                         backgroundColor: "#fafafa",
+                        cursor: "pointer",
+
+                        "&:hover": {
+                          backgroundColor: "#eef2f7",
+                        },
                       }}
                     >
-                      <Typography>{subtask.title}</Typography>
+                      <Typography
+                        title={subtask.title}
+                        sx={{
+                          fontSize: 14,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {subtask.title}
+                      </Typography>
                     </Box>
                   ),
                 )}
 
+                {/* ✅ TOGGLE */}
                 {task.subtasks.length > 1 && (
                   <Typography
                     onClick={() => setShowSubtasks((prev) => !prev)}
@@ -261,7 +282,7 @@ export default function DetailedTask({ task }: Props) {
           )}
         </Box>
 
-        {/* ✅ INPUT */}
+        {/* ✅ COMMENT INPUT */}
         <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
@@ -307,7 +328,7 @@ export default function DetailedTask({ task }: Props) {
   );
 }
 
-/* ✅ ROW (GRID FOR PERFECT ALIGNMENT) */
+/* ✅ ROW */
 function Row({ label, children }: any) {
   return (
     <Box

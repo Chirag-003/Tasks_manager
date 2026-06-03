@@ -1,29 +1,96 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
+import { Manrope } from "next/font/google";
+
+// ✅ Professional + slightly unique font
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+});
 
 export default function Header() {
   return (
     <Box
       sx={{
         height: "60px",
-        borderBottom: "1px solid #e0e0e0",
+        px: 3,
+
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        px: 2,
-        bgcolor: "#ffffff",
+
+        backgroundColor: "#ffffff",
+        borderBottom: "1px solid #e5e7eb",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}
     >
-      {/* Left */}
-      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-        Task Management
-      </Typography>
+      {/* ✅ LEFT TITLE */}
+      <Box className={manrope.className}>
+        <Typography
+          sx={{
+            fontSize: "20px", // ✅ clean + noticeable
+            fontWeight: 600,
+            letterSpacing: "-0.3px",
+            color: "#1f2937",
+            fontFamily: "inherit", // ✅ IMPORTANT
+          }}
+        >
+          Task{" "}
+          <Box
+            component="span"
+            sx={{
+              color: "#2563eb", // ✅ subtle highlight
+              fontWeight: 700,
+              fontFamily: "inherit",
+            }}
+          >
+            Management
+          </Box>
+        </Typography>
+      </Box>
 
-      {/* Right */}
-      <Typography variant="body2">Profile</Typography>
+      {/* ✅ RIGHT PROFILE */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.2,
+
+          px: 1,
+          py: 0.6,
+          borderRadius: 2,
+          cursor: "pointer",
+
+          transition: "all 0.15s ease",
+
+          "&:hover": {
+            backgroundColor: "#f3f4f6",
+          },
+        }}
+      >
+        <Avatar
+          sx={{
+            width: 30,
+            height: 30,
+            fontSize: 13,
+            backgroundColor: "#2563eb",
+          }}
+        >
+          T
+        </Avatar>
+
+        <Typography
+          className={manrope.className}
+          sx={{
+            fontSize: "13px",
+            color: "#374151",
+            fontWeight: 500,
+          }}
+        >
+          Profile
+        </Typography>
+      </Box>
     </Box>
   );
 }
-
-// this is the comment

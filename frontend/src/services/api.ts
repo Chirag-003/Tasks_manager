@@ -31,6 +31,11 @@ export const api = createApi({
       providesTags: ["Subtasks"],
     }),
 
+    getSubtaskById: builder.query<any, number>({
+      query: (subtaskId) => `/api/subtasks/${subtaskId}`,
+      providesTags: ["Subtasks"],
+    }),
+
     // ✅ CREATE TASK
     createTask: builder.mutation<any, any>({
       query: (taskData) => ({
@@ -85,6 +90,7 @@ export const {
   useGetTasksQuery,
   useGetTaskByIdQuery,
   useGetSubtasksQuery,
+  useGetSubtaskByIdQuery,
   useGetUsersQuery,
   useCreateTaskMutation,
   useDeleteTaskMutation,

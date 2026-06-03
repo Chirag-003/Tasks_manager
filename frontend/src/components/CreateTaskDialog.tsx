@@ -191,13 +191,35 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
             <Box sx={{ display: "flex", gap: 2 }}>
               <Box sx={{ flex: 1 }}>
                 <Typography sx={{ fontSize: 13, mb: 0.5 }}>Status</Typography>
-
                 <TextField
                   select
                   name="status"
                   value={form.status}
                   onChange={handleChange}
                   fullWidth
+                  SelectProps={{
+                    MenuProps: {
+                      TransitionProps: {
+                        timeout: 250,
+                      },
+                      PaperProps: {
+                        sx: {
+                          mt: 1,
+                          borderRadius: 2,
+                        },
+                      },
+
+                      // ✅ FIX HERE (CENTER ALIGN)
+                      anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "center", // ⭐ changed
+                      },
+                      transformOrigin: {
+                        vertical: "top",
+                        horizontal: "center", // ⭐ changed
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="backlog">Backlog</MenuItem>
                   <MenuItem value="todo">Todo</MenuItem>
@@ -238,13 +260,18 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
 
         {/* ✅ ACTIONS */}
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            sx={{ textTransform: "none", borderRadius: "20px" }}
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
 
           <Button
             variant="contained"
             onClick={handleSubmit}
             disabled={!form.title.trim() || !!userError}
-            sx={{ borderRadius: "20px", px: 3 }}
+            sx={{ borderRadius: "20px", px: 3, textTransform: "none" }}
           >
             Create Task
           </Button>

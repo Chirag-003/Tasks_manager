@@ -173,12 +173,15 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         </DialogContent>
 
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button sx={{ textTransform: "none" }} onClick={onClose}>
+            Cancel
+          </Button>
 
           <Button
             variant="contained"
             onClick={handleSubmit}
             disabled={!form.title.trim() || !!userError}
+            sx={{ textTransform: "none" }}
           >
             Create
           </Button>
