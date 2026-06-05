@@ -31,12 +31,10 @@ export default function UsersPage() {
         gap: 2,
       }}
     >
-      {/* ✅ HEADER */}
       <Typography variant="h5" sx={{ fontWeight: 600 }}>
         Users
       </Typography>
 
-      {/* ✅ TABLE HEADER */}
       <Box
         sx={{
           display: "grid",
@@ -54,7 +52,6 @@ export default function UsersPage() {
         <div>Team</div>
       </Box>
 
-      {/* ✅ ROWS */}
       <Box>
         {data?.map((user: any) => (
           <Box key={user.id}>

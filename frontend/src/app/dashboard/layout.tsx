@@ -11,25 +11,21 @@ export default function DashboardLayout({
 }) {
   return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* ✅ HEADER */}
       <Header />
 
-      {/* ✅ MAIN AREA */}
       <Box
         sx={{
           display: "flex",
           flex: 1,
-          overflow: "hidden", // ✅ prevents outer scroll
+          overflow: "hidden",
         }}
       >
-        {/* ✅ SIDEBAR */}
         <Sidebar />
 
-        {/* ✅ CONTENT */}
         <Box
           sx={{
             flex: 1,
-            overflowY: "hidden", // ✅ only content scrolls if needed
+            overflowY: "hidden",
             p: 2,
           }}
         >

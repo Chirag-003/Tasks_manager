@@ -41,7 +41,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
     severity: "success" as "success" | "error",
   });
 
-  // ✅ handle input
   const handleChange = (e: any) => {
     setForm({
       ...form,
@@ -49,7 +48,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
     });
   };
 
-  // ✅ users validation
   const handleUsersChange = (e: any) => {
     const value = e.target.value;
 
@@ -74,21 +72,18 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
     }
   };
 
-  // ✅ submit
   const handleSubmit = async () => {
     if (!form.title.trim() || userError) return;
 
     try {
       await onCreate(form);
 
-      // ✅ SUCCESS snackbar
       setSnackbar({
         open: true,
         message: "Task created ✅",
         severity: "success",
       });
 
-      // ✅ reset
       setForm({
         title: "",
         description: "",
@@ -147,7 +142,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
 
         <DialogContent sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {/* ✅ TITLE */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Title <span style={{ color: "red" }}>*</span>
@@ -183,7 +177,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
               />
             </Box>
 
-            {/* ✅ STATUS + SPRINT */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <Box sx={{ flex: 1 }}>
                 <Typography sx={{ fontSize: 13, mb: 0.5 }}>Status</Typography>
@@ -238,7 +231,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
               </Box>
             </Box>
 
-            {/* ✅ USERS */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>Users</Typography>
 
@@ -253,7 +245,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
           </Box>
         </DialogContent>
 
-        {/* ✅ ACTIONS */}
         <DialogActions sx={{ px: 3, py: 2 }}>
           <Button
             sx={{ textTransform: "none", borderRadius: "20px" }}
@@ -273,7 +264,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
         </DialogActions>
       </Dialog>
 
-      {/* ✅ SUCCESS SNACKBAR ONLY */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

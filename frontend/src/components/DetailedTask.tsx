@@ -175,7 +175,6 @@ export default function DetailedTask({ task }: Props) {
             overflow: "hidden",
           }}
         >
-          {/* HEADER */}
           <Box
             sx={{
               px: 2,
@@ -243,7 +242,6 @@ export default function DetailedTask({ task }: Props) {
             </Box>
           </Box>
 
-          {/* CONTENT */}
           <Box
             sx={{
               p: 3,
@@ -290,7 +288,6 @@ export default function DetailedTask({ task }: Props) {
 
             <Divider />
 
-            {/* SUBTASKS */}
             <Box
               display="flex"
               justifyContent="space-between"
@@ -312,7 +309,6 @@ export default function DetailedTask({ task }: Props) {
 
             <Divider />
 
-            {/* COMMENTS */}
             <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
               Comments
             </Typography>
@@ -342,7 +338,6 @@ export default function DetailedTask({ task }: Props) {
             )}
           </Box>
 
-          {/* COMMENT INPUT */}
           <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
             <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
               <TextField
@@ -400,7 +395,6 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
-      {/* DELETE MODAL */}
       <Dialog
         open={openDelete}
         onClose={() => {

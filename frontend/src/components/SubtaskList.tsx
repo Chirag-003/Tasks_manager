@@ -13,19 +13,16 @@ export default function SubtaskList({ subtasks }: Props) {
   const router = useRouter();
   const [showAll, setShowAll] = useState(false);
 
-  // ✅ No subtasks case
   if (!subtasks?.length) {
     return (
       <Typography sx={{ color: "text.secondary" }}>No subtasks</Typography>
     );
   }
 
-  // ✅ Decide what to show
   const visibleSubtasks = showAll ? subtasks : subtasks.slice(0, 1);
 
   return (
     <Box>
-      {/* ✅ SUBTASK LIST */}
       {visibleSubtasks.map((subtask) => (
         <Box
           key={subtask.id}
@@ -66,7 +63,6 @@ export default function SubtaskList({ subtasks }: Props) {
         </Box>
       ))}
 
-      {/* ✅ SHOW MORE / LESS */}
       {subtasks.length > 1 && (
         <Typography
           onClick={() => setShowAll((prev) => !prev)}

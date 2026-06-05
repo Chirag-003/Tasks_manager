@@ -112,7 +112,6 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
 
         <DialogContent sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {/* TITLE */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Title <span style={{ color: "red" }}>*</span>
@@ -132,7 +131,6 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
               />
             </Box>
 
-            {/* STATUS */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Status <span style={{ color: "red" }}>*</span>
@@ -154,7 +152,6 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
               </TextField>
             </Box>
 
-            {/* USERS */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>Users</Typography>
 

@@ -31,7 +31,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
 
   return (
     <Card
-      onClick={onClick} // ✅ whole card navigates
+      onClick={onClick}
       sx={{
         mb: 2,
         borderRadius: 3,
@@ -54,7 +54,6 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
       }}
     >
       <CardContent sx={{ p: 2 }}>
-        {/* ✅ HEADER */}
         <Box
           sx={{
             display: "flex",
@@ -85,7 +84,6 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           />
         </Box>
 
-        {/* ✅ DESCRIPTION */}
         {task.description && (
           <Typography
             sx={{
@@ -98,7 +96,6 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           </Typography>
         )}
 
-        {/* ✅ USERS */}
         <Typography
           sx={{
             mt: 2,
@@ -114,11 +111,10 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           </span>
         </Typography>
 
-        {/* ✅ SUBTASK ROW */}
         <Box
           onClick={(e) => {
             if (task.subtasks?.length > 0) {
-              e.stopPropagation(); // ✅ stop card navigation
+              e.stopPropagation();
               setExpanded((prev) => !prev);
             }
           }}
@@ -157,11 +153,10 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           )}
         </Box>
 
-        {/* ✅ EXPANDABLE SUBTASK LIST */}
         {task.subtasks?.length > 0 && (
           <Box
             sx={{
-              maxHeight: expanded ? 500 : 0, // ✅ no clipping
+              maxHeight: expanded ? 500 : 0,
               overflow: "hidden",
               transition: "max-height 0.35s ease",
             }}
@@ -171,8 +166,8 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
                 <Box
                   key={sub.id}
                   onClick={(e) => {
-                    e.stopPropagation(); // ✅ prevent card navigation
-                    router.push(`/dashboard/subtasks/${sub.id}`); // ✅ redirect
+                    e.stopPropagation();
+                    router.push(`/dashboard/subtasks/${sub.id}`);
                   }}
                   sx={{
                     px: 1.5,
@@ -195,7 +190,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
                       fontSize: "13px",
                       color: "#334155",
 
-                      whiteSpace: "nowrap", // ✅ one line only
+                      whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}

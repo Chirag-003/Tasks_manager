@@ -96,7 +96,6 @@ export default function DetailedSubtask({ subtask }: Props) {
 
   if (!subtask) return null;
 
-  // ✅ ADD COMMENT
   const handleAddComment = async () => {
     if (!commentText.trim()) return;
 
@@ -115,7 +114,6 @@ export default function DetailedSubtask({ subtask }: Props) {
     }
   };
 
-  // ✅ DELETE
   const handleDelete = async () => {
     try {
       await deleteSubtask(subtask.id).unwrap();
@@ -152,7 +150,6 @@ export default function DetailedSubtask({ subtask }: Props) {
             overflow: "hidden",
           }}
         >
-          {/* ✅ HEADER */}
           <Box
             sx={{
               p: 2,
@@ -225,7 +222,6 @@ export default function DetailedSubtask({ subtask }: Props) {
             </Box>
           </Box>
 
-          {/* ✅ CONTENT */}
           <Box
             sx={{
               p: 3,
@@ -236,7 +232,6 @@ export default function DetailedSubtask({ subtask }: Props) {
               overflowY: "auto",
             }}
           >
-            {/* ✅ DETAILS (MATCH TASK PAGE) */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Row label="Assignee">
                 <AssigneeField
@@ -259,7 +254,6 @@ export default function DetailedSubtask({ subtask }: Props) {
 
             <Divider />
 
-            {/* ✅ COMMENTS */}
             <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
               Comments
             </Typography>
@@ -286,7 +280,6 @@ export default function DetailedSubtask({ subtask }: Props) {
             )}
           </Box>
 
-          {/* ✅ COMMENT INPUT (MATCH TASK UI) */}
           <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
             <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
               <TextField
@@ -316,7 +309,6 @@ export default function DetailedSubtask({ subtask }: Props) {
                 Add
               </Button>
 
-              {/* ✅ DELETE BUTTON */}
               <Box sx={{ ml: "auto" }}>
                 <Button
                   variant="outlined"
@@ -339,7 +331,6 @@ export default function DetailedSubtask({ subtask }: Props) {
         </Box>
       </Box>
 
-      {/* ✅ DELETE MODAL */}
       <Dialog
         open={openDelete}
         onClose={() => {
@@ -398,7 +389,6 @@ export default function DetailedSubtask({ subtask }: Props) {
   );
 }
 
-/* ✅ ROW */
 function Row({ label, children }: any) {
   return (
     <Box

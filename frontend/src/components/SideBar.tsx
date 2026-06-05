@@ -25,7 +25,6 @@ export default function Sidebar() {
         bgcolor: "#ffffff",
       }}
     >
-      {/* ✅ APP TITLE */}
       <Typography
         variant="h6"
         sx={{
@@ -38,7 +37,6 @@ export default function Sidebar() {
         Task App
       </Typography>
 
-      {/* ✅ MENU */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
         {menuItems.map((item) => {
           const isActive =
@@ -81,7 +79,6 @@ export default function Sidebar() {
                   },
                 }}
               >
-                {/* ✅ LEFT ACTIVE INDICATOR */}
                 {isActive && (
                   <Box
                     sx={{
@@ -96,7 +93,6 @@ export default function Sidebar() {
                   />
                 )}
 
-                {/* ✅ LABEL */}
                 {item.label}
               </Box>
             </Link>

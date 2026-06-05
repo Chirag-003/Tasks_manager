@@ -24,7 +24,6 @@ export default function DescriptionField({
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(value || "");
 
-  // ✅ sync when prop changes
   useEffect(() => {
     setDescription(value || "");
   }, [value]);
@@ -53,7 +52,7 @@ export default function DescriptionField({
       setIsEditing(false);
     } catch (err) {
       console.error(err);
-      setDescription(value); // ✅ revert
+      setDescription(value);
       setIsEditing(false);
     }
   };
@@ -94,7 +93,6 @@ export default function DescriptionField({
           onChange={(e) => {
             setDescription(e.target.value);
 
-            // ✅ AUTO-EXPAND LOGIC
             const el = e.target as HTMLTextAreaElement;
             el.style.height = "auto";
             el.style.height = el.scrollHeight + "px";
@@ -106,7 +104,6 @@ export default function DescriptionField({
               setIsEditing(false);
             }
 
-            // ✅ Ctrl/Cmd + Enter → save
             if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
               handleSave();
             }
@@ -114,7 +111,7 @@ export default function DescriptionField({
           inputRef={(el) => {
             if (el) {
               const length = el.value.length;
-              el.setSelectionRange(length, length); // ✅ move cursor to end
+              el.setSelectionRange(length, length);
             }
           }}
           sx={{
@@ -122,12 +119,10 @@ export default function DescriptionField({
               border: "none",
             },
 
-            // ✅ remove padding around field
             "& .MuiInputBase-root": {
               padding: 0,
             },
 
-            // ✅ STYLE TEXTAREA DIRECTLY
             "& textarea": {
               padding: 0,
               fontSize: 14,

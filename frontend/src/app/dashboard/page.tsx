@@ -21,11 +21,9 @@ export default function DashboardPage() {
     );
   }
 
-  // ✅ TOTALS
   const totalUsers = users.length;
   const totalTasks = tasks.length;
 
-  // ✅ ALL STATUSES (YOUR ENUMS)
   const ALL_STATUSES = [
     "backlog",
     "todo",
@@ -35,13 +33,11 @@ export default function DashboardPage() {
     "completed",
   ];
 
-  // ✅ STATUS COUNT (INCLUDING EMPTY)
   const statusCount = ALL_STATUSES.reduce((acc: any, status) => {
     acc[status] = tasks.filter((t: any) => t.status === status).length;
     return acc;
   }, {});
 
-  // ✅ TEAM COUNT
   const teamCounts = users.reduce((acc: any, user: any) => {
     const team = user.team_name || "No Team";
     acc[team] = (acc[team] || 0) + 1;
@@ -51,24 +47,21 @@ export default function DashboardPage() {
   return (
     <Box
       sx={{
-        height: "100%", // ✅ IMPORTANT
-        overflowY: "auto", // ✅ ENABLE SCROLL ✅🔥
+        height: "100%",
+        overflowY: "auto",
         p: 3,
         pb: 6,
       }}
     >
-      {/* ✅ TITLE */}
       <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
         Dashboard
       </Typography>
 
-      {/* ✅ SUMMARY */}
       <GridSection>
         <DashboardCard label="Total Users" value={totalUsers} />
         <DashboardCard label="Total Tasks" value={totalTasks} />
       </GridSection>
 
-      {/* ✅ STATUS */}
       <Box sx={{ mt: 4 }}>
         <Typography sx={{ fontWeight: 600, mb: 2 }}>Tasks by Status</Typography>
 
@@ -87,7 +80,6 @@ export default function DashboardPage() {
         </GridSection>
       </Box>
 
-      {/* ✅ TEAMS */}
       <Box sx={{ mt: 4 }}>
         <Typography sx={{ fontWeight: 600, mb: 2 }}>Teams</Typography>
 
@@ -101,13 +93,12 @@ export default function DashboardPage() {
   );
 }
 
-/* ✅ FIXED GRID (uniform layout) */
 function GridSection({ children }: any) {
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, 200px)", // ✅ fixed width
+        gridTemplateColumns: "repeat(auto-fill, 200px)",
         gap: 2,
         justifyContent: "flex-start",
       }}
@@ -117,13 +108,12 @@ function GridSection({ children }: any) {
   );
 }
 
-/* ✅ FIXED CARD (same size everywhere) */
 function DashboardCard({ label, value }: any) {
   return (
     <Card
       sx={{
-        width: "200px", // ✅ FIXED WIDTH
-        height: "100px", // ✅ FIXED HEIGHT
+        width: "200px",
+        height: "100px",
 
         borderRadius: 3,
         border: "1px solid #e5e7eb",

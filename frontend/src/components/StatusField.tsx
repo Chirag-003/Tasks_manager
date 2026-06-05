@@ -48,7 +48,6 @@ export default function StatusField({ entityId, entityType, value }: Props) {
       value={value}
       onChange={(e) => handleChange(e.target.value as string)}
       size="small"
-      // ✅ custom arrow
       IconComponent={ArrowDropDownIcon}
       sx={{
         fontSize: 14,
@@ -57,7 +56,6 @@ export default function StatusField({ entityId, entityType, value }: Props) {
         display: "inline-flex",
         alignItems: "center",
 
-        // ✅ remove border completely
         ".MuiOutlinedInput-notchedOutline": {
           border: "none",
         },
@@ -68,16 +66,14 @@ export default function StatusField({ entityId, entityType, value }: Props) {
           border: "none",
         },
 
-        // ✅ reduce internal spacing
         "& .MuiSelect-select": {
           padding: "0px 6px",
           display: "flex",
           alignItems: "center",
         },
 
-        // ✅ move arrow closer
         "& .MuiSelect-icon": {
-          right: 0, // ✅ reduces space from right
+          right: 0,
         },
 
         minWidth: "auto",

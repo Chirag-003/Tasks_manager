@@ -10,8 +10,8 @@ export default function RootLayout({
       <body
         style={{
           margin: 0,
-          height: "100vh", // ✅ FULL VIEWPORT
-          overflow: "hidden", // ✅ STOP PAGE SCROLL ❗
+          height: "100vh",
+          overflow: "hidden",
         }}
       >
         <ReduxProvider>{children}</ReduxProvider>

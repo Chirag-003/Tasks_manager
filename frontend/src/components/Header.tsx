@@ -48,7 +48,6 @@ export default function Header() {
         </Typography>
       </Box>
 
-      {/* ✅ RIGHT PROFILE */}
       <Box
         sx={{
           display: "flex",

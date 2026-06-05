@@ -121,7 +121,6 @@ export default function AssigneeField({
         </IconButton>
       </Box>
 
-      {/* ✅ DROPDOWN */}
       {isOpen && (
         <Paper
           sx={{

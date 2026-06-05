@@ -40,13 +40,11 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
               display: "flex",
               flexDirection: "column",
 
-              // ✅ WRAPPER CONTROLS HOVER
               "&:hover .scroll-area::-webkit-scrollbar-thumb": {
                 backgroundColor: "#cbd5e1",
               },
             }}
           >
-            {/* ✅ COLUMN HEADER */}
             <Typography
               sx={{
                 fontWeight: 600,
@@ -57,7 +55,6 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
               {col.title}
             </Typography>
 
-            {/* ✅ SCROLLABLE AREA */}
             <Box
               className="scroll-area"
               sx={{
@@ -66,7 +63,6 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
                 overflowY: "auto",
                 pr: 1,
 
-                // ✅ SCROLLBAR BASE
                 "&::-webkit-scrollbar": {
                   width: "8px",
                 },
@@ -75,7 +71,6 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
                   backgroundColor: "transparent",
                 },
 
-                // ✅ HIDDEN BY DEFAULT
                 "&::-webkit-scrollbar-thumb": {
                   backgroundColor: "transparent",
                   borderRadius: "10px",

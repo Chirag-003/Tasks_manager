@@ -49,7 +49,6 @@ export default function TasksPage() {
         message: "Task deleted successfully ✅",
       });
 
-      // ✅ ✅ ✅ REMOVE PARAM AFTER USING IT
       router.replace("/dashboard/tasks");
     }
   }, [searchParams, router]);
@@ -76,13 +75,12 @@ export default function TasksPage() {
           flexDirection: "column",
         }}
       >
-        {/* HEADER */}
         <Box sx={{ mb: 1 }}>
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
             Tasks
           </Typography>
         </Box>
-        {/* TABS */}
+
         <Tabs
           value={status}
           onChange={(e, newValue) => dispatch(setStatus(newValue))}
@@ -102,21 +100,18 @@ export default function TasksPage() {
 
               transition: "all 0.2s ease",
 
-              // ✅ MINIMAL HOVER (LESS BOXY)
               "&:hover": {
                 color: "#111827",
-                backgroundColor: "transparent", // 🔥 remove box feel
+                backgroundColor: "transparent",
               },
             },
 
-            // ✅ ACTIVE TAB (clean underline feel)
             "& .Mui-selected": {
               color: "#1976d2",
-              backgroundColor: "transparent", // 🔥 no block
+              backgroundColor: "transparent",
               borderRadius: 2,
             },
 
-            // ✅ CLEAN INDICATOR (more premium)
             "& .MuiTabs-indicator": {
               height: "3px",
               borderRadius: 2,
@@ -127,11 +122,12 @@ export default function TasksPage() {
           <Tab label="All" value="all" />
           <Tab label="Backlog" value="backlog" />
           <Tab label="Todo" value="todo" />
-          <Tab label="In Progress" value="in_progress" />
+          <Tab label="In Progress" value="in progress" />
+          <Tab label="In Review" value="in review" />
+          <Tab label="QA" value="qa" />
           <Tab label="Completed" value="completed" />
         </Tabs>
 
-        {/* TASK LIST */}
         <Box
           sx={{
             mt: 2,
@@ -142,7 +138,7 @@ export default function TasksPage() {
             display: "flex",
 
             "&::-webkit-scrollbar": {
-              height: "6px", // ✅ thin scrollbar
+              height: "6px",
             },
 
             "&::-webkit-scrollbar-track": {
@@ -150,12 +146,12 @@ export default function TasksPage() {
             },
 
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#cbd5f1", // light grey
+              backgroundColor: "#cbd5f1",
               borderRadius: "8px",
             },
 
             "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#94a3b8", // darker on hover
+              backgroundColor: "#94a3b8",
             },
           }}
         >
@@ -166,7 +162,7 @@ export default function TasksPage() {
             }
           />
         </Box>
-        {/* CREATE BUTTON */}
+
         <Button
           variant="contained"
           onClick={handleOpen}
@@ -181,7 +177,7 @@ export default function TasksPage() {
         >
           Create Task
         </Button>
-        {/* DIALOG */}
+
         <CreateTaskDialog
           open={open}
           onClose={handleClose}
