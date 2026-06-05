@@ -3,7 +3,6 @@
 import { Box, Typography, Avatar } from "@mui/material";
 import { Manrope } from "next/font/google";
 
-// ✅ Professional + slightly unique font
 const manrope = Manrope({
   subsets: ["latin"],
   weight: ["600", "700"],
@@ -25,27 +24,26 @@ export default function Header() {
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}
     >
-      {/* ✅ LEFT TITLE */}
       <Box className={manrope.className}>
         <Typography
           sx={{
-            fontSize: "20px", // ✅ clean + noticeable
+            fontSize: "20px",
             fontWeight: 600,
             letterSpacing: "-0.3px",
             color: "#1f2937",
-            fontFamily: "inherit", // ✅ IMPORTANT
+            fontFamily: "inherit",
           }}
         >
-          Task{" "}
+          Dev
           <Box
             component="span"
             sx={{
-              color: "#2563eb", // ✅ subtle highlight
+              color: "#2563eb",
               fontWeight: 700,
               fontFamily: "inherit",
             }}
           >
-            Management
+            Track
           </Box>
         </Typography>
       </Box>

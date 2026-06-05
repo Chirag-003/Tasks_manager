@@ -29,30 +29,36 @@ export default function SubtaskList({ subtasks }: Props) {
       {visibleSubtasks.map((subtask) => (
         <Box
           key={subtask.id}
+          onClick={() => router.push(`/dashboard/subtasks/${subtask.id}`)}
           sx={{
-            p: 1.2,
-            border: "1px solid #e5e7eb",
+            px: 1.5,
+            py: 1.2,
             borderRadius: 2,
+            border: "1px solid #e5e7eb",
+            backgroundColor: "#f8fafc",
             mb: 1,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+
             display: "flex",
             alignItems: "center",
+
+            "&:hover": {
+              backgroundColor: "#eef2f7",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              transform: "translateY(-1px)",
+            },
           }}
         >
-          {/* ✅ TITLE (CLICKABLE) */}
           <Typography
-            onClick={() => router.push(`/dashboard/subtasks/${subtask.id}`)}
             sx={{
               fontSize: 14,
-              cursor: "pointer",
+              color: "#334155",
               flex: 1,
 
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-
-              "&:hover": {
-                color: "#2563eb",
-              },
             }}
           >
             {subtask.title}

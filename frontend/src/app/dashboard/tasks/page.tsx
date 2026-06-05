@@ -48,8 +48,11 @@ export default function TasksPage() {
         open: true,
         message: "Task deleted successfully ✅",
       });
+
+      // ✅ ✅ ✅ REMOVE PARAM AFTER USING IT
+      router.replace("/dashboard/tasks");
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   const handleClose = () => setOpen(false);
 

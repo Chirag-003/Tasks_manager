@@ -40,11 +40,9 @@ export default function DetailedTask({ task }: Props) {
   const router = useRouter();
 
   const [commentText, setCommentText] = useState("");
-  const [showSubtasks, setShowSubtasks] = useState(false);
   const [openSubtask, setOpenSubtask] = useState(false);
 
   const [openDelete, setOpenDelete] = useState(false);
-
   const [deleteError, setDeleteError] = useState("");
 
   const [addComment, { isLoading }] = useAddTaskCommentMutation();
@@ -64,6 +62,7 @@ export default function DetailedTask({ task }: Props) {
 
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
+
     if (!trimmed) {
       setTitle(task.title);
       setTitleError("Title cannot be empty");
@@ -71,7 +70,6 @@ export default function DetailedTask({ task }: Props) {
       setTimeout(() => {
         setTitleError("");
       }, 3000);
-
       return;
     }
 
@@ -110,7 +108,6 @@ export default function DetailedTask({ task }: Props) {
 
   if (!task) return null;
 
-  // ✅ DELETE
   const handleDelete = async () => {
     try {
       await deleteTask(task.id).unwrap();
@@ -119,7 +116,6 @@ export default function DetailedTask({ task }: Props) {
       let message =
         err?.data?.detail || "Cannot delete task because it has subtasks";
 
-      // ✅ CLEAN MESSAGE
       if (typeof message === "string") {
         message = message
           .replace(/^\d+:\s*/, "")
@@ -138,8 +134,6 @@ export default function DetailedTask({ task }: Props) {
     }).unwrap();
 
     setSubtasks((prev: any[]) => [newSubtask, ...prev]);
-
-    setShowSubtasks(true);
   };
 
   const handleAddComment = async () => {
@@ -198,11 +192,10 @@ export default function DetailedTask({ task }: Props) {
 
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               {!isEditingTitle ? (
-                // ✅ NORMAL VIEW (BOLD TEXT)
                 <Typography
                   onClick={() => {
                     setIsEditingTitle(true);
-                    setTitle(task.title); // ensure latest value
+                    setTitle(task.title);
                   }}
                   sx={{
                     fontWeight: 600,
@@ -213,7 +206,6 @@ export default function DetailedTask({ task }: Props) {
                   {task.title}
                 </Typography>
               ) : (
-                // ✅ EDIT MODE (INPUT FIELD)
                 <TextField
                   autoFocus
                   variant="standard"
@@ -226,12 +218,12 @@ export default function DetailedTask({ task }: Props) {
                     if (e.key === "Enter") {
                       e.preventDefault();
                       handleUpdateTitle();
-                      setIsEditingTitle(false); // ✅ go back to text
+                      setIsEditingTitle(false);
                     }
                   }}
                   onBlur={() => {
-                    setTitle(task.title); // ✅ discard
-                    setIsEditingTitle(false); // ✅ go back
+                    setTitle(task.title);
+                    setIsEditingTitle(false);
                   }}
                   InputProps={{
                     disableUnderline: true,
@@ -244,13 +236,7 @@ export default function DetailedTask({ task }: Props) {
               )}
 
               {titleError && (
-                <Typography
-                  sx={{
-                    fontSize: 12,
-                    color: "#dc2626",
-                    mt: 0.5,
-                  }}
-                >
+                <Typography sx={{ fontSize: 12, color: "#dc2626", mt: 0.5 }}>
                   {titleError}
                 </Typography>
               )}
@@ -265,7 +251,6 @@ export default function DetailedTask({ task }: Props) {
               flexDirection: "column",
               gap: 2,
               flex: 1,
-              minHeight: 0,
               overflowY: "auto",
             }}
           >
@@ -288,7 +273,9 @@ export default function DetailedTask({ task }: Props) {
 
               <Row label="Sprint">{task.sprint || "—"}</Row>
             </Box>
+
             <Divider />
+
             <Box>
               <Typography sx={{ fontSize: 13, mb: 1, color: "text.secondary" }}>
                 Description
@@ -300,8 +287,10 @@ export default function DetailedTask({ task }: Props) {
                 value={task.description}
               />
             </Box>
+
             <Divider />
-            {/* ✅ SUBTASK HEADER */}
+
+            {/* SUBTASKS */}
             <Box
               display="flex"
               justifyContent="space-between"
@@ -318,13 +307,16 @@ export default function DetailedTask({ task }: Props) {
                 </IconButton>
               </Tooltip>
             </Box>
-            {/* ✅ SUBTASK LIST */}
+
             <SubtaskList subtasks={subtasks} />
 
             <Divider />
+
+            {/* COMMENTS */}
             <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
               Comments
             </Typography>
+
             {!task.comments?.data?.length ? (
               <Typography sx={{ color: "text.secondary" }}>
                 No comments
@@ -379,11 +371,12 @@ export default function DetailedTask({ task }: Props) {
               >
                 Add
               </Button>
+
               <Box sx={{ ml: "auto" }}>
                 <Button
                   variant="outlined"
                   color="error"
-                  startIcon={<DeleteOutlinedIcon />} // ✅ icon + text
+                  startIcon={<DeleteOutlinedIcon />}
                   onClick={() => setOpenDelete(true)}
                   sx={{
                     borderRadius: 2,
@@ -407,33 +400,23 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
-      {/* ✅ DELETE MODAL WITH ERROR */}
+      {/* DELETE MODAL */}
       <Dialog
         open={openDelete}
         onClose={() => {
           setOpenDelete(false);
-          setDeleteError(""); // reset error
+          setDeleteError("");
         }}
       >
         <DialogTitle sx={{ fontWeight: 600 }}>Delete Task</DialogTitle>
 
         <DialogContent>
           <Typography sx={{ fontSize: 14 }}>
-            Are you sure you want to delete this task? This action cannot be
-            undone.
+            Are you sure you want to delete this task?
           </Typography>
 
-          {/* ✅ SHOW ERROR */}
           {deleteError && (
-            <Box
-              sx={{
-                mt: 2,
-                px: 1.5,
-                py: 1,
-                borderRadius: 1,
-                bgcolor: "#fee2e2",
-              }}
-            >
+            <Box sx={{ mt: 2, p: 1, bgcolor: "#fee2e2", borderRadius: 1 }}>
               <Typography sx={{ fontSize: 13, color: "#dc2626" }}>
                 {deleteError}
               </Typography>
@@ -441,24 +424,9 @@ export default function DetailedTask({ task }: Props) {
           )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
-            onClick={() => {
-              setOpenDelete(false);
-              setDeleteError("");
-            }}
-            sx={{ textTransform: "none" }}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleDelete}
-            disabled={!!deleteError} // ✅ disable if error exists
-            sx={{ textTransform: "none" }}
-          >
+        <DialogActions>
+          <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+          <Button color="error" onClick={handleDelete}>
             Delete
           </Button>
         </DialogActions>
@@ -467,17 +435,9 @@ export default function DetailedTask({ task }: Props) {
   );
 }
 
-/* ✅ ROW */
 function Row({ label, children }: any) {
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "120px 1fr",
-        gap: 2,
-        alignItems: "center",
-      }}
-    >
+    <Box sx={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 2 }}>
       <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
         {label}
       </Typography>

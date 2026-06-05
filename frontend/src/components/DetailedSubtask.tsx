@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import {
   useAddSubtaskCommentMutation,
   useDeleteSubtaskMutation,
+  useUpdateSubtaskMutation,
 } from "@/services/api";
 
 import AssigneeField from "./AssigneeField";
@@ -40,6 +41,58 @@ export default function DetailedSubtask({ subtask }: Props) {
 
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+
+  const [title, setTitle] = useState(subtask.title);
+  const [updateSubtask] = useUpdateSubtaskMutation();
+  const [titleError, setTitleError] = useState("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  const handleUpdateTitle = async () => {
+    const trimmed = title.trim();
+
+    if (!trimmed) {
+      setTitle(subtask.title);
+      setTitleError("Title cannot be empty");
+
+      setTimeout(() => {
+        setTitleError("");
+      }, 3000);
+
+      return;
+    }
+
+    if (trimmed === subtask.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    const previousTitle = subtask.title;
+
+    try {
+      await updateSubtask({
+        id: subtask.id,
+        data: { title: trimmed },
+      }).unwrap();
+
+      setTitleError("");
+      setIsEditingTitle(false);
+    } catch (err: any) {
+      let message =
+        err?.data?.detail || err?.error || "Subtask title must be unique";
+
+      if (typeof message === "string") {
+        message = message.replace(/^\d+:\s*/, "").trim();
+      }
+
+      setTitle(previousTitle);
+      setTitleError(message);
+      setIsEditingTitle(false);
+
+      setTimeout(() => {
+        setTitleError("");
+      }, 3000);
+    }
+  };
 
   if (!subtask) return null;
 
@@ -113,9 +166,63 @@ export default function DetailedSubtask({ subtask }: Props) {
               <ArrowBackIcon />
             </IconButton>
 
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {subtask.title}
-            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              {!isEditingTitle ? (
+                <Typography
+                  onClick={() => {
+                    setIsEditingTitle(true);
+                    setTitle(subtask.title);
+                  }}
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: 18,
+                    cursor: "pointer",
+                  }}
+                >
+                  {title}
+                </Typography>
+              ) : (
+                <TextField
+                  autoFocus
+                  variant="standard"
+                  value={title}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    setTitleError("");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleUpdateTitle();
+                      setIsEditingTitle(false);
+                    }
+                  }}
+                  onBlur={() => {
+                    setTitle(subtask.title);
+                    setIsEditingTitle(false);
+                  }}
+                  InputProps={{
+                    disableUnderline: true,
+                  }}
+                  sx={{
+                    fontSize: 18,
+                    fontWeight: 400,
+                  }}
+                />
+              )}
+
+              {titleError && (
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: "#dc2626",
+                    mt: 0.5,
+                  }}
+                >
+                  {titleError}
+                </Typography>
+              )}
+            </Box>
           </Box>
 
           {/* ✅ CONTENT */}
