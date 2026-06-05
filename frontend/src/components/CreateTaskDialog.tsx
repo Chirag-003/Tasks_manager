@@ -104,19 +104,17 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
     } catch (err: any) {
       let message = err?.data?.detail || "Failed to create task";
 
-      // ✅ clean backend message
       if (Array.isArray(message)) {
         message = message[0];
       }
 
       if (typeof message === "string") {
         message = message
-          .replace(/^\d+:\s*/, "") // remove "400: "
-          .replace(/\(\d+\)/g, "") // remove "(400)"
+          .replace(/^\d+:\s*/, "")
+          .replace(/\(\d+\)/g, "")
           .trim();
       }
 
-      // ✅ ONLY inline error
       setTitleError(message);
     }
   };
@@ -143,7 +141,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
           },
         }}
       >
-        {/* ✅ HEADER */}
         <DialogTitle sx={{ fontWeight: 600 }}>Create Task</DialogTitle>
 
         <Divider />
@@ -170,7 +167,6 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
               />
             </Box>
 
-            {/* ✅ DESCRIPTION */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Description
@@ -209,14 +205,13 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
                         },
                       },
 
-                      // ✅ FIX HERE (CENTER ALIGN)
                       anchorOrigin: {
                         vertical: "bottom",
-                        horizontal: "center", // ⭐ changed
+                        horizontal: "center",
                       },
                       transformOrigin: {
                         vertical: "top",
-                        horizontal: "center", // ⭐ changed
+                        horizontal: "center",
                       },
                     },
                   }}

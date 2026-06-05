@@ -170,13 +170,29 @@ def get_task(db: Session, task_id: int):
 
 
 def update_task(db: Session, task_id: int, task_data):
-
+    # ✅ Fetch task
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
+    # ✅ Get only provided fields
     update_data = task_data.dict(exclude_unset=True)
 
+    # ✅ Duplicate title validation
+    if "title" in update_data:
+        existing_task = (
+            db.query(Task)
+            .filter(Task.title == update_data["title"], Task.id != task_id)
+            .first()
+        )
+
+        if existing_task:
+            raise HTTPException(
+                status_code=400,
+                detail="Task title already exists",
+            )
+
+    # ✅ Handle users (many-to-many)
     if "users" in update_data:
         users = db.query(User).filter(User.id.in_(update_data["users"])).all()
 
@@ -186,19 +202,32 @@ def update_task(db: Session, task_id: int, task_data):
         task.users = users
         del update_data["users"]
 
+    # ✅ Apply updates dynamically
     for key, value in update_data.items():
         setattr(task, key, value)
 
+    # ✅ Commit with proper error handling
     try:
         db.commit()
+
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Task title already exists",
+        )
 
     except Exception as e:
         db.rollback()
         print("Error updating task:", e)
-        raise HTTPException(status_code=500, detail="Error updating task")
+        raise HTTPException(
+            status_code=500,
+            detail="Something went wrong while updating task",
+        )
 
     db.refresh(task)
 
+    # ✅ Structured response
     return {
         "id": task.id,
         "title": task.title,

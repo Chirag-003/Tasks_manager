@@ -69,7 +69,6 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
     try {
       await onCreate(form);
 
-      // ✅ SUCCESS ONLY
       setSnackbar({
         open: true,
         message: "Subtask created ✅",
@@ -89,16 +88,14 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
     } catch (err: any) {
       let message = err?.data?.detail || "Failed to create subtask";
 
-      // ✅ handle array case
       if (Array.isArray(message)) {
         message = message[0];
       }
 
-      // ✅ REMOVE status code patterns
       if (typeof message === "string") {
         message = message
-          .replace(/^\d+:\s*/, "") // ✅ removes "400: " ✅
-          .replace(/\(\d+\)/g, "") // ✅ removes "(400)"
+          .replace(/^\d+:\s*/, "")
+          .replace(/\(\d+\)/g, "")
           .trim();
       }
 
@@ -188,7 +185,6 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         </DialogActions>
       </Dialog>
 
-      {/* ✅ ONLY SUCCESS SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

@@ -101,7 +101,7 @@ def get_subtasks(db: Session, task_id: int):
                 ],
                 "comments": {
                     "count": len(subtask.comments),
-                    "data": subtask.comments[:1],
+                    "data": subtask.comments,
                 },
             }
         )
@@ -132,7 +132,7 @@ def get_subtask_by_id(db: Session, subtask_id: int):
         ],
         "comments": {
             "count": len(subtask.comments),
-            "data": subtask.comments[:1],
+            "data": subtask.comments,
         },
     }
 
