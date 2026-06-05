@@ -103,10 +103,10 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             color: "#6b7280",
           }}
         >
-          Users:{" "}
+          Assignees:{" "}
           <span style={{ color: "#111827", wordBreak: "break-word" }}>
             {!task.users?.length
-              ? "—"
+              ? "No Assignees"
               : task.users.map((u: any) => u.username).join(", ")}
           </span>
         </Typography>

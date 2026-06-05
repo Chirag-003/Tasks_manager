@@ -288,24 +288,10 @@ export default function DetailedTask({ task }: Props) {
 
             <Divider />
 
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={1}
-            >
-              <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-                Subtasks
-              </Typography>
-
-              <Tooltip title="Add subtask">
-                <IconButton size="small" onClick={() => setOpenSubtask(true)}>
-                  <AddIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-
-            <SubtaskList subtasks={subtasks} />
+            <SubtaskList
+              subtasks={subtasks}
+              onAddClick={() => setOpenSubtask(true)}
+            />
 
             <Divider />
 

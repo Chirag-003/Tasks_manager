@@ -3,6 +3,7 @@
 import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
 import TaskList from "@/components/TaskList";
 import CreateTaskDialog from "@/components/CreateTaskDialog";
+import Loader from "@/components/Loader";
 
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,7 +26,6 @@ export default function TasksPage() {
 
   const dispatch = useDispatch();
   const status = useSelector((state: any) => state.filter.status);
-
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -55,7 +55,7 @@ export default function TasksPage() {
 
   const handleClose = () => setOpen(false);
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loader />;
   if (isError) return <p>Error fetching tasks</p>;
 
   const filteredTasks =
