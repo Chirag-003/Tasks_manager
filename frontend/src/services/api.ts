@@ -10,8 +10,17 @@ export const api = createApi({
   tagTypes: ["Tasks", "Users", "Subtasks"],
 
   endpoints: (builder) => ({
-    getTasks: builder.query<any, void>({
-      query: () => "/task1/",
+    getTasks: builder.query<any, any>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+
+        if (filters?.search) params.append("search", filters.search);
+        if (filters?.status) params.append("status", filters.status);
+        if (filters?.sprint) params.append("sprint", filters.sprint);
+        if (filters?.user_id) params.append("user_id", filters.user_id);
+
+        return `/task1/?${params.toString()}`;
+      },
       providesTags: ["Tasks"],
     }),
 
@@ -61,6 +70,10 @@ export const api = createApi({
         body: data,
       }),
       invalidatesTags: ["Tasks"],
+    }),
+
+    getSprints: builder.query<string[], void>({
+      query: () => "/task1/sprints",
     }),
 
     // ✅ CREATE SUBTASK
@@ -126,4 +139,5 @@ export const {
   useAddSubtaskCommentMutation,
   useUpdateSubtaskMutation,
   useDeleteSubtaskMutation,
+  useGetSprintsQuery,
 } = api;

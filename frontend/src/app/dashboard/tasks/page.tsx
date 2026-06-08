@@ -1,33 +1,56 @@
 "use client";
 
 import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
+
 import TaskList from "@/components/TaskList";
 import CreateTaskDialog from "@/components/CreateTaskDialog";
 import Loader from "@/components/Loader";
+import FilterMenu from "@/components/FilterMenu";
 
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setStatus } from "@/store/slices/filterSlice";
 
 import {
   Box,
-  Tabs,
-  Tab,
   Typography,
   Button,
   Snackbar,
   Alert,
+  TextField,
+  Popover,
 } from "@mui/material";
+
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function TasksPage() {
-  const { data, isLoading, isError } = useGetTasksQuery();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ✅ filters state
+  const [filters, setFilters] = useState({
+    search: "",
+    status: "",
+    sprint: "",
+    user_id: "",
+  });
+
+  // ✅ search debounce
+  const [searchInput, setSearchInput] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setFilters((prev) => ({
+        ...prev,
+        search: searchInput,
+      }));
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
+  const { data, isLoading, isError } = useGetTasksQuery(filters);
   const [createTask] = useCreateTaskMutation();
 
-  const dispatch = useDispatch();
-  const status = useSelector((state: any) => state.filter.status);
-  const router = useRouter();
-
+  // ✅ create modal
   const [open, setOpen] = useState(false);
 
   const handleOpen = (e: any) => {
@@ -35,8 +58,22 @@ export default function TasksPage() {
     setOpen(true);
   };
 
-  const searchParams = useSearchParams();
+  const handleClose = () => setOpen(false);
 
+  // ✅ popover state
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseFilter = () => {
+    setAnchorEl(null);
+  };
+
+  const openFilter = Boolean(anchorEl);
+
+  // ✅ snackbar
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -53,15 +90,8 @@ export default function TasksPage() {
     }
   }, [searchParams, router]);
 
-  const handleClose = () => setOpen(false);
-
   if (isLoading) return <Loader />;
   if (isError) return <p>Error fetching tasks</p>;
-
-  const filteredTasks =
-    status === "all"
-      ? data || []
-      : (data || []).filter((t: any) => t.status === status);
 
   return (
     <>
@@ -75,94 +105,95 @@ export default function TasksPage() {
           flexDirection: "column",
         }}
       >
-        <Box sx={{ mb: 1 }}>
+        {/* ✅ HEADER */}
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={2}
+        >
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
             Tasks
           </Typography>
+
+          <Box display="flex" gap={2}>
+            {/* ✅ SEARCH */}
+            <TextField
+              placeholder="Search tasks..."
+              size="small"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              sx={{ width: 250 }}
+            />
+
+            {/* ✅ FILTER */}
+            <Button
+              variant="outlined"
+              onClick={handleOpenFilter}
+              sx={{ textTransform: "none" }}
+            >
+              Filter
+            </Button>
+          </Box>
         </Box>
 
-        <Tabs
-          value={status}
-          onChange={(e, newValue) => dispatch(setStatus(newValue))}
+        {/* ✅ FILTER POPOVER */}
+        <Popover
+          open={openFilter}
+          anchorEl={anchorEl}
+          onClose={handleCloseFilter}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left",
+          }}
           sx={{
-            borderBottom: "1px solid #e0e0e0",
-            minHeight: 36,
-
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#6b7280",
-
-              px: 1.5,
-              py: 0.5,
-              minHeight: 40,
-
-              transition: "all 0.2s ease",
-
-              "&:hover": {
-                color: "#111827",
-                backgroundColor: "transparent",
-              },
-            },
-
-            "& .Mui-selected": {
-              color: "#1976d2",
-              backgroundColor: "transparent",
-              borderRadius: 2,
-            },
-
-            "& .MuiTabs-indicator": {
-              height: "3px",
-              borderRadius: 2,
-              backgroundColor: "#1976d2",
+            "& .MuiPaper-root": {
+              mt: 1,
             },
           }}
         >
-          <Tab label="All" value="all" />
-          <Tab label="Backlog" value="backlog" />
-          <Tab label="Todo" value="todo" />
-          <Tab label="In Progress" value="in progress" />
-          <Tab label="In Review" value="in review" />
-          <Tab label="QA" value="qa" />
-          <Tab label="Completed" value="completed" />
-        </Tabs>
+          <Box p={2} width={280}>
+            <FilterMenu
+              onChange={(newFilters: any) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  ...newFilters,
+                }));
+              }}
+            />
+          </Box>
+        </Popover>
 
+        {/* ✅ TASK LIST */}
         <Box
           sx={{
-            mt: 2,
             flex: 1,
             minHeight: 0,
-            overflowX: "auto",
-            overflowY: "hidden",
             display: "flex",
+            overflowX: "auto",
 
             "&::-webkit-scrollbar": {
               height: "6px",
             },
-
-            "&::-webkit-scrollbar-track": {
-              backgroundColor: "transparent",
-            },
-
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: "#cbd5f1",
               borderRadius: "8px",
             },
-
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#94a3b8",
-            },
           }}
         >
           <TaskList
-            tasks={filteredTasks}
+            tasks={data || []}
             onTaskClick={(task: any) =>
               router.push(`/dashboard/tasks/${task.id}`)
             }
           />
         </Box>
 
+        {/* ✅ CREATE BUTTON */}
         <Button
           variant="contained"
           onClick={handleOpen}
@@ -178,6 +209,7 @@ export default function TasksPage() {
           Create Task
         </Button>
 
+        {/* ✅ CREATE MODAL */}
         <CreateTaskDialog
           open={open}
           onClose={handleClose}
@@ -187,6 +219,7 @@ export default function TasksPage() {
         />
       </Box>
 
+      {/* ✅ SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

@@ -63,8 +63,33 @@ def create_task(db: Session, task):
     }
 
 
-def get_tasks(db: Session, skip: int = 0, limit: int = 10):
-    tasks = db.query(Task).offset(skip).limit(limit).all()
+def get_tasks(
+    db: Session,
+    skip: int = 0,
+    limit: int = 10,
+    status=None,
+    sprint=None,
+    user_id=None,
+    search=None,
+):
+    # ✅ Base query
+    query = db.query(Task)
+
+    # ✅ Filters
+    if status:
+        query = query.filter(Task.status == status)
+
+    if sprint:
+        query = query.filter(Task.sprint == sprint)
+
+    if user_id:
+        query = query.join(Task.users).filter(User.id == user_id)
+
+    if search:
+        query = query.filter(Task.title.ilike(f"%{search}%"))
+
+    # ✅ Pagination
+    tasks = query.offset(skip).limit(limit).all()
 
     result = []
 
@@ -74,7 +99,7 @@ def get_tasks(db: Session, skip: int = 0, limit: int = 10):
                 "id": task.id,
                 "title": task.title,
                 "description": task.description,
-                "status": task.status.value,
+                "status": task.status.value,  # ✅ keep enum value
                 "sprint": task.sprint,
                 "users": [
                     {
@@ -89,7 +114,7 @@ def get_tasks(db: Session, skip: int = 0, limit: int = 10):
                     {
                         "id": subtask.id,
                         "title": subtask.title,
-                        "status": subtask.status.value,
+                        "status": subtask.status.value,  # ✅ consistency
                         "task_id": subtask.task_id,
                         "sprint": task.sprint,
                         "users": [
@@ -102,14 +127,14 @@ def get_tasks(db: Session, skip: int = 0, limit: int = 10):
                             for user in subtask.users
                         ],
                         "comments": {
-                            "count": len(subtask.comments),
+                            "count": len(subtask.comments),  # ✅ fixed
                             "data": subtask.comments,
                         },
                     }
                     for subtask in task.subtasks
                 ],
                 "comments": {
-                    "count": len(task.comments),
+                    "count": len(task.comments),  # ✅ fixed
                     "data": task.comments,
                 },
             }
