@@ -47,7 +47,9 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
         alignItems="center"
         mb={1}
       >
-        <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+        <Typography
+          sx={{ fontSize: 13, color: "text.secondary", cursor: "default" }}
+        >
           Subtasks
         </Typography>
 
@@ -60,7 +62,9 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
 
       {/* ✅ EMPTY STATE */}
       {!subtasks?.length ? (
-        <Typography sx={{ color: "text.secondary" }}>No subtasks</Typography>
+        <Typography sx={{ color: "text.secondary", cursor: "default" }}>
+          No subtasks
+        </Typography>
       ) : (
         <>
           {visibleSubtasks.map((subtask) => (

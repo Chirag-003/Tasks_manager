@@ -79,7 +79,7 @@ export const api = createApi({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["Tasks"],
+      invalidatesTags: ["Subtasks"],
     }),
 
     deleteSubtask: builder.mutation({

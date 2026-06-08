@@ -18,6 +18,7 @@ const statusOptions = [
   "todo",
   "in progress",
   "in review",
+
   "completed",
 ];
 

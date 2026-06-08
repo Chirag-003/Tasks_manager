@@ -20,13 +20,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
-  useAddSubtaskCommentMutation,
   useDeleteSubtaskMutation,
   useUpdateSubtaskMutation,
 } from "@/services/api";
 
 import AssigneeField from "./AssigneeField";
 import StatusField from "./StatusField";
+import CommentsField from "./CommentField";
 
 type Props = {
   subtask: any;
@@ -34,9 +34,7 @@ type Props = {
 
 export default function DetailedSubtask({ subtask }: Props) {
   const router = useRouter();
-  const [commentText, setCommentText] = useState("");
 
-  const [addComment, { isLoading }] = useAddSubtaskCommentMutation();
   const [deleteSubtask] = useDeleteSubtaskMutation();
 
   const [openDelete, setOpenDelete] = useState(false);
@@ -96,25 +94,9 @@ export default function DetailedSubtask({ subtask }: Props) {
 
   if (!subtask) return null;
 
-  const handleAddComment = async () => {
-    if (!commentText.trim()) return;
-
-    try {
-      await addComment({
-        subtaskId: subtask.id,
-        data: {
-          content: commentText,
-          user_id: 5,
-        },
-      }).unwrap();
-
-      setCommentText("");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const handleDelete = async () => {
+    setDeleteError("");
+
     try {
       await deleteSubtask(subtask.id).unwrap();
       router.push("/dashboard/tasks");
@@ -150,6 +132,7 @@ export default function DetailedSubtask({ subtask }: Props) {
             overflow: "hidden",
           }}
         >
+          {/* HEADER */}
           <Box
             sx={{
               p: 2,
@@ -222,115 +205,80 @@ export default function DetailedSubtask({ subtask }: Props) {
             </Box>
           </Box>
 
+          {/* MAIN CONTENT */}
           <Box
             sx={{
               p: 3,
               display: "flex",
               flexDirection: "column",
-              gap: 2,
               flex: 1,
               overflowY: "auto",
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Row label="Assignee">
-                <AssigneeField
-                  entityId={subtask.id}
-                  entityType="subtask"
-                  users={subtask.users}
-                />
-              </Row>
+            {/* TOP SECTION */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1.5,
+                }}
+              >
+                <Row label="Assignee">
+                  <AssigneeField
+                    entityId={subtask.id}
+                    entityType="subtask"
+                    users={subtask.users}
+                  />
+                </Row>
 
-              <Row label="Status">
-                <StatusField
-                  entityId={subtask.id}
-                  entityType="subtask"
-                  value={subtask.status}
-                />
-              </Row>
+                <Row label="Status">
+                  <StatusField
+                    entityId={subtask.id}
+                    entityType="subtask"
+                    value={subtask.status}
+                  />
+                </Row>
 
-              <Row label="Sprint">{subtask.sprint || "—"}</Row>
+                <Row label="Sprint">{subtask.sprint || "—"}</Row>
+              </Box>
+
+              <Divider />
             </Box>
 
-            <Divider />
-
-            <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-              Comments
-            </Typography>
-
-            {!subtask?.comments?.data?.length ? (
-              <Typography sx={{ color: "text.secondary" }}>
-                No comments
-              </Typography>
-            ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {subtask.comments.data.map((comment: any) => (
-                  <Box
-                    key={comment.id}
+            {/* ✅ BOTTOM STICKY COMMENTS */}
+            <Box sx={{ mt: "auto" }}>
+              <CommentsField
+                entityId={subtask.id}
+                entityType="subtask"
+                comments={subtask.comments?.data || []}
+                rightSlot={
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteOutlinedIcon />}
+                    onClick={() => {
+                      setDeleteError("");
+                      setOpenDelete(true);
+                    }}
                     sx={{
-                      p: 1.2,
                       borderRadius: 2,
-                      backgroundColor: "#f5f7fa",
+                      textTransform: "none",
+                      "&:hover": {
+                        backgroundColor: "#fee2e2",
+                      },
                     }}
                   >
-                    <Typography>{comment.content}</Typography>
-                  </Box>
-                ))}
-              </Box>
-            )}
-          </Box>
-
-          <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
-              <TextField
-                multiline
-                minRows={1}
-                maxRows={4}
-                placeholder="Add a comment..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                sx={{
-                  flex: 0.6,
-                  "& .MuiInputBase-root": {
-                    padding: "6px 8px",
-                  },
-                  "& textarea": {
-                    padding: 0,
-                    lineHeight: "1.6",
-                  },
-                }}
+                    Delete Subtask
+                  </Button>
+                }
               />
-
-              <Button
-                variant="contained"
-                onClick={handleAddComment}
-                sx={{ height: "fit-content" }}
-              >
-                Add
-              </Button>
-
-              <Box sx={{ ml: "auto" }}>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteOutlinedIcon />}
-                  onClick={() => setOpenDelete(true)}
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: "none",
-                    "&:hover": {
-                      backgroundColor: "#fee2e2",
-                    },
-                  }}
-                >
-                  Delete Subtask
-                </Button>
-              </Box>
             </Box>
           </Box>
         </Box>
       </Box>
 
+      {/* DELETE DIALOG */}
       <Dialog
         open={openDelete}
         onClose={() => {
@@ -378,7 +326,6 @@ export default function DetailedSubtask({ subtask }: Props) {
             variant="contained"
             color="error"
             onClick={handleDelete}
-            disabled={!!deleteError}
             sx={{ textTransform: "none" }}
           >
             Delete

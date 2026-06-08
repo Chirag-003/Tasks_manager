@@ -6,21 +6,19 @@ import {
   Divider,
   IconButton,
   TextField,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
 } from "@mui/material";
+
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import AddIcon from "@mui/icons-material/Add";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  useAddTaskCommentMutation,
   useCreateSubtaskMutation,
   useDeleteTaskMutation,
   useUpdateTaskMutation,
@@ -31,6 +29,7 @@ import AssigneeField from "./AssigneeField";
 import StatusField from "./StatusField";
 import DescriptionField from "./DescriptionField";
 import SubtaskList from "./SubtaskList";
+import CommentsField from "./CommentField";
 
 type Props = {
   task: any;
@@ -39,13 +38,11 @@ type Props = {
 export default function DetailedTask({ task }: Props) {
   const router = useRouter();
 
-  const [commentText, setCommentText] = useState("");
   const [openSubtask, setOpenSubtask] = useState(false);
 
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  const [addComment, { isLoading }] = useAddTaskCommentMutation();
   const [createSubtask] = useCreateSubtaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
 
@@ -109,6 +106,8 @@ export default function DetailedTask({ task }: Props) {
   if (!task) return null;
 
   const handleDelete = async () => {
+    setDeleteError("");
+
     try {
       await deleteTask(task.id).unwrap();
       router.push("/dashboard/tasks?deleted=true");
@@ -136,24 +135,6 @@ export default function DetailedTask({ task }: Props) {
     setSubtasks((prev: any[]) => [newSubtask, ...prev]);
   };
 
-  const handleAddComment = async () => {
-    if (!commentText.trim()) return;
-
-    try {
-      await addComment({
-        taskId: task.id,
-        data: {
-          content: commentText,
-          user_id: 5,
-        },
-      }).unwrap();
-
-      setCommentText("");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
     <>
       <Box
@@ -175,6 +156,7 @@ export default function DetailedTask({ task }: Props) {
             overflow: "hidden",
           }}
         >
+          {/* HEADER */}
           <Box
             sx={{
               px: 2,
@@ -227,10 +209,6 @@ export default function DetailedTask({ task }: Props) {
                   InputProps={{
                     disableUnderline: true,
                   }}
-                  sx={{
-                    fontSize: 18,
-                    fontWeight: 400,
-                  }}
                 />
               )}
 
@@ -242,134 +220,103 @@ export default function DetailedTask({ task }: Props) {
             </Box>
           </Box>
 
+          {/* MAIN CONTENT */}
           <Box
             sx={{
               p: 3,
               display: "flex",
               flexDirection: "column",
-              gap: 2,
               flex: 1,
               overflowY: "auto",
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Row label="Assignee">
-                <AssigneeField
-                  entityId={task.id}
-                  entityType="task"
-                  users={task.users}
-                />
-              </Row>
+            {/* TOP CONTENT */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                cursor: "default",
+              }}
+            >
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Row label="Assignee">
+                  <AssigneeField
+                    entityId={task.id}
+                    entityType="task"
+                    users={task.users}
+                  />
+                </Row>
 
-              <Row label="Status">
-                <StatusField
-                  entityId={task.id}
-                  entityType="task"
-                  value={task.status}
-                />
-              </Row>
+                <Row label="Status">
+                  <StatusField
+                    entityId={task.id}
+                    entityType="task"
+                    value={task.status}
+                  />
+                </Row>
 
-              <Row label="Sprint">{task.sprint || "—"}</Row>
-            </Box>
-
-            <Divider />
-
-            <Box>
-              <Typography sx={{ fontSize: 13, mb: 1, color: "text.secondary" }}>
-                Description
-              </Typography>
-
-              <DescriptionField
-                entityId={task.id}
-                entityType="task"
-                value={task.description}
-              />
-            </Box>
-
-            <Divider />
-
-            <SubtaskList
-              subtasks={subtasks}
-              onAddClick={() => setOpenSubtask(true)}
-            />
-
-            <Divider />
-
-            <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-              Comments
-            </Typography>
-
-            {!task.comments?.data?.length ? (
-              <Typography sx={{ color: "text.secondary" }}>
-                No comments
-              </Typography>
-            ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {task.comments.data.map((c: any) => (
-                  <Box
-                    key={c.id}
-                    sx={{
-                      p: 1.2,
-                      borderRadius: 2,
-                      backgroundColor: "#f5f7fa",
-                    }}
-                  >
-                    <Typography>{c.content}</Typography>
-                    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                      — {c.user?.username}
-                    </Typography>
-                  </Box>
-                ))}
+                <Row label="Sprint">{task.sprint || "—"}</Row>
               </Box>
-            )}
-          </Box>
 
-          <Box sx={{ p: 2, borderTop: "1px solid #e5e7eb" }}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
-              <TextField
-                multiline
-                minRows={1}
-                maxRows={4}
-                placeholder="Add a comment..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                sx={{
-                  flex: 0.6,
-                  "& .MuiInputBase-root": {
-                    padding: "6px 8px",
-                  },
-                  "& textarea": {
-                    padding: 0,
-                    lineHeight: "1.6",
-                  },
-                }}
-              />
+              <Divider />
 
-              <Button
-                variant="contained"
-                onClick={handleAddComment}
-                sx={{ height: "fit-content" }}
-              >
-                Add
-              </Button>
-
-              <Box sx={{ ml: "auto" }}>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteOutlinedIcon />}
-                  onClick={() => setOpenDelete(true)}
+              <Box>
+                <Typography
                   sx={{
-                    borderRadius: 2,
-                    textTransform: "none",
-                    "&:hover": {
-                      backgroundColor: "#fee2e2",
-                    },
+                    fontSize: 13,
+                    mb: 1,
+                    color: "text.secondary",
+                    cursor: "default",
                   }}
                 >
-                  Delete Task
-                </Button>
+                  Description
+                </Typography>
+
+                <DescriptionField
+                  entityId={task.id}
+                  entityType="task"
+                  value={task.description}
+                />
               </Box>
+
+              <Divider />
+
+              <SubtaskList
+                subtasks={subtasks}
+                onAddClick={() => setOpenSubtask(true)}
+              />
+
+              <Divider />
+            </Box>
+
+            {/* ✅ BOTTOM COMMENTS */}
+            <Box sx={{ mt: "auto" }}>
+              <CommentsField
+                entityId={task.id}
+                entityType="task"
+                comments={task.comments?.data || []}
+                rightSlot={
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteOutlinedIcon />}
+                    onClick={() => {
+                      setDeleteError("");
+                      setOpenDelete(true);
+                    }}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: "none",
+                      "&:hover": {
+                        backgroundColor: "#fee2e2",
+                      },
+                    }}
+                  >
+                    Delete Task
+                  </Button>
+                }
+              />
             </Box>
           </Box>
 
@@ -381,6 +328,7 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
+      {/* DIALOG */}
       <Dialog
         open={openDelete}
         onClose={() => {
