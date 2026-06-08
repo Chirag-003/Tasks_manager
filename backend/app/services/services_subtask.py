@@ -72,13 +72,30 @@ def create_subtask(db: Session, task_id: int, subtask_data):
     }
 
 
-def get_subtasks(db: Session, task_id: int):
-
+def get_subtasks(
+    db: Session,
+    task_id: int,
+    status=None,
+    user_id=None,
+):
+    # ✅ Check if task exists
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    subtasks = db.query(SubTask).filter(SubTask.task_id == task_id).all()
+    # ✅ Base query
+    query = db.query(SubTask).filter(SubTask.task_id == task_id)
+
+    # ✅ Filter by status
+    if status:
+        query = query.filter(SubTask.status == status)
+
+    # ✅ Filter by user
+    if user_id:
+        query = query.join(SubTask.users).filter(User.id == user_id)
+
+    # ✅ Get results
+    subtasks = query.all()
 
     result = []
 
@@ -87,9 +104,9 @@ def get_subtasks(db: Session, task_id: int):
             {
                 "id": subtask.id,
                 "title": subtask.title,
-                "status": subtask.status.value,
+                "status": subtask.status.value,  # ✅ enum value
                 "task_id": subtask.task_id,
-                "sprint": subtask.task.sprint,
+                "sprint": subtask.task.sprint,  # ✅ from parent task
                 "users": [
                     {
                         "id": user.id,

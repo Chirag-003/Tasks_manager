@@ -3,24 +3,32 @@ import { useState, useEffect } from "react";
 
 import { useGetUsersQuery, useGetSprintsQuery } from "@/services/api";
 
-export default function FilterMenu({ onChange }: any) {
+type Props = {
+  onChange: (filters: any) => void;
+  type?: "task" | "subtask"; // ✅ controls behavior
+};
+
+export default function FilterMenu({ onChange, type = "task" }: Props) {
   const [filters, setFilters] = useState({
     status: "",
     sprint: "",
     user_id: "",
   });
 
-  // ✅ Users from API
+  // ✅ Fetch users
   const { data: users } = useGetUsersQuery();
 
-  // ✅ Sprints from backend
-  const { data: sprints } = useGetSprintsQuery();
+  // ✅ Fetch sprints ONLY for task
+  const { data: sprints } = useGetSprintsQuery(undefined, {
+    skip: type === "subtask", // ✅ don't call for subtasks
+  });
 
   // ✅ Auto apply
   useEffect(() => {
     onChange(filters);
   }, [filters]);
 
+  // ✅ Correct update logic
   const handleChange = (key: string, value: any) => {
     setFilters((prev) => ({
       ...prev,
@@ -48,23 +56,25 @@ export default function FilterMenu({ onChange }: any) {
         </Select>
       </FormControl>
 
-      {/* ✅ SPRINT */}
-      <FormControl fullWidth size="small">
-        <InputLabel>Sprint</InputLabel>
-        <Select
-          value={filters.sprint}
-          label="Sprint"
-          onChange={(e) => handleChange("sprint", e.target.value)}
-        >
-          <MenuItem value="">All</MenuItem>
+      {/* ✅ ✅ SPRINT → ONLY FOR TASK */}
+      {type === "task" && (
+        <FormControl fullWidth size="small">
+          <InputLabel>Sprint</InputLabel>
+          <Select
+            value={filters.sprint}
+            label="Sprint"
+            onChange={(e) => handleChange("sprint", e.target.value)}
+          >
+            <MenuItem value="">All</MenuItem>
 
-          {sprints?.map((sprint: string) => (
-            <MenuItem key={sprint} value={sprint}>
-              {sprint}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+            {sprints?.map((sprint: string) => (
+              <MenuItem key={sprint} value={sprint}>
+                {sprint}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
 
       {/* ✅ USERS */}
       <FormControl fullWidth size="small">
@@ -86,4 +96,3 @@ export default function FilterMenu({ onChange }: any) {
     </Box>
   );
 }
-``;

@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from fastapi import Query
+from typing import Optional
 
 from app.db.session import get_db
 from app.schemas.schemas_subtasks import SubTaskCreate, SubTaskResponse, SubTaskUpdate
@@ -19,9 +21,19 @@ def create_subtask(task_id: int, subtask: SubTaskCreate, db: Session = Depends(g
 
 
 @router.get("/tasks/{task_id}/subtasks", response_model=list[SubTaskResponse])
-def get_subtasks(task_id: int, db: Session = Depends(get_db)):
+def get_subtasks(
+    task_id: int,
+    status: Optional[str] = Query(default=None),
+    user_id: Optional[int] = Query(default=None),
+    db: Session = Depends(get_db),
+):
     try:
-        return services_subtask.get_subtasks(db, task_id)
+        return services_subtask.get_subtasks(
+            db,
+            task_id=task_id,
+            status=status,
+            user_id=user_id,
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

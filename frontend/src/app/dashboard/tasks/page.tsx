@@ -47,6 +47,7 @@ export default function TasksPage() {
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
+  // ✅ (kept same, no unnecessary change)
   const { data, isLoading, isError } = useGetTasksQuery(filters);
   const [createTask] = useCreateTaskMutation();
 
@@ -126,7 +127,7 @@ export default function TasksPage() {
               sx={{ width: 250 }}
             />
 
-            {/* ✅ FILTER */}
+            {/* ✅ FILTER BUTTON */}
             <Button
               variant="outlined"
               onClick={handleOpenFilter}
@@ -158,6 +159,7 @@ export default function TasksPage() {
         >
           <Box p={2} width={280}>
             <FilterMenu
+              type="task" // ✅ IMPORTANT NEW ADDITION
               onChange={(newFilters: any) => {
                 setFilters((prev) => ({
                   ...prev,
@@ -209,7 +211,7 @@ export default function TasksPage() {
           Create Task
         </Button>
 
-        {/* ✅ CREATE MODAL */}
+        {/* ✅ CREATE DIALOG */}
         <CreateTaskDialog
           open={open}
           onClose={handleClose}

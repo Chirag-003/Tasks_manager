@@ -35,8 +35,15 @@ export const api = createApi({
     }),
 
     // ✅ GET SUBTASKS
-    getSubtasks: builder.query<any, number>({
-      query: (taskId) => `/tasks/${taskId}/subtasks`,
+    getSubtasks: builder.query<any, any>({
+      query: ({ task_id, status, user_id }) => {
+        const params = new URLSearchParams();
+
+        if (status) params.append("status", status);
+        if (user_id) params.append("user_id", user_id);
+
+        return `/tasks/${task_id}/subtasks?${params.toString()}`;
+      },
       providesTags: ["Subtasks"],
     }),
 
