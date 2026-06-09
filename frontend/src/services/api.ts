@@ -34,13 +34,14 @@ export const api = createApi({
       providesTags: ["Users"],
     }),
 
-    // ✅ GET SUBTASKS
     getSubtasks: builder.query<any, any>({
-      query: ({ task_id, status, user_id }) => {
+      query: ({ task_id, status, user_id, search }) => {
         const params = new URLSearchParams();
 
         if (status) params.append("status", status);
         if (user_id) params.append("user_id", user_id);
+
+        if (search) params.append("search", search);
 
         return `/tasks/${task_id}/subtasks?${params.toString()}`;
       },

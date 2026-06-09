@@ -25,6 +25,7 @@ def get_subtasks(
     task_id: int,
     status: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
+    search: Optional[str] = Query(default=None),
     db: Session = Depends(get_db),
 ):
     try:
@@ -33,6 +34,7 @@ def get_subtasks(
             task_id=task_id,
             status=status,
             user_id=user_id,
+            search=search,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

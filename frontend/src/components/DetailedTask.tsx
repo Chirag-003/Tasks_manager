@@ -17,7 +17,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -55,19 +55,25 @@ export default function DetailedTask({ task }: Props) {
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
-  // ✅ FILTER STATE
+  // ✅ ✅ FILTER STATE
   const [subtaskFilters, setSubtaskFilters] = useState({
     status: "",
     user_id: "",
+    search: "",
   });
 
-  // ✅ BACKEND FETCH
-  const { data: subtasks } = useGetSubtasksQuery({
-    task_id: task.id,
-    ...subtaskFilters,
-  });
+  // ✅ ✅ FORCE REFETCH WHEN FILTERS CHANGE
+  const { data: subtasks = [] } = useGetSubtasksQuery(
+    {
+      task_id: task.id,
+      ...subtaskFilters,
+    },
+    {
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
-  // ✅ POPOVER STATE
+  // ✅ FILTER POPOVER
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpenFilter = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -77,6 +83,22 @@ export default function DetailedTask({ task }: Props) {
   const handleCloseFilter = () => setAnchorEl(null);
   const openFilter = Boolean(anchorEl);
 
+  // ✅ ✅ CLEAN SEARCH HANDLER
+  const handleSearch = useCallback((value: string) => {
+    const trimmed = value.trim();
+
+    setSubtaskFilters((prev) => {
+      // ✅ avoid unnecessary re-renders / API calls
+      if (prev.search === trimmed) return prev;
+
+      return {
+        ...prev,
+        search: trimmed || "",
+      };
+    });
+  }, []);
+
+  // ✅ TITLE UPDATE
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
 
@@ -87,12 +109,7 @@ export default function DetailedTask({ task }: Props) {
       return;
     }
 
-    if (trimmed === task.title) {
-      setIsEditingTitle(false);
-      return;
-    }
-
-    const previousTitle = task.title;
+    if (trimmed === task.title) return;
 
     try {
       await updateTask({
@@ -103,18 +120,15 @@ export default function DetailedTask({ task }: Props) {
       setTitleError("");
       setIsEditingTitle(false);
     } catch (err: any) {
-      let message = err?.data?.detail || "Task title must be unique";
-
-      setTitle(previousTitle);
-      setTitleError(message);
-      setIsEditingTitle(false);
-
+      setTitle(task.title);
+      setTitleError(err?.data?.detail || "Task title must be unique");
       setTimeout(() => setTitleError(""), 3000);
     }
   };
 
   if (!task) return null;
 
+  // ✅ DELETE
   const handleDelete = async () => {
     setDeleteError("");
 
@@ -124,6 +138,7 @@ export default function DetailedTask({ task }: Props) {
     } catch (err: any) {
       let message =
         err?.data?.detail || "Cannot delete task because it has subtasks";
+
       if (typeof message === "string") {
         message = message.replace(/^\d+:\s*/, "").trim();
       }
@@ -132,6 +147,7 @@ export default function DetailedTask({ task }: Props) {
     }
   };
 
+  // ✅ CREATE SUBTASK
   const handleCreateSubtask = async (data: any) => {
     await createSubtask({
       taskId: task.id,
@@ -166,33 +182,23 @@ export default function DetailedTask({ task }: Props) {
               <ArrowBackIcon fontSize="small" />
             </IconButton>
 
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              {!isEditingTitle ? (
-                <Typography
-                  onClick={() => setIsEditingTitle(true)}
-                  sx={{ fontWeight: 600, fontSize: 18, cursor: "pointer" }}
-                >
-                  {task.title}
-                </Typography>
-              ) : (
-                <TextField
-                  autoFocus
-                  variant="standard"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleUpdateTitle();
-                  }}
-                  onBlur={() => setIsEditingTitle(false)}
-                />
-              )}
-
-              {titleError && (
-                <Typography sx={{ fontSize: 12, color: "#dc2626" }}>
-                  {titleError}
-                </Typography>
-              )}
-            </Box>
+            {!isEditingTitle ? (
+              <Typography
+                onClick={() => setIsEditingTitle(true)}
+                sx={{ fontWeight: 600, fontSize: 18 }}
+              >
+                {task.title}
+              </Typography>
+            ) : (
+              <TextField
+                autoFocus
+                variant="standard"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleUpdateTitle()}
+                onBlur={() => setIsEditingTitle(false)}
+              />
+            )}
           </Box>
 
           {/* MAIN */}
@@ -218,6 +224,16 @@ export default function DetailedTask({ task }: Props) {
 
               <Divider />
 
+              <Typography
+                sx={{
+                  fontSize: 16,
+                  color: "text.secondary",
+                  fontWeight: 500,
+                }}
+              >
+                Description
+              </Typography>
+
               <DescriptionField
                 entityId={task.id}
                 entityType="task"
@@ -226,46 +242,38 @@ export default function DetailedTask({ task }: Props) {
 
               <Divider />
 
-              {/* ✅ SUBTASK HEADER */}
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography sx={{ fontWeight: 600 }}>Subtasks</Typography>
+              {/* ✅ ✅ SUBTASK LIST */}
+              <SubtaskList
+                subtasks={subtasks}
+                onAddClick={() => setOpenSubtask(true)}
+                onSearch={handleSearch}
+                onFilterClick={handleOpenFilter}
+              />
 
-                <Button size="small" onClick={handleOpenFilter}>
-                  Filter
-                </Button>
-              </Box>
-
-              {/* ✅ FILTER POPOVER */}
+              {/* ✅ FILTER */}
               <Popover
                 open={openFilter}
                 anchorEl={anchorEl}
                 onClose={handleCloseFilter}
                 anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
                 transformOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{ "& .MuiPaper-root": { mt: 1 } }}
               >
                 <Box p={2} width={260}>
                   <FilterMenu
                     type="subtask"
-                    onChange={(filters) => setSubtaskFilters(filters)}
+                    onChange={(filters) =>
+                      setSubtaskFilters((prev) => ({
+                        ...prev,
+                        ...filters,
+                      }))
+                    }
                   />
                 </Box>
               </Popover>
 
-              {/* ✅ SUBTASK LIST */}
-              <SubtaskList
-                subtasks={subtasks || []}
-                onAddClick={() => setOpenSubtask(true)}
-              />
-
               <Divider />
             </Box>
 
-            {/* ✅ COMMENTS + DELETE BUTTON RESTORED */}
             <Box sx={{ mt: "auto" }}>
               <CommentsField
                 entityId={task.id}
@@ -273,19 +281,13 @@ export default function DetailedTask({ task }: Props) {
                 comments={task.comments?.data || []}
                 rightSlot={
                   <Button
+                    sx={{ textTransform: "capitalize" }}
                     variant="outlined"
                     color="error"
                     startIcon={<DeleteOutlinedIcon />}
                     onClick={() => {
                       setDeleteError("");
                       setOpenDelete(true);
-                    }}
-                    sx={{
-                      borderRadius: 2,
-                      textTransform: "none",
-                      "&:hover": {
-                        backgroundColor: "#fee2e2",
-                      },
                     }}
                   >
                     Delete Task
@@ -303,15 +305,15 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
-      {/* ✅ DELETE DIALOG */}
+      {/* DELETE */}
       <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
         <DialogTitle>Delete Task</DialogTitle>
 
         <DialogContent>
-          <Typography>Are you sure you want to delete this task?</Typography>
+          <Typography>Are you sure?</Typography>
 
           {deleteError && (
-            <Box sx={{ mt: 2, p: 1, bgcolor: "#fee2e2", borderRadius: 1 }}>
+            <Box sx={{ mt: 2, p: 1, bgcolor: "#fee2e2" }}>
               <Typography sx={{ fontSize: 13, color: "#dc2626" }}>
                 {deleteError}
               </Typography>
@@ -332,7 +334,13 @@ export default function DetailedTask({ task }: Props) {
 
 function Row({ label, children }: any) {
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 2 }}>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "120px 1fr",
+        gap: 2,
+      }}
+    >
       <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
         {label}
       </Typography>

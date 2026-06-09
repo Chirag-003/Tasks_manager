@@ -41,9 +41,11 @@ export default function TasksPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
+      const trimmed = searchInput.trim();
+
       setFilters((prev) => ({
         ...prev,
-        search: searchInput,
+        search: trimmed || "",
       }));
     }, 300);
 
@@ -188,12 +190,20 @@ export default function TasksPage() {
             overflowX: "auto",
           }}
         >
-          <TaskList
-            tasks={data || []}
-            onTaskClick={(task: any) =>
-              router.push(`/dashboard/tasks/${task.id}`)
-            }
-          />
+          {!data?.length ? (
+            <Typography sx={{ color: "text.secondary" }}>
+              {searchInput.trim()
+                ? `No results found for "${searchInput.trim()}"`
+                : "No tasks available"}
+            </Typography>
+          ) : (
+            <TaskList
+              tasks={data}
+              onTaskClick={(task: any) =>
+                router.push(`/dashboard/tasks/${task.id}`)
+              }
+            />
+          )}
         </Box>
 
         {/* CREATE BUTTON */}
@@ -235,4 +245,3 @@ export default function TasksPage() {
     </>
   );
 }
-``;

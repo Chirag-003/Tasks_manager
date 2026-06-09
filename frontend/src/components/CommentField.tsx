@@ -141,7 +141,11 @@ export default function CommentsField({
             variant="contained"
             onClick={handleAddComment}
             disabled={isLoading}
-            sx={{ height: "fit-content", minWidth: 100 }}
+            sx={{
+              height: "fit-content",
+              minWidth: 100,
+              textTransform: "capitalize",
+            }}
           >
             Add
           </Button>

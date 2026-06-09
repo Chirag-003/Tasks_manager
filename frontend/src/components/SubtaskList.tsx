@@ -1,26 +1,52 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, Tooltip, TextField, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { Chip } from "@mui/material";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import UILoader from "@/components/Loader";
 
 type Props = {
   subtasks: any[];
   onAddClick: () => void;
+  onSearch?: (value: string) => void;
+  onFilterClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
-export default function SubtaskList({ subtasks, onAddClick }: Props) {
+export default function SubtaskList({
+  subtasks,
+  onAddClick,
+  onSearch,
+  onFilterClick,
+}: Props) {
   const router = useRouter();
 
-  const [showAll, setShowAll] = useState(false);
+  // ✅ PERSIST EXPANSION STATE
+  const [showAll, setShowAll] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("subtasks-expanded") === "true";
+    }
+    return false;
+  });
 
-  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null); // ✅ NEW
+  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
+
+  // ✅ ✅ NEW: CONTROLLED SEARCH INPUT
+  const [searchInput, setSearchInput] = useState("");
+
+  // ✅ ✅ DEBOUNCE + TRIM HANDLING
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const trimmed = searchInput.trim();
+      onSearch?.(trimmed || ""); // ✅ send clean value
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, onSearch]);
 
   const visibleSubtasks = showAll ? subtasks : subtasks.slice(0, 1);
 
@@ -45,7 +71,7 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
 
   return (
     <Box>
-      {/* ✅ ✅ LOADER OVERLAY (ONLY ADDITION) */}
+      {/* ✅ LOADER */}
       {loadingSubtaskId && (
         <Box
           sx={{
@@ -69,24 +95,47 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
         justifyContent="space-between"
         alignItems="center"
         mb={1}
+        gap={2}
       >
-        <Typography
-          sx={{ fontSize: 13, color: "text.secondary", cursor: "default" }}
-        >
-          Subtasks
-        </Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              color: "#111827",
+            }}
+          >
+            Subtasks
+          </Typography>
 
-        <Tooltip title="Add subtask">
-          <IconButton size="small" onClick={onAddClick}>
-            <AddIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+          <Tooltip title="Add subtask">
+            <IconButton size="small" onClick={onAddClick}>
+              <AddIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        <Box display="flex" gap={1}>
+          <TextField
+            placeholder="Search..."
+            size="small"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            sx={{ width: 180 }}
+          />
+
+          <Button size="small" onClick={onFilterClick}>
+            Filter
+          </Button>
+        </Box>
       </Box>
 
-      {/* ✅ EMPTY STATE */}
+      {/* ✅ ✅ EMPTY STATE WITH SEARCH AWARENESS */}
       {!subtasks?.length ? (
-        <Typography sx={{ color: "text.secondary", cursor: "default" }}>
-          No subtasks
+        <Typography sx={{ color: "text.secondary" }}>
+          {searchInput.trim()
+            ? `No results found for "${searchInput.trim()}"`
+            : "No subtasks"}
         </Typography>
       ) : (
         <>
@@ -94,7 +143,7 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
             <Box
               key={subtask.id}
               onClick={() => {
-                setLoadingSubtaskId(subtask.id); // ✅ NEW
+                setLoadingSubtaskId(subtask.id);
                 router.push(`/dashboard/subtasks/${subtask.id}`);
               }}
               sx={{
@@ -106,7 +155,6 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
                 mb: 1,
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-
                 display: "flex",
                 alignItems: "center",
 
@@ -145,12 +193,17 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
           {/* ✅ SHOW MORE */}
           {subtasks.length > 1 && (
             <Typography
-              onClick={() => setShowAll((prev) => !prev)}
+              onClick={() => {
+                setShowAll((prev) => {
+                  const next = !prev;
+                  localStorage.setItem("subtasks-expanded", String(next));
+                  return next;
+                });
+              }}
               sx={{
                 fontSize: 13,
                 cursor: "pointer",
                 color: "#2563eb",
-
                 "&:hover": {
                   textDecoration: "underline",
                 },
