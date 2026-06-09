@@ -260,12 +260,15 @@ export default function DetailedTask({ task }: Props) {
               >
                 <Box p={2} width={260}>
                   <FilterMenu
+                    filters={subtaskFilters}
                     type="subtask"
-                    onChange={(filters) =>
-                      setSubtaskFilters((prev) => ({
-                        ...prev,
-                        ...filters,
-                      }))
+                    onChange={(filters) => setSubtaskFilters(filters)}
+                    onClear={() =>
+                      setSubtaskFilters({
+                        status: "",
+                        user_id: "",
+                        search: "",
+                      })
                     }
                   />
                 </Box>

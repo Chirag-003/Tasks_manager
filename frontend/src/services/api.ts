@@ -40,7 +40,6 @@ export const api = createApi({
 
         if (status) params.append("status", status);
         if (user_id) params.append("user_id", user_id);
-
         if (search) params.append("search", search);
 
         return `/tasks/${task_id}/subtasks?${params.toString()}`;

@@ -25,16 +25,20 @@ export default function UsersPage() {
   return (
     <Box
       sx={{
-        p: 3,
+        height: "95%",
+        px: 3,
+        py: 2,
         display: "flex",
         flexDirection: "column",
-        gap: 2,
+        backgroundColor: "#f8fafc",
       }}
     >
-      <Typography variant="h5" sx={{ fontWeight: 600 }}>
+      {/* HEADER */}
+      <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
         Users
       </Typography>
 
+      {/* TABLE HEADER */}
       <Box
         sx={{
           display: "grid",
@@ -44,6 +48,8 @@ export default function UsersPage() {
           fontSize: "13px",
           color: "#6b7280",
           borderBottom: "1px solid #e5e7eb",
+          backgroundColor: "#fff",
+          borderRadius: "8px 8px 0 0",
         }}
       >
         <div>ID</div>
@@ -52,7 +58,39 @@ export default function UsersPage() {
         <div>Team</div>
       </Box>
 
-      <Box>
+      {/* ✅ SCROLLABLE LIST WITH PARTIAL SCROLL VISIBILITY */}
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          pr: 1,
+          backgroundColor: "#fff",
+          borderRadius: "0 0 8px 8px",
+
+          /* ✅ Scroll style */
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "transparent",
+          },
+
+          /* ✅ ✅ PARTIALLY VISIBLE */
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#e2e8f0", // ✅ faint visible
+            borderRadius: "10px",
+            minHeight: "40px",
+            transition: "background-color 0.2s ease",
+          },
+
+          /* ✅ Darker on hover */
+          "&:hover::-webkit-scrollbar-thumb": {
+            backgroundColor: "#cbd5e1",
+          },
+        }}
+      >
         {data?.map((user: any) => (
           <Box key={user.id}>
             <Box
@@ -62,8 +100,8 @@ export default function UsersPage() {
                 px: 2,
                 py: 1.5,
                 alignItems: "center",
-
                 transition: "background 0.2s ease",
+
                 "&:hover": {
                   backgroundColor: "#f5f7fa",
                 },

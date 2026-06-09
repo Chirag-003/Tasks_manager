@@ -6,6 +6,8 @@ from app.models.model_task import Task
 from app.models.model_users import User
 from app.schemas.schemas_enums import StatusEnum
 
+from sqlalchemy import or_
+
 
 def create_subtask(db: Session, task_id: int, subtask_data):
 
@@ -72,39 +74,36 @@ def create_subtask(db: Session, task_id: int, subtask_data):
     }
 
 
-from sqlalchemy import or_
-
-
 def get_subtasks(
     db: Session,
     task_id: int,
     status=None,
     user_id=None,
-    search=None,  # added
+    search=None,
+    sprint=None,  # ✅ ADD
 ):
     # Check if task exists
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    # Base query
-    query = db.query(SubTask).filter(SubTask.task_id == task_id)
+    # ✅ ✅ CHANGE: JOIN TASK
+    query = db.query(SubTask).join(Task).filter(Task.id == task_id)
 
-    # Filter by status
+    # ✅ status
     if status:
         query = query.filter(SubTask.status == status)
 
-    # Filter by user
+    # ✅ user
     if user_id:
         query = query.join(SubTask.users).filter(User.id == user_id)
 
-    # ✅ SEARCH FILTER (new)
+    # ✅ search
     if search:
         search = search.strip()
         if search:
             query = query.filter(SubTask.title.ilike(f"%{search}%"))
 
-    # Get results
     subtasks = query.all()
 
     result = []

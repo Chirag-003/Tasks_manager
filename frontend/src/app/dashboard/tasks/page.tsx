@@ -25,7 +25,6 @@ export default function TasksPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ✅ filters state
   const [filters, setFilters] = useState({
     search: "",
     status: "",
@@ -33,10 +32,8 @@ export default function TasksPage() {
     user_id: "",
   });
 
-  // ✅ ✅ NEW → click loading state
   const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
 
-  // ✅ search debounce
   const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
@@ -55,7 +52,6 @@ export default function TasksPage() {
   const { data, isLoading, isError } = useGetTasksQuery(filters);
   const [createTask] = useCreateTaskMutation();
 
-  // ✅ create modal
   const [open, setOpen] = useState(false);
 
   const handleOpen = (e: any) => {
@@ -65,7 +61,7 @@ export default function TasksPage() {
 
   const handleClose = () => setOpen(false);
 
-  // ✅ popover state
+  // ✅ FILTER POPOVER
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -78,7 +74,7 @@ export default function TasksPage() {
 
   const openFilter = Boolean(anchorEl);
 
-  // ✅ snackbar
+  // ✅ SNACKBAR
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -88,20 +84,19 @@ export default function TasksPage() {
     if (searchParams.get("deleted") === "true") {
       setSnackbar({
         open: true,
-        message: "Task deleted successfully ✅",
+        message: "Task deleted successfully",
       });
 
       router.replace("/dashboard/tasks");
     }
   }, [searchParams, router]);
 
-  // ✅ TASK SKELETON (correct)
   if (isLoading) return <UILoader type="task" />;
   if (isError) return <p>Error fetching tasks</p>;
 
   return (
     <>
-      {/* ✅ ✅ CLICK LOADER OVERLAY (NEW) */}
+      {/* ✅ LOADER */}
       {loadingTaskId && (
         <Box
           sx={{
@@ -130,12 +125,7 @@ export default function TasksPage() {
         }}
       >
         {/* HEADER */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={2}
-        >
+        <Box display="flex" justifyContent="space-between" mb={2}>
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
             Tasks
           </Typography>
@@ -166,28 +156,58 @@ export default function TasksPage() {
           onClose={handleCloseFilter}
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           transformOrigin={{ vertical: "top", horizontal: "left" }}
-          sx={{ "& .MuiPaper-root": { mt: 1 } }}
         >
           <Box p={2} width={280}>
             <FilterMenu
               type="task"
+              filters={filters}
               onChange={(newFilters: any) => {
                 setFilters((prev) => ({
                   ...prev,
                   ...newFilters,
                 }));
               }}
+              onClear={() =>
+                setFilters({
+                  search: "",
+                  status: "",
+                  sprint: "",
+                  user_id: "",
+                })
+              }
+              onClose={handleCloseFilter}
             />
           </Box>
         </Popover>
 
-        {/* TASK LIST */}
+        {/* ✅ ✅ TASK LIST WITH CUSTOM HORIZONTAL SCROLL */}
         <Box
           sx={{
             flex: 1,
             minHeight: 0,
-            display: "flex",
             overflowX: "auto",
+            overflowY: "hidden",
+            pb: 1,
+
+            /* ✅ scrollbar styling */
+            "&::-webkit-scrollbar": {
+              height: "8px",
+            },
+
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "transparent",
+            },
+
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#e2e8f0", // ✅ faint visible
+              borderRadius: "10px",
+              minWidth: "40px",
+              transition: "background-color 0.2s ease",
+            },
+
+            "&:hover::-webkit-scrollbar-thumb": {
+              backgroundColor: "#cbd5e1", // ✅ darker on hover
+            },
           }}
         >
           {!data?.length ? (
@@ -199,9 +219,10 @@ export default function TasksPage() {
           ) : (
             <TaskList
               tasks={data}
-              onTaskClick={(task: any) =>
-                router.push(`/dashboard/tasks/${task.id}`)
-              }
+              onTaskClick={(task: any) => {
+                setLoadingTaskId(task.id);
+                router.push(`/dashboard/tasks/${task.id}`);
+              }}
             />
           )}
         </Box>
@@ -236,7 +257,6 @@ export default function TasksPage() {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="success" variant="filled">
           {snackbar.message}

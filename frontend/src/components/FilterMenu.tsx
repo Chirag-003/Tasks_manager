@@ -1,48 +1,79 @@
-import { Box, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import {
+  Box,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Button,
+  Typography,
+  IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useState, useEffect } from "react";
 
 import { useGetUsersQuery, useGetSprintsQuery } from "@/services/api";
 
 type Props = {
+  filters?: any;
   onChange: (filters: any) => void;
-  type?: "task" | "subtask"; // ✅ controls behavior
+  onClear: () => void;
+  onClose?: () => void; // ✅ ADD THIS
+  type?: "task" | "subtask";
 };
 
-export default function FilterMenu({ onChange, type = "task" }: Props) {
-  const [filters, setFilters] = useState({
+export default function FilterMenu({
+  filters,
+  onChange,
+  onClear,
+  onClose,
+  type = "task",
+}: Props) {
+  // ✅ DEFAULT FILTERS
+  const defaultFilters = {
     status: "",
-    sprint: "",
     user_id: "",
-  });
+    ...(type === "task" ? { sprint: "" } : {}),
+  };
 
-  // ✅ Fetch users
+  const [localFilters, setLocalFilters] = useState(filters || defaultFilters);
+
   const { data: users } = useGetUsersQuery();
 
-  // ✅ Fetch sprints ONLY for task
   const { data: sprints } = useGetSprintsQuery(undefined, {
-    skip: type === "subtask", // ✅ don't call for subtasks
+    skip: type !== "task",
   });
 
-  // ✅ Auto apply
+  // ✅ SYNC WITH PARENT
   useEffect(() => {
-    onChange(filters);
+    setLocalFilters(filters || defaultFilters);
   }, [filters]);
 
-  // ✅ Correct update logic
   const handleChange = (key: string, value: any) => {
-    setFilters((prev) => ({
-      ...prev,
+    const updated = {
+      ...localFilters,
       [key]: value,
-    }));
+    };
+
+    setLocalFilters(updated);
+    onChange(updated);
   };
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
+      {/* ✅ HEADER */}
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography sx={{ fontWeight: 600 }}>Filters</Typography>
+
+        <IconButton size="small" onClick={onClose}>
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
       {/* ✅ STATUS */}
       <FormControl fullWidth size="small">
         <InputLabel>Status</InputLabel>
         <Select
-          value={filters.status}
+          value={localFilters.status || ""}
           label="Status"
           onChange={(e) => handleChange("status", e.target.value)}
         >
@@ -56,12 +87,12 @@ export default function FilterMenu({ onChange, type = "task" }: Props) {
         </Select>
       </FormControl>
 
-      {/* ✅ ✅ SPRINT → ONLY FOR TASK */}
+      {/* ✅ SPRINT (ONLY FOR TASKS) */}
       {type === "task" && (
         <FormControl fullWidth size="small">
           <InputLabel>Sprint</InputLabel>
           <Select
-            value={filters.sprint}
+            value={localFilters.sprint || ""}
             label="Sprint"
             onChange={(e) => handleChange("sprint", e.target.value)}
           >
@@ -80,7 +111,7 @@ export default function FilterMenu({ onChange, type = "task" }: Props) {
       <FormControl fullWidth size="small">
         <InputLabel>Assignee</InputLabel>
         <Select
-          value={filters.user_id}
+          value={localFilters.user_id || ""}
           label="Assignee"
           onChange={(e) => handleChange("user_id", e.target.value)}
         >
@@ -93,6 +124,26 @@ export default function FilterMenu({ onChange, type = "task" }: Props) {
           ))}
         </Select>
       </FormControl>
+
+      {/* ✅ RESET BUTTON */}
+      <Box display="flex" justifyContent="flex-end">
+        <Button
+          size="small"
+          color="error"
+          onClick={() => {
+            const cleared = {
+              status: "",
+              user_id: "",
+              ...(type === "task" ? { sprint: "" } : {}),
+            };
+
+            setLocalFilters(cleared);
+            onClear();
+          }}
+        >
+          Reset
+        </Button>
+      </Box>
     </Box>
   );
 }
