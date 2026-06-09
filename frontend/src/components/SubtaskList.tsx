@@ -8,6 +8,8 @@ import { Chip } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import UILoader from "@/components/Loader";
+
 type Props = {
   subtasks: any[];
   onAddClick: () => void;
@@ -15,7 +17,10 @@ type Props = {
 
 export default function SubtaskList({ subtasks, onAddClick }: Props) {
   const router = useRouter();
+
   const [showAll, setShowAll] = useState(false);
+
+  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null); // ✅ NEW
 
   const visibleSubtasks = showAll ? subtasks : subtasks.slice(0, 1);
 
@@ -40,7 +45,25 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
 
   return (
     <Box>
-      {/* ✅ HEADER MOVED HERE */}
+      {/* ✅ ✅ LOADER OVERLAY (ONLY ADDITION) */}
+      {loadingSubtaskId && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(255,255,255,0.6)",
+            backdropFilter: "blur(2px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <UILoader type="full" text="Opening subtask..." />
+        </Box>
+      )}
+
+      {/* ✅ HEADER */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -70,7 +93,10 @@ export default function SubtaskList({ subtasks, onAddClick }: Props) {
           {visibleSubtasks.map((subtask) => (
             <Box
               key={subtask.id}
-              onClick={() => router.push(`/dashboard/subtasks/${subtask.id}`)}
+              onClick={() => {
+                setLoadingSubtaskId(subtask.id); // ✅ NEW
+                router.push(`/dashboard/subtasks/${subtask.id}`);
+              }}
               sx={{
                 px: 1.5,
                 py: 1.2,

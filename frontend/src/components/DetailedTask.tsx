@@ -11,24 +11,24 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Popover, // ✅ NEW
+  Popover,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
   useCreateSubtaskMutation,
   useDeleteTaskMutation,
   useUpdateTaskMutation,
-  useGetSubtasksQuery, // ✅ NEW
+  useGetSubtasksQuery,
 } from "@/services/api";
 
 import CreateSubtaskDialog from "@/components/CreateSubtaskDialog";
-import FilterMenu from "@/components/FilterMenu"; // ✅ NEW
+import FilterMenu from "@/components/FilterMenu";
 
 import AssigneeField from "./AssigneeField";
 import StatusField from "./StatusField";
@@ -44,50 +44,38 @@ export default function DetailedTask({ task }: Props) {
   const router = useRouter();
 
   const [openSubtask, setOpenSubtask] = useState(false);
-
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
   const [createSubtask] = useCreateSubtaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
+  const [updateTask] = useUpdateTaskMutation();
 
   const [title, setTitle] = useState(task.title);
-  const [updateTask] = useUpdateTaskMutation();
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
-  // ❌ REMOVE LOCAL SUBTASK STATE
-  // const [subtasks, setSubtasks] = useState(task.subtasks || []);
-
-  // ✅ ✅ NEW: Subtask filters
+  // ✅ FILTER STATE
   const [subtaskFilters, setSubtaskFilters] = useState({
     status: "",
     user_id: "",
   });
 
-  // ✅ ✅ NEW: Backend call
+  // ✅ BACKEND FETCH
   const { data: subtasks } = useGetSubtasksQuery({
     task_id: task.id,
     ...subtaskFilters,
   });
 
-  // ✅ ✅ FILTER POPOVER STATE
+  // ✅ POPOVER STATE
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpenFilter = (e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
   };
 
-  const handleCloseFilter = () => {
-    setAnchorEl(null);
-  };
-
+  const handleCloseFilter = () => setAnchorEl(null);
   const openFilter = Boolean(anchorEl);
-
-  // ❌ REMOVE THIS (not needed anymore)
-  // useEffect(() => {
-  //   setSubtasks(task.subtasks || []);
-  // }, [task.subtasks]);
 
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
@@ -95,10 +83,7 @@ export default function DetailedTask({ task }: Props) {
     if (!trimmed) {
       setTitle(task.title);
       setTitleError("Title cannot be empty");
-
-      setTimeout(() => {
-        setTitleError("");
-      }, 3000);
+      setTimeout(() => setTitleError(""), 3000);
       return;
     }
 
@@ -118,20 +103,13 @@ export default function DetailedTask({ task }: Props) {
       setTitleError("");
       setIsEditingTitle(false);
     } catch (err: any) {
-      let message =
-        err?.data?.detail || err?.error || "Task title must be unique";
-
-      if (typeof message === "string") {
-        message = message.replace(/^\d+:\s*/, "").trim();
-      }
+      let message = err?.data?.detail || "Task title must be unique";
 
       setTitle(previousTitle);
       setTitleError(message);
       setIsEditingTitle(false);
 
-      setTimeout(() => {
-        setTitleError("");
-      }, 3000);
+      setTimeout(() => setTitleError(""), 3000);
     }
   };
 
@@ -146,12 +124,8 @@ export default function DetailedTask({ task }: Props) {
     } catch (err: any) {
       let message =
         err?.data?.detail || "Cannot delete task because it has subtasks";
-
       if (typeof message === "string") {
-        message = message
-          .replace(/^\d+:\s*/, "")
-          .replace(/\(\d+\)/g, "")
-          .trim();
+        message = message.replace(/^\d+:\s*/, "").trim();
       }
 
       setDeleteError(message);
@@ -167,15 +141,7 @@ export default function DetailedTask({ task }: Props) {
 
   return (
     <>
-      <Box
-        sx={{
-          height: "100%",
-          display: "flex",
-          overflow: "hidden",
-          backgroundColor: "#edeff0",
-          p: 2,
-        }}
-      >
+      <Box sx={{ height: "100%", display: "flex", p: 2, bgcolor: "#edeff0" }}>
         <Box
           sx={{
             width: "100%",
@@ -183,7 +149,6 @@ export default function DetailedTask({ task }: Props) {
             borderRadius: 3,
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden",
           }}
         >
           {/* HEADER */}
@@ -204,15 +169,8 @@ export default function DetailedTask({ task }: Props) {
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               {!isEditingTitle ? (
                 <Typography
-                  onClick={() => {
-                    setIsEditingTitle(true);
-                    setTitle(task.title);
-                  }}
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: 18,
-                    cursor: "pointer",
-                  }}
+                  onClick={() => setIsEditingTitle(true)}
+                  sx={{ fontWeight: 600, fontSize: 18, cursor: "pointer" }}
                 >
                   {task.title}
                 </Typography>
@@ -221,65 +179,42 @@ export default function DetailedTask({ task }: Props) {
                   autoFocus
                   variant="standard"
                   value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    setTitleError("");
-                  }}
+                  onChange={(e) => setTitle(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleUpdateTitle();
-                      setIsEditingTitle(false);
-                    }
+                    if (e.key === "Enter") handleUpdateTitle();
                   }}
-                  onBlur={() => {
-                    setTitle(task.title);
-                    setIsEditingTitle(false);
-                  }}
-                  InputProps={{
-                    disableUnderline: true,
-                  }}
+                  onBlur={() => setIsEditingTitle(false)}
                 />
               )}
 
               {titleError && (
-                <Typography sx={{ fontSize: 12, color: "#dc2626", mt: 0.5 }}>
+                <Typography sx={{ fontSize: 12, color: "#dc2626" }}>
                   {titleError}
                 </Typography>
               )}
             </Box>
           </Box>
 
-          {/* MAIN CONTENT */}
-          <Box
-            sx={{
-              p: 3,
-              display: "flex",
-              flexDirection: "column",
-              flex: 1,
-              overflowY: "auto",
-            }}
-          >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <Row label="Assignee">
-                  <AssigneeField
-                    entityId={task.id}
-                    entityType="task"
-                    users={task.users}
-                  />
-                </Row>
+          {/* MAIN */}
+          <Box sx={{ p: 3, flex: 1, overflowY: "auto" }}>
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Row label="Assignee">
+                <AssigneeField
+                  entityId={task.id}
+                  entityType="task"
+                  users={task.users}
+                />
+              </Row>
 
-                <Row label="Status">
-                  <StatusField
-                    entityId={task.id}
-                    entityType="task"
-                    value={task.status}
-                  />
-                </Row>
+              <Row label="Status">
+                <StatusField
+                  entityId={task.id}
+                  entityType="task"
+                  value={task.status}
+                />
+              </Row>
 
-                <Row label="Sprint">{task.sprint || "—"}</Row>
-              </Box>
+              <Row label="Sprint">{task.sprint || "—"}</Row>
 
               <Divider />
 
@@ -291,7 +226,7 @@ export default function DetailedTask({ task }: Props) {
 
               <Divider />
 
-              {/* ✅ SUBTASK HEADER + FILTER */}
+              {/* ✅ SUBTASK HEADER */}
               <Box
                 display="flex"
                 justifyContent="space-between"
@@ -316,12 +251,12 @@ export default function DetailedTask({ task }: Props) {
                 <Box p={2} width={260}>
                   <FilterMenu
                     type="subtask"
-                    onChange={(filters: any) => setSubtaskFilters(filters)}
+                    onChange={(filters) => setSubtaskFilters(filters)}
                   />
                 </Box>
               </Popover>
 
-              {/* ✅ UPDATED SUBTASK LIST */}
+              {/* ✅ SUBTASK LIST */}
               <SubtaskList
                 subtasks={subtasks || []}
                 onAddClick={() => setOpenSubtask(true)}
@@ -330,11 +265,32 @@ export default function DetailedTask({ task }: Props) {
               <Divider />
             </Box>
 
+            {/* ✅ COMMENTS + DELETE BUTTON RESTORED */}
             <Box sx={{ mt: "auto" }}>
               <CommentsField
                 entityId={task.id}
                 entityType="task"
                 comments={task.comments?.data || []}
+                rightSlot={
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteOutlinedIcon />}
+                    onClick={() => {
+                      setDeleteError("");
+                      setOpenDelete(true);
+                    }}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: "none",
+                      "&:hover": {
+                        backgroundColor: "#fee2e2",
+                      },
+                    }}
+                  >
+                    Delete Task
+                  </Button>
+                }
               />
             </Box>
           </Box>
@@ -347,6 +303,7 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
+      {/* ✅ DELETE DIALOG */}
       <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
         <DialogTitle>Delete Task</DialogTitle>
 

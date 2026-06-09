@@ -4,7 +4,7 @@ import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
 
 import TaskList from "@/components/TaskList";
 import CreateTaskDialog from "@/components/CreateTaskDialog";
-import Loader from "@/components/Loader";
+import UILoader from "@/components/Loader";
 import FilterMenu from "@/components/FilterMenu";
 
 import { useState, useEffect } from "react";
@@ -33,6 +33,9 @@ export default function TasksPage() {
     user_id: "",
   });
 
+  // ✅ ✅ NEW → click loading state
+  const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
+
   // ✅ search debounce
   const [searchInput, setSearchInput] = useState("");
 
@@ -47,7 +50,6 @@ export default function TasksPage() {
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  // ✅ (kept same, no unnecessary change)
   const { data, isLoading, isError } = useGetTasksQuery(filters);
   const [createTask] = useCreateTaskMutation();
 
@@ -91,11 +93,30 @@ export default function TasksPage() {
     }
   }, [searchParams, router]);
 
-  if (isLoading) return <Loader />;
+  // ✅ TASK SKELETON (correct)
+  if (isLoading) return <UILoader type="task" />;
   if (isError) return <p>Error fetching tasks</p>;
 
   return (
     <>
+      {/* ✅ ✅ CLICK LOADER OVERLAY (NEW) */}
+      {loadingTaskId && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(255,255,255,0.6)",
+            backdropFilter: "blur(2px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <UILoader type="full" text="Opening task..." />
+        </Box>
+      )}
+
       <Box
         sx={{
           height: "95%",
@@ -106,7 +127,7 @@ export default function TasksPage() {
           flexDirection: "column",
         }}
       >
-        {/* ✅ HEADER */}
+        {/* HEADER */}
         <Box
           display="flex"
           alignItems="center"
@@ -118,7 +139,6 @@ export default function TasksPage() {
           </Typography>
 
           <Box display="flex" gap={2}>
-            {/* ✅ SEARCH */}
             <TextField
               placeholder="Search tasks..."
               size="small"
@@ -127,7 +147,6 @@ export default function TasksPage() {
               sx={{ width: 250 }}
             />
 
-            {/* ✅ FILTER BUTTON */}
             <Button
               variant="outlined"
               onClick={handleOpenFilter}
@@ -138,28 +157,18 @@ export default function TasksPage() {
           </Box>
         </Box>
 
-        {/* ✅ FILTER POPOVER */}
+        {/* FILTER */}
         <Popover
           open={openFilter}
           anchorEl={anchorEl}
           onClose={handleCloseFilter}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "left",
-          }}
-          sx={{
-            "& .MuiPaper-root": {
-              mt: 1,
-            },
-          }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          sx={{ "& .MuiPaper-root": { mt: 1 } }}
         >
           <Box p={2} width={280}>
             <FilterMenu
-              type="task" // ✅ IMPORTANT NEW ADDITION
+              type="task"
               onChange={(newFilters: any) => {
                 setFilters((prev) => ({
                   ...prev,
@@ -170,21 +179,13 @@ export default function TasksPage() {
           </Box>
         </Popover>
 
-        {/* ✅ TASK LIST */}
+        {/* TASK LIST */}
         <Box
           sx={{
             flex: 1,
             minHeight: 0,
             display: "flex",
             overflowX: "auto",
-
-            "&::-webkit-scrollbar": {
-              height: "6px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#cbd5f1",
-              borderRadius: "8px",
-            },
           }}
         >
           <TaskList
@@ -195,7 +196,7 @@ export default function TasksPage() {
           />
         </Box>
 
-        {/* ✅ CREATE BUTTON */}
+        {/* CREATE BUTTON */}
         <Button
           variant="contained"
           onClick={handleOpen}
@@ -211,7 +212,6 @@ export default function TasksPage() {
           Create Task
         </Button>
 
-        {/* ✅ CREATE DIALOG */}
         <CreateTaskDialog
           open={open}
           onClose={handleClose}
@@ -221,7 +221,7 @@ export default function TasksPage() {
         />
       </Box>
 
-      {/* ✅ SNACKBAR */}
+      {/* SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -235,3 +235,4 @@ export default function TasksPage() {
     </>
   );
 }
+``;
