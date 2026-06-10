@@ -9,14 +9,24 @@ from sqlalchemy.exc import IntegrityError
 
 from app.schemas.schemas_enums import StatusEnum
 
+from sqlalchemy import func  # ✅ ADD THIS IMPORT
+
 
 def create_task(db: Session, task):
-    exiting_task = db.query(Task).filter(Task.title == task.title).first()
+
+    # ✅ FIX: normalize title for comparison
+    normalized_title = task.title.strip().lower()
+
+    exiting_task = (
+        db.query(Task).filter(func.lower(Task.title) == normalized_title).first()
+    )
+
     if exiting_task:
         raise HTTPException(status_code=400, detail="Task already exists")
 
+    # ✅ FIX: save trimmed title (no trailing spaces)
     db_task = Task(
-        title=task.title,
+        title=task.title.strip(),
         description=task.description,
         status=(task.status or StatusEnum.backlog),
         sprint=task.sprint,

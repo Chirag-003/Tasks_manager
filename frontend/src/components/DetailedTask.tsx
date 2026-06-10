@@ -55,14 +55,12 @@ export default function DetailedTask({ task }: Props) {
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
-  // ✅ ✅ FILTER STATE
   const [subtaskFilters, setSubtaskFilters] = useState({
     status: "",
     user_id: "",
     search: "",
   });
 
-  // ✅ ✅ FORCE REFETCH WHEN FILTERS CHANGE
   const { data: subtasks = [] } = useGetSubtasksQuery(
     {
       task_id: task.id,
@@ -73,7 +71,6 @@ export default function DetailedTask({ task }: Props) {
     },
   );
 
-  // ✅ FILTER POPOVER
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpenFilter = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -83,12 +80,10 @@ export default function DetailedTask({ task }: Props) {
   const handleCloseFilter = () => setAnchorEl(null);
   const openFilter = Boolean(anchorEl);
 
-  // ✅ ✅ CLEAN SEARCH HANDLER
   const handleSearch = useCallback((value: string) => {
     const trimmed = value.trim();
 
     setSubtaskFilters((prev) => {
-      // ✅ avoid unnecessary re-renders / API calls
       if (prev.search === trimmed) return prev;
 
       return {
@@ -98,7 +93,6 @@ export default function DetailedTask({ task }: Props) {
     });
   }, []);
 
-  // ✅ TITLE UPDATE
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
 
@@ -128,7 +122,6 @@ export default function DetailedTask({ task }: Props) {
 
   if (!task) return null;
 
-  // ✅ DELETE
   const handleDelete = async () => {
     setDeleteError("");
 
@@ -147,7 +140,6 @@ export default function DetailedTask({ task }: Props) {
     }
   };
 
-  // ✅ CREATE SUBTASK
   const handleCreateSubtask = async (data: any) => {
     await createSubtask({
       taskId: task.id,
@@ -242,7 +234,6 @@ export default function DetailedTask({ task }: Props) {
 
               <Divider />
 
-              {/* ✅ ✅ SUBTASK LIST */}
               <SubtaskList
                 subtasks={subtasks}
                 onAddClick={() => setOpenSubtask(true)}
@@ -250,13 +241,10 @@ export default function DetailedTask({ task }: Props) {
                 onFilterClick={handleOpenFilter}
               />
 
-              {/* ✅ FILTER */}
               <Popover
                 open={openFilter}
                 anchorEl={anchorEl}
                 onClose={handleCloseFilter}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
               >
                 <Box p={2} width={260}>
                   <FilterMenu
@@ -308,25 +296,60 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
-      {/* DELETE */}
-      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
-        <DialogTitle>Delete Task</DialogTitle>
+      {/* ✅ ✅ UPDATED DELETE DIALOG */}
+      <Dialog
+        open={openDelete}
+        onClose={() => setOpenDelete(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600, pb: 1 }}>Delete Task</DialogTitle>
 
         <DialogContent>
-          <Typography>Are you sure?</Typography>
+          <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+            Are you sure you want to delete this task? This action cannot be
+            undone.
+          </Typography>
 
           {deleteError && (
-            <Box sx={{ mt: 2, p: 1, bgcolor: "#fee2e2" }}>
-              <Typography sx={{ fontSize: 13, color: "#dc2626" }}>
+            <Box
+              sx={{
+                mt: 2,
+                px: 2,
+                py: 1.5,
+                borderRadius: 1,
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+              }}
+            >
+              <Typography
+                sx={{ fontSize: 13, color: "#b91c1c", fontWeight: 500 }}
+              >
                 {deleteError}
               </Typography>
             </Box>
           )}
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete}>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setOpenDelete(false)}
+            variant="outlined"
+            sx={{ textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleDelete}
+            sx={{
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": { boxShadow: "none" },
+            }}
+          >
             Delete
           </Button>
         </DialogActions>

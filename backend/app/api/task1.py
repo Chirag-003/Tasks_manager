@@ -25,7 +25,7 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=list[TaskResponse])
 def get_tasks(
     skip: int = 0,
-    limit: int = 30,
+    limit: int = 100,
     status: Optional[StatusEnum] = Query(default=None),
     sprint: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
