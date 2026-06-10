@@ -117,11 +117,11 @@ export default function SubtaskList({
 
         <Box display="flex" gap={1}>
           <TextField
-            placeholder="Search..."
+            placeholder="Search subtasks by title..."
             size="small"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            sx={{ width: 180 }}
+            sx={{ width: 230 }}
           />
 
           <Button size="small" onClick={onFilterClick}>

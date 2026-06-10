@@ -90,7 +90,7 @@ export const api = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Subtasks"],
+      invalidatesTags: ["Subtasks", "Tasks"],
     }),
 
     updateSubtask: builder.mutation({
@@ -99,7 +99,7 @@ export const api = createApi({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["Subtasks"],
+      invalidatesTags: ["Subtasks", "Tasks"],
     }),
 
     deleteSubtask: builder.mutation({
@@ -107,7 +107,7 @@ export const api = createApi({
         url: `/subtasks/${subtaskId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Subtasks"],
+      invalidatesTags: ["Subtasks", "Tasks"],
     }),
 
     // ✅ ADD TASK COMMENT

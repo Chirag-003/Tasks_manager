@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { Task } from "@mui/icons-material";
 
 export default function TasksPage() {
   const router = useRouter();
@@ -132,7 +133,7 @@ export default function TasksPage() {
 
           <Box display="flex" gap={2}>
             <TextField
-              placeholder="Search tasks..."
+              placeholder="Search task by title..."
               size="small"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
