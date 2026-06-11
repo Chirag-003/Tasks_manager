@@ -3,7 +3,7 @@
 import { Box, Typography, Skeleton } from "@mui/material";
 
 type Props = {
-  type?: "full" | "task" | "subtask" | "detail";
+  type?: "full" | "task" | "subtask" | "detail" | "taskFlat";
   text?: string;
 };
 
@@ -133,6 +133,37 @@ export default function UILoader({
             <Skeleton key={i} height={40} sx={{ mt: 1 }} />
           ))}
         </Box>
+      </Box>
+    );
+  }
+  // ✅ TASK FLAT SKELETON (FOR TAG VIEW)
+  if (type === "taskFlat") {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          alignContent: "flex-start",
+          width: "100%",
+        }}
+      >
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Box
+            key={i}
+            sx={{
+              width: 280,
+              p: 2,
+              borderRadius: 2,
+              bgcolor: "#fff",
+            }}
+          >
+            <Skeleton height={20} width="70%" />
+            <Skeleton height={15} width="90%" />
+            <Skeleton height={15} width="60%" sx={{ mt: 1 }} />
+            <Skeleton height={30} sx={{ mt: 2 }} />
+          </Box>
+        ))}
       </Box>
     );
   }

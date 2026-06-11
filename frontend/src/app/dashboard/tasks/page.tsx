@@ -36,6 +36,10 @@ export default function TasksPage() {
   const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
 
   const [searchInput, setSearchInput] = useState("");
+  const [activeStatus, setActiveStatus] = useState("");
+
+  const [visibleTasks, setVisibleTasks] = useState<any[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -50,10 +54,32 @@ export default function TasksPage() {
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  const { data, isLoading, isError } = useGetTasksQuery(filters);
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      status: activeStatus,
+    }));
+  }, [activeStatus]);
+
+  // ✅ ✅ ✅ ONLY ADD isFetching
+  const { data, isLoading, isFetching, isError } = useGetTasksQuery(filters);
+
   const [createTask] = useCreateTaskMutation();
 
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!data) return;
+
+    setIsTransitioning(true);
+
+    const timeout = setTimeout(() => {
+      setVisibleTasks(data);
+      setIsTransitioning(false);
+    }, 150);
+
+    return () => clearTimeout(timeout);
+  }, [data]);
 
   const handleOpen = (e: any) => {
     e.currentTarget.blur();
@@ -62,7 +88,6 @@ export default function TasksPage() {
 
   const handleClose = () => setOpen(false);
 
-  // ✅ FILTER POPOVER
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -75,7 +100,6 @@ export default function TasksPage() {
 
   const openFilter = Boolean(anchorEl);
 
-  // ✅ SNACKBAR
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -97,7 +121,6 @@ export default function TasksPage() {
 
   return (
     <>
-      {/* ✅ LOADER */}
       {loadingTaskId && (
         <Box
           sx={{
@@ -126,27 +149,86 @@ export default function TasksPage() {
         }}
       >
         {/* HEADER */}
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            Tasks
-          </Typography>
+        <Box mb={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={1.5}
+          >
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              Tasks
+            </Typography>
 
-          <Box display="flex" gap={2}>
-            <TextField
-              placeholder="Search task by title..."
-              size="small"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              sx={{ width: 250 }}
-            />
+            <Box display="flex" gap={2}>
+              <TextField
+                placeholder="Search task by title..."
+                size="small"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                sx={{ width: 250 }}
+              />
 
-            <Button
-              variant="outlined"
-              onClick={handleOpenFilter}
-              sx={{ textTransform: "none" }}
-            >
-              Filter
-            </Button>
+              <Button
+                variant="outlined"
+                onClick={handleOpenFilter}
+                sx={{ textTransform: "none" }}
+              >
+                Filter
+              </Button>
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              gap: 4,
+              borderBottom: "1px solid #e5e7eb",
+            }}
+          >
+            {[
+              "",
+              "backlog",
+              "todo",
+              "in progress",
+              "in review",
+              "qa",
+              "completed",
+            ].map((status) => {
+              const isActive = activeStatus === status;
+
+              return (
+                <Box
+                  key={status || "all"}
+                  onClick={() => setActiveStatus(status)}
+                  sx={{
+                    position: "relative",
+                    cursor: "pointer",
+                    pb: 1.2,
+                    fontSize: "15px",
+                    fontWeight: isActive ? 600 : 500,
+                    textTransform: "capitalize",
+                    color: isActive ? "#2563eb" : "#475569",
+                    transition: "color 0.2s ease",
+                    "&:hover": { color: "#1d4ed8" },
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      left: 0,
+                      bottom: 0,
+                      width: isActive ? "100%" : "0%",
+                      opacity: isActive ? 1 : 0,
+                      height: "2.5px",
+                      backgroundColor: "#2563eb",
+                      borderRadius: "2px",
+                      transition: "all 0.2s ease",
+                    },
+                  }}
+                >
+                  {status ? (status === "qa" ? "QA" : status) : "All"}
+                </Box>
+              );
+            })}
           </Box>
         </Box>
 
@@ -181,7 +263,7 @@ export default function TasksPage() {
           </Box>
         </Popover>
 
-        {/* ✅ ✅ TASK LIST WITH CUSTOM HORIZONTAL SCROLL */}
+        {/* ✅ ✅ ✅ FIXED TASK LIST */}
         <Box
           sx={{
             flex: 1,
@@ -189,29 +271,16 @@ export default function TasksPage() {
             overflowX: "auto",
             overflowY: "hidden",
             pb: 1,
-
-            /* ✅ scrollbar styling */
-            "&::-webkit-scrollbar": {
-              height: "8px",
-            },
-
-            "&::-webkit-scrollbar-track": {
-              backgroundColor: "transparent",
-            },
-
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#e2e8f0", // ✅ faint visible
-              borderRadius: "10px",
-              minWidth: "40px",
-              transition: "background-color 0.2s ease",
-            },
-
-            "&:hover::-webkit-scrollbar-thumb": {
-              backgroundColor: "#cbd5e1", // ✅ darker on hover
-            },
           }}
         >
-          {!data?.length ? (
+          {isFetching ||
+          (data?.[0]?.status !== activeStatus && activeStatus !== "") ? (
+            activeStatus ? (
+              <UILoader type="taskFlat" />
+            ) : (
+              <UILoader type="task" />
+            )
+          ) : !data?.length ? (
             <Typography sx={{ color: "text.secondary" }}>
               {searchInput.trim()
                 ? `No results found for "${searchInput.trim()}"`
@@ -220,6 +289,7 @@ export default function TasksPage() {
           ) : (
             <TaskList
               tasks={data}
+              grouped={!activeStatus}
               onTaskClick={(task: any) => {
                 setLoadingTaskId(task.id);
                 router.push(`/dashboard/tasks/${task.id}`);

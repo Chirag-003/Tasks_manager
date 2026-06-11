@@ -70,22 +70,24 @@ export default function FilterMenu({
       </Box>
 
       {/* ✅ STATUS */}
-      <FormControl fullWidth size="small">
-        <InputLabel>Status</InputLabel>
-        <Select
-          value={localFilters.status || ""}
-          label="Status"
-          onChange={(e) => handleChange("status", e.target.value)}
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="backlog">Backlog</MenuItem>
-          <MenuItem value="todo">Todo</MenuItem>
-          <MenuItem value="in progress">In Progress</MenuItem>
-          <MenuItem value="in review">In Review</MenuItem>
-          <MenuItem value="qa">QA</MenuItem>
-          <MenuItem value="completed">Completed</MenuItem>
-        </Select>
-      </FormControl>
+      {type === "subtask" && (
+        <FormControl fullWidth size="small">
+          <InputLabel>Status</InputLabel>
+          <Select
+            value={localFilters.status || ""}
+            label="Status"
+            onChange={(e) => handleChange("status", e.target.value)}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="backlog">Backlog</MenuItem>
+            <MenuItem value="todo">Todo</MenuItem>
+            <MenuItem value="in progress">In Progress</MenuItem>
+            <MenuItem value="in review">In Review</MenuItem>
+            <MenuItem value="qa">QA</MenuItem>
+            <MenuItem value="completed">Completed</MenuItem>
+          </Select>
+        </FormControl>
+      )}
 
       {/* ✅ SPRINT (ONLY FOR TASKS) */}
       {type === "task" && (

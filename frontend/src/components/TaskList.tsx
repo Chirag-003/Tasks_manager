@@ -6,9 +6,14 @@ import TaskCard from "./TaskCard";
 type TaskListProps = {
   tasks: any[];
   onTaskClick: (task: any) => void;
+  grouped?: boolean;
 };
 
-export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
+export default function TaskList({
+  tasks,
+  onTaskClick,
+  grouped = true,
+}: TaskListProps) {
   const columns = [
     { key: "backlog", title: "Backlog" },
     { key: "todo", title: "Todo" },
@@ -18,6 +23,48 @@ export default function TaskList({ tasks, onTaskClick }: TaskListProps) {
     { key: "completed", title: "Completed" },
   ];
 
+  // ✅ ✅ ✅ FLAT VIEW (WITH SCROLLBAR)
+  if (!grouped) {
+    return (
+      <Box
+        sx={{
+          height: "100%",
+          overflowY: "auto",
+          pr: 1,
+
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          alignContent: "flex-start",
+
+          /* ✅ custom scrollbar */
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#e2e8f0",
+            borderRadius: "10px",
+            minHeight: "40px",
+            transition: "background-color 0.2s ease",
+          },
+          "&:hover::-webkit-scrollbar-thumb": {
+            backgroundColor: "#cbd5e1",
+          },
+        }}
+      >
+        {tasks.map((task) => (
+          <Box key={task.id} sx={{ width: 280 }}>
+            <TaskCard task={task} onClick={() => onTaskClick(task)} />
+          </Box>
+        ))}
+      </Box>
+    );
+  }
+
+  // ✅ ✅ ✅ GROUPED VIEW (UNCHANGED)
   return (
     <Box
       sx={{
