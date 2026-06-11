@@ -11,6 +11,10 @@ from app.models.model_task import Task
 from app.models.model_users import User
 from sqlalchemy import distinct
 
+
+from app.core.redis_client import redis_client
+import json
+
 router = APIRouter()
 
 

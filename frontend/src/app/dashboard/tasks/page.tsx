@@ -20,7 +20,6 @@ import {
 } from "@mui/material";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Task } from "@mui/icons-material";
 
 export default function TasksPage() {
   const router = useRouter();
@@ -34,12 +33,25 @@ export default function TasksPage() {
   });
 
   const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
-
   const [searchInput, setSearchInput] = useState("");
-  const [activeStatus, setActiveStatus] = useState("");
 
-  const [visibleTasks, setVisibleTasks] = useState<any[]>([]);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const statusParam = searchParams.get("status") || "";
+  const [activeStatus, setActiveStatus] = useState(statusParam);
+
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
+
+  const openFilter = Boolean(anchorEl);
+
+  useEffect(() => {
+    const statusFromUrl = searchParams.get("status") || "";
+    setActiveStatus(statusFromUrl);
+  }, [searchParams]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -61,50 +73,6 @@ export default function TasksPage() {
     }));
   }, [activeStatus]);
 
-  // ✅ ✅ ✅ ONLY ADD isFetching
-  const { data, isLoading, isFetching, isError } = useGetTasksQuery(filters);
-
-  const [createTask] = useCreateTaskMutation();
-
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!data) return;
-
-    setIsTransitioning(true);
-
-    const timeout = setTimeout(() => {
-      setVisibleTasks(data);
-      setIsTransitioning(false);
-    }, 150);
-
-    return () => clearTimeout(timeout);
-  }, [data]);
-
-  const handleOpen = (e: any) => {
-    e.currentTarget.blur();
-    setOpen(true);
-  };
-
-  const handleClose = () => setOpen(false);
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseFilter = () => {
-    setAnchorEl(null);
-  };
-
-  const openFilter = Boolean(anchorEl);
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-  });
-
   useEffect(() => {
     if (searchParams.get("deleted") === "true") {
       setSnackbar({
@@ -115,6 +83,25 @@ export default function TasksPage() {
       router.replace("/dashboard/tasks");
     }
   }, [searchParams, router]);
+
+  const { data, isLoading, isFetching, isError } = useGetTasksQuery(filters);
+
+  const [createTask] = useCreateTaskMutation();
+
+  const handleOpen = (e: any) => {
+    e.currentTarget.blur();
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
+
+  const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseFilter = () => {
+    setAnchorEl(null);
+  };
 
   if (isLoading) return <UILoader type="task" />;
   if (isError) return <p>Error fetching tasks</p>;
@@ -179,12 +166,9 @@ export default function TasksPage() {
             </Box>
           </Box>
 
+          {/* STATUS TAGS */}
           <Box
-            sx={{
-              display: "flex",
-              gap: 4,
-              borderBottom: "1px solid #e5e7eb",
-            }}
+            sx={{ display: "flex", gap: 4, borderBottom: "1px solid #e5e7eb" }}
           >
             {[
               "",
@@ -200,7 +184,19 @@ export default function TasksPage() {
               return (
                 <Box
                   key={status || "all"}
-                  onClick={() => setActiveStatus(status)}
+                  onClick={() => {
+                    setActiveStatus(status);
+
+                    const params = new URLSearchParams(searchParams.toString());
+
+                    if (status) {
+                      params.set("status", status);
+                    } else {
+                      params.delete("status");
+                    }
+
+                    router.push(`/dashboard/tasks?${params.toString()}`);
+                  }}
                   sx={{
                     position: "relative",
                     cursor: "pointer",
@@ -273,8 +269,7 @@ export default function TasksPage() {
             pb: 1,
           }}
         >
-          {isFetching ||
-          (data?.[0]?.status !== activeStatus && activeStatus !== "") ? (
+          {isFetching ? (
             activeStatus ? (
               <UILoader type="taskFlat" />
             ) : (
