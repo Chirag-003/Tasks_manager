@@ -5,7 +5,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import UILoader from "@/components/Loader"; // ✅ ADDED
+import UILoader from "@/components/Loader";
 
 type TaskCardProps = {
   task: any;
@@ -20,6 +20,10 @@ const getStatusColor = (status: string) => {
       return "default";
     case "in progress":
       return "primary";
+    case "in review":
+      return "info";
+    case "qa":
+      return "secondary";
     case "completed":
       return "success";
     default:
@@ -31,11 +35,10 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
 
-  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null); // ✅ ADDED
+  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
 
   return (
     <>
-      {/* ✅ ✅ OVERLAY LOADER */}
       {loadingSubtaskId && (
         <Box
           sx={{

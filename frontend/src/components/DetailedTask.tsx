@@ -36,6 +36,12 @@ import DescriptionField from "./DescriptionField";
 import SubtaskList from "./SubtaskList";
 import CommentsField from "./CommentField";
 
+// ✅ ONLY ADDED
+import { z } from "zod";
+
+// ✅ ONLY ADDED
+const titleSchema = z.string().min(1, "Title cannot be empty");
+
 type Props = {
   task: any;
 };
@@ -93,12 +99,15 @@ export default function DetailedTask({ task }: Props) {
     });
   }, []);
 
+  // ✅ ONLY THIS FUNCTION UPDATED
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
 
-    if (!trimmed) {
+    const result = titleSchema.safeParse(trimmed);
+
+    if (!result.success) {
       setTitle(task.title);
-      setTitleError("Title cannot be empty");
+      setTitleError(result.error.errors[0].message);
       setTimeout(() => setTitleError(""), 3000);
       return;
     }
@@ -177,7 +186,7 @@ export default function DetailedTask({ task }: Props) {
             {!isEditingTitle ? (
               <Typography
                 onClick={() => setIsEditingTitle(true)}
-                sx={{ fontWeight: 600, fontSize: 18 }}
+                sx={{ fontWeight: 600, fontSize: 18, cursor: "pointer" }}
               >
                 {task.title}
               </Typography>
@@ -189,6 +198,10 @@ export default function DetailedTask({ task }: Props) {
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleUpdateTitle()}
                 onBlur={() => setIsEditingTitle(false)}
+                fullWidth
+                InputProps={{
+                  disableUnderline: true,
+                }}
               />
             )}
           </Box>
@@ -296,7 +309,7 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
-      {/* ✅ ✅ UPDATED DELETE DIALOG */}
+      {/* DELETE DIALOG */}
       <Dialog
         open={openDelete}
         onClose={() => setOpenDelete(false)}

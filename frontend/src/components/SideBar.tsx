@@ -16,8 +16,8 @@ export default function Sidebar() {
   return (
     <Box
       sx={{
-        width: 200,
-        minWidth: 200,
+        width: 140,
+        minWidth: 140,
         height: "100%",
         borderRight: "1px solid #e5e7eb",
         px: 2,
@@ -65,11 +65,11 @@ export default function Sidebar() {
 
                   position: "relative",
 
-                  color: isActive ? "#111827" : "#6b7280",
+                  color: isActive ? "#111827" : "#47494e",
                   fontWeight: isActive ? 600 : 400,
                   fontSize: 14,
 
-                  backgroundColor: isActive ? "#f1f5f9" : "transparent",
+                  backgroundColor: isActive ? "#e6ebf0" : "transparent",
 
                   transition: "all 0.2s ease",
 

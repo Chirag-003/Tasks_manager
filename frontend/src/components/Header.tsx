@@ -74,7 +74,7 @@ export default function Header() {
             backgroundColor: "#2563eb",
           }}
         >
-          T
+          C
         </Avatar>
 
         <Typography
@@ -85,7 +85,7 @@ export default function Header() {
             fontWeight: 500,
           }}
         >
-          Profile
+          Chirag
         </Typography>
       </Box>
     </Box>

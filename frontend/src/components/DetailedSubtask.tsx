@@ -28,6 +28,12 @@ import AssigneeField from "./AssigneeField";
 import StatusField from "./StatusField";
 import CommentsField from "./CommentField";
 
+// ✅ ✅ ✅ ONLY ADDED
+import { z } from "zod";
+
+// ✅ ✅ ✅ ONLY ADDED
+const titleSchema = z.string().min(1, "Title cannot be empty");
+
 type Props = {
   subtask: any;
 };
@@ -48,9 +54,12 @@ export default function DetailedSubtask({ subtask }: Props) {
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
 
-    if (!trimmed) {
+    // ✅ ✅ ✅ ONLY UPDATED (ZOD VALIDATION)
+    const result = titleSchema.safeParse(trimmed);
+
+    if (!result.success) {
       setTitle(subtask.title);
-      setTitleError("Title cannot be empty");
+      setTitleError(result.error.errors[0].message);
 
       setTimeout(() => {
         setTitleError("");
@@ -147,7 +156,7 @@ export default function DetailedSubtask({ subtask }: Props) {
               <ArrowBackIcon />
             </IconButton>
 
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
               {!isEditingTitle ? (
                 <Typography
                   onClick={() => {
@@ -182,6 +191,7 @@ export default function DetailedSubtask({ subtask }: Props) {
                     setTitle(subtask.title);
                     setIsEditingTitle(false);
                   }}
+                  fullWidth
                   InputProps={{
                     disableUnderline: true,
                   }}
@@ -206,7 +216,7 @@ export default function DetailedSubtask({ subtask }: Props) {
             </Box>
           </Box>
 
-          {/* MAIN CONTENT */}
+          {/* MAIN CONTENT (UNCHANGED) */}
           <Box
             sx={{
               p: 3,
@@ -216,15 +226,8 @@ export default function DetailedSubtask({ subtask }: Props) {
               overflowY: "auto",
             }}
           >
-            {/* TOP SECTION */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1.5,
-                }}
-              >
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Row label="Assignee">
                   <AssigneeField
                     entityId={subtask.id}
@@ -247,7 +250,6 @@ export default function DetailedSubtask({ subtask }: Props) {
               <Divider />
             </Box>
 
-            {/* ✅ BOTTOM STICKY COMMENTS */}
             <Box sx={{ mt: "auto" }}>
               <CommentsField
                 entityId={subtask.id}

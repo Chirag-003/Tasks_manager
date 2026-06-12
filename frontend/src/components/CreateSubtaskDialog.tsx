@@ -14,13 +14,38 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+
 import { useState } from "react";
 
+// ✅ NEW IMPORTS
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// ✅ ZOD SCHEMA
+const subtaskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  status: z.string(),
+  users: z.array(z.number()).optional(),
+});
+
+type SubtaskFormData = z.infer<typeof subtaskSchema>;
+
 export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
-  const [form, setForm] = useState({
-    title: "",
-    status: "backlog",
-    users: [] as number[],
+  // ✅ REPLACED useState FORM
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<SubtaskFormData>({
+    resolver: zodResolver(subtaskSchema),
+    defaultValues: {
+      title: "",
+      status: "backlog",
+      users: [],
+    },
   });
 
   const [snackbar, setSnackbar] = useState({
@@ -32,42 +57,36 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
   const [userError, setUserError] = useState("");
   const [titleError, setTitleError] = useState("");
 
-  const handleChange = (e: any) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
+  // ✅ USERS HANDLING (CONNECTED TO RHF)
   const handleUsersChange = (e: any) => {
     const value = e.target.value;
 
     if (!value) {
-      setForm({ ...form, users: [] });
+      setValue("users", []);
       setUserError("");
       return;
     }
 
     const ids = value.split(",");
-
     const invalid = ids.some((id: string) => isNaN(Number(id.trim())));
 
     if (invalid) {
       setUserError("Enter valid numeric user IDs (e.g. 1,2,3)");
     } else {
       setUserError("");
-      setForm({
-        ...form,
-        users: ids.map((id: string) => Number(id.trim())),
-      });
+      setValue(
+        "users",
+        ids.map((id: string) => Number(id.trim())),
+      );
     }
   };
 
-  const handleSubmit = async () => {
-    if (!form.title.trim() || userError) return;
+  // ✅ UPDATED SUBMIT
+  const onSubmit = async (data: SubtaskFormData) => {
+    if (userError) return;
 
     try {
-      await onCreate(form);
+      await onCreate(data);
 
       setSnackbar({
         open: true,
@@ -75,12 +94,7 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         severity: "success",
       });
 
-      setForm({
-        title: "",
-        status: "backlog",
-        users: [],
-      });
-
+      reset(); // ✅ replaces manual reset
       setUserError("");
       setTitleError("");
 
@@ -112,46 +126,54 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
 
         <DialogContent sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* ✅ TITLE */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Title <span style={{ color: "red" }}>*</span>
               </Typography>
 
-              <TextField
+              <Controller
                 name="title"
-                value={form.title}
-                onChange={(e) => {
-                  handleChange(e);
-                  setTitleError("");
-                }}
-                fullWidth
-                placeholder="Enter subtask title"
-                error={!!titleError}
-                helperText={titleError}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    placeholder="Enter subtask title"
+                    error={!!errors.title || !!titleError}
+                    helperText={errors.title?.message || titleError}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setTitleError("");
+                    }}
+                  />
+                )}
               />
             </Box>
 
+            {/* ✅ STATUS */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Status <span style={{ color: "red" }}>*</span>
               </Typography>
 
-              <TextField
-                select
+              <Controller
                 name="status"
-                value={form.status}
-                onChange={handleChange}
-                fullWidth
-              >
-                <MenuItem value="backlog">Backlog</MenuItem>
-                <MenuItem value="todo">Todo</MenuItem>
-                <MenuItem value="in progress">In Progress</MenuItem>
-                <MenuItem value="in review">In Review</MenuItem>
-                <MenuItem value="qa">QA</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
-              </TextField>
+                control={control}
+                render={({ field }) => (
+                  <TextField select {...field} fullWidth>
+                    <MenuItem value="backlog">Backlog</MenuItem>
+                    <MenuItem value="todo">Todo</MenuItem>
+                    <MenuItem value="in progress">In Progress</MenuItem>
+                    <MenuItem value="in review">In Review</MenuItem>
+                    <MenuItem value="qa">QA</MenuItem>
+                    <MenuItem value="completed">Completed</MenuItem>
+                  </TextField>
+                )}
+              />
             </Box>
 
+            {/* ✅ USERS */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>Users</Typography>
 
@@ -173,8 +195,8 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
 
           <Button
             variant="contained"
-            onClick={handleSubmit}
-            disabled={!form.title.trim() || !!userError}
+            onClick={handleSubmit(onSubmit)} // ✅ UPDATED
+            disabled={!!userError}
             sx={{ textTransform: "none" }}
           >
             Create

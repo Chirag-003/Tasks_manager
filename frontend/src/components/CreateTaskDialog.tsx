@@ -15,7 +15,13 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+
 import { useState } from "react";
+
+// ✅ NEW IMPORTS
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type Props = {
   open: boolean;
@@ -23,13 +29,34 @@ type Props = {
   onCreate: (data: any) => Promise<void>;
 };
 
+// ✅ ZOD SCHEMA
+const taskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  status: z.string(),
+  sprint: z.string().optional(),
+  users: z.array(z.number()).optional(),
+});
+
+type TaskFormData = z.infer<typeof taskSchema>;
+
 export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    status: "backlog",
-    sprint: "",
-    users: [] as number[],
+  // ✅ REPLACED useState form WITH RHF
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<TaskFormData>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      status: "backlog",
+      sprint: "",
+      users: [],
+    },
   });
 
   const [userError, setUserError] = useState("");
@@ -41,42 +68,36 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
     severity: "success" as "success" | "error",
   });
 
-  const handleChange = (e: any) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
+  // ✅ USERS FIELD HANDLING (KEPT, just wired to RHF)
   const handleUsersChange = (e: any) => {
     const value = e.target.value;
 
     if (!value) {
-      setForm({ ...form, users: [] });
+      setValue("users", []);
       setUserError("");
       return;
     }
 
     const ids = value.split(",");
-
     const invalid = ids.some((id: string) => isNaN(Number(id.trim())));
 
     if (invalid) {
       setUserError("Enter valid numeric user IDs (e.g. 1,2,3)");
     } else {
       setUserError("");
-      setForm({
-        ...form,
-        users: ids.map((id: string) => Number(id.trim())),
-      });
+      setValue(
+        "users",
+        ids.map((id: string) => Number(id.trim())),
+      );
     }
   };
 
-  const handleSubmit = async () => {
-    if (!form.title.trim() || userError) return;
+  // ✅ UPDATED SUBMIT
+  const onSubmit = async (data: TaskFormData) => {
+    if (userError) return;
 
     try {
-      await onCreate(form);
+      await onCreate(data);
 
       setSnackbar({
         open: true,
@@ -84,14 +105,7 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
         severity: "success",
       });
 
-      setForm({
-        title: "",
-        description: "",
-        status: "backlog",
-        sprint: "",
-        users: [],
-      });
-
+      reset(); // ✅ replaces manual reset
       setUserError("");
       setTitleError("");
 
@@ -142,95 +156,87 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
 
         <DialogContent sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* ✅ TITLE */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Title <span style={{ color: "red" }}>*</span>
               </Typography>
 
-              <TextField
+              <Controller
                 name="title"
-                value={form.title}
-                onChange={(e) => {
-                  handleChange(e);
-                  setTitleError("");
-                }}
-                fullWidth
-                placeholder="Enter task title"
-                error={!!titleError}
-                helperText={titleError}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    placeholder="Enter task title"
+                    error={!!errors.title || !!titleError}
+                    helperText={errors.title?.message || titleError}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setTitleError("");
+                    }}
+                  />
+                )}
               />
             </Box>
 
+            {/* DESCRIPTION */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>
                 Description
               </Typography>
 
-              <TextField
+              <Controller
                 name="description"
-                value={form.description}
-                onChange={handleChange}
-                fullWidth
-                multiline
-                minRows={3}
-                placeholder="Describe the task..."
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    multiline
+                    minRows={3}
+                    placeholder="Describe the task..."
+                  />
+                )}
               />
             </Box>
 
+            {/* STATUS & SPRINT */}
             <Box sx={{ display: "flex", gap: 2 }}>
               <Box sx={{ flex: 1 }}>
                 <Typography sx={{ fontSize: 13, mb: 0.5 }}>Status</Typography>
-                <TextField
-                  select
-                  name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  fullWidth
-                  SelectProps={{
-                    MenuProps: {
-                      TransitionProps: {
-                        timeout: 250,
-                      },
-                      PaperProps: {
-                        sx: {
-                          mt: 1,
-                          borderRadius: 2,
-                        },
-                      },
 
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "center",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "center",
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="backlog">Backlog</MenuItem>
-                  <MenuItem value="todo">Todo</MenuItem>
-                  <MenuItem value="in progress">In Progress</MenuItem>
-                  <MenuItem value="in review">In Review</MenuItem>
-                  <MenuItem value="qa">QA</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                </TextField>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField select {...field} fullWidth>
+                      <MenuItem value="backlog">Backlog</MenuItem>
+                      <MenuItem value="todo">Todo</MenuItem>
+                      <MenuItem value="in progress">In Progress</MenuItem>
+                      <MenuItem value="in review">In Review</MenuItem>
+                      <MenuItem value="qa">QA</MenuItem>
+                      <MenuItem value="completed">Completed</MenuItem>
+                    </TextField>
+                  )}
+                />
               </Box>
 
               <Box sx={{ flex: 1 }}>
                 <Typography sx={{ fontSize: 13, mb: 0.5 }}>Sprint</Typography>
 
-                <TextField
+                <Controller
                   name="sprint"
-                  value={form.sprint}
-                  onChange={handleChange}
-                  fullWidth
-                  placeholder="Sprint name"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} fullWidth placeholder="Sprint name" />
+                  )}
                 />
               </Box>
             </Box>
 
+            {/* USERS */}
             <Box>
               <Typography sx={{ fontSize: 13, mb: 0.5 }}>Users</Typography>
 
@@ -255,8 +261,8 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
 
           <Button
             variant="contained"
-            onClick={handleSubmit}
-            disabled={!form.title.trim() || !!userError}
+            onClick={handleSubmit(onSubmit)} // ✅ UPDATED
+            disabled={!!userError}
             sx={{ borderRadius: "20px", px: 3, textTransform: "none" }}
           >
             Create Task

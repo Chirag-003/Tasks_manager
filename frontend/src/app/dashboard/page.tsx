@@ -11,7 +11,7 @@ import { useGetUsersQuery, useGetTasksQuery } from "@/services/api";
 
 export default function DashboardPage() {
   const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
-  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery();
+  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery({});
 
   if (usersLoading || tasksLoading) {
     return (

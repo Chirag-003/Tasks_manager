@@ -259,7 +259,7 @@ export default function TasksPage() {
           </Box>
         </Popover>
 
-        {/* ✅ ✅ ✅ FIXED TASK LIST */}
+        {/* FIXED TASK LIST */}
         <Box
           sx={{
             flex: 1,
@@ -301,7 +301,7 @@ export default function TasksPage() {
             position: "fixed",
             bottom: 30,
             right: 30,
-            borderRadius: "24px",
+            borderRadius: "10px",
             px: 3,
             textTransform: "none",
           }}
