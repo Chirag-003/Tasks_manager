@@ -19,7 +19,17 @@ def create_subtask(task_id: int, subtask: SubTaskCreate, db: Session = Depends(g
     try:
         result = services_subtask.create_subtask(db, task_id, subtask)
 
-        # ✅ invalidate subtasks list cache for this task
+        # ✅ write-through → single subtask cache
+        try:
+            redis_client.setex(
+                f"subtask:{result.id}",
+                60,
+                json.dumps(SubTaskResponse.model_validate(result).model_dump()),
+            )
+        except Exception:
+            pass
+
+        # ✅ invalidate list cache for this task
         for key in redis_client.scan_iter(f"subtasks:{task_id}:*"):
             redis_client.delete(key)
 
@@ -139,10 +149,17 @@ def update_subtask(
     try:
         result = services_subtask.update_subtask(db, subtask_id, subtask)
 
-        # ✅ invalidate single subtask cache
-        redis_client.delete(f"subtask:{subtask_id}")
+        # ✅ write-through → update single cache
+        try:
+            redis_client.setex(
+                f"subtask:{subtask_id}",
+                60,
+                json.dumps(SubTaskResponse.model_validate(result).model_dump()),
+            )
+        except Exception:
+            pass
 
-        # ✅ invalidate all subtasks list caches (safe approach)
+        # ✅ invalidate list cache
         for key in redis_client.scan_iter("subtasks:*"):
             redis_client.delete(key)
 
@@ -157,10 +174,10 @@ def delete_subtask(subtask_id: int, db: Session = Depends(get_db)):
     try:
         result = services_subtask.delete_subtask(db, subtask_id)
 
-        # ✅ invalidate single subtask cache
+        # ✅ delete single cache
         redis_client.delete(f"subtask:{subtask_id}")
 
-        # ✅ invalidate all lists
+        # ✅ invalidate list cache
         for key in redis_client.scan_iter("subtasks:*"):
             redis_client.delete(key)
 

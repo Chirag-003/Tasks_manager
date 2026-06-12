@@ -22,7 +22,17 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     try:
         result = services_task.create_task(db, task)
 
-        # ✅ invalidate cache (tasks + sprints)
+        # ✅ write-through (ADD single task cache)
+        try:
+            redis_client.setex(
+                f"task:{result.id}",
+                60,
+                json.dumps(TaskResponse.model_validate(result).model_dump()),
+            )
+        except Exception:
+            pass
+
+        # ✅ invalidate list cache
         for key in redis_client.scan_iter("tasks:*"):
             redis_client.delete(key)
         redis_client.delete("tasks:sprints")
@@ -177,10 +187,19 @@ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
     try:
         result = services_task.update_task(db, task_id, task)
 
-        # ✅ invalidate cache
+        # ✅ write-through (UPDATE single task cache)
+        try:
+            redis_client.setex(
+                f"task:{task_id}",
+                60,
+                json.dumps(TaskResponse.model_validate(result).model_dump()),
+            )
+        except Exception:
+            pass
+
+        # ✅ invalidate list caches
         for key in redis_client.scan_iter("tasks:*"):
             redis_client.delete(key)
-        redis_client.delete(f"task:{task_id}")
         redis_client.delete("tasks:sprints")
 
         return result
@@ -194,10 +213,12 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     try:
         result = services_task.delete_task(db, task_id)
 
-        # ✅ invalidate cache
+        # ✅ delete single cache
+        redis_client.delete(f"task:{task_id}")
+
+        # ✅ invalidate list caches
         for key in redis_client.scan_iter("tasks:*"):
             redis_client.delete(key)
-        redis_client.delete(f"task:{task_id}")
         redis_client.delete("tasks:sprints")
 
         return result
