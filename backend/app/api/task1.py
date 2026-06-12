@@ -11,7 +11,6 @@ from app.models.model_task import Task
 from app.models.model_users import User
 from sqlalchemy import distinct
 
-
 from app.core.redis_client import redis_client
 import json
 
@@ -21,7 +20,15 @@ router = APIRouter()
 @router.post("/", response_model=TaskResponse)
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     try:
-        return services_task.create_task(db, task)
+        result = services_task.create_task(db, task)
+
+        # ✅ invalidate cache (tasks + sprints)
+        for key in redis_client.scan_iter("tasks:*"):
+            redis_client.delete(key)
+        redis_client.delete("tasks:sprints")
+
+        return result
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -37,7 +44,35 @@ def get_tasks(
     db: Session = Depends(get_db),
 ):
     try:
-        return services_task.get_tasks(
+
+        def normalize(value):
+            if value is None:
+                return "null"
+            if hasattr(value, "value"):
+                return value.value
+            return str(value).strip().lower() if value != "" else "null"
+
+        cache_key = (
+            f"tasks:"
+            f"{normalize(status)}:"
+            f"{normalize(sprint)}:"
+            f"{normalize(user_id)}:"
+            f"{normalize(search)}:"
+            f"{skip}:{limit}"
+        )
+
+        cached_data = redis_client.get(cache_key)
+
+        if cached_data:
+            print("✅ CACHE HIT")
+            try:
+                return json.loads(cached_data)
+            except Exception:
+                redis_client.delete(cache_key)
+
+        print("❌ CACHE MISS")
+
+        tasks = services_task.get_tasks(
             db,
             skip=skip,
             limit=limit,
@@ -46,6 +81,18 @@ def get_tasks(
             user_id=user_id,
             search=search,
         )
+
+        if tasks:
+            redis_client.setex(
+                cache_key,
+                60,
+                json.dumps(
+                    [TaskResponse.model_validate(task).model_dump() for task in tasks]
+                ),
+            )
+
+        return tasks
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -53,11 +100,34 @@ def get_tasks(
 @router.get("/sprints")
 def get_sprints(db: Session = Depends(get_db)):
     try:
-        # ✅ Get unique sprints
-        sprints = db.query(Task.sprint).filter(Task.sprint != None).distinct().all()
+        cache_key = "tasks:sprints"
 
-        # ✅ Flatten result
+        try:
+            cached_data = redis_client.get(cache_key)
+        except Exception:
+            cached_data = None
+
+        if cached_data:
+            print("✅ CACHE HIT (sprints)")
+            try:
+                return json.loads(cached_data)
+            except Exception:
+                redis_client.delete(cache_key)
+
+        print("❌ CACHE MISS (sprints)")
+
+        sprints = db.query(Task.sprint).filter(Task.sprint != None).distinct().all()
         sprint_list = [s[0] for s in sprints if s[0]]
+
+        if sprint_list:
+            try:
+                redis_client.setex(
+                    cache_key,
+                    300,
+                    json.dumps(sprint_list),
+                )
+            except Exception:
+                pass
 
         return sprint_list
 
@@ -68,7 +138,36 @@ def get_sprints(db: Session = Depends(get_db)):
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_task(task_id: int, db: Session = Depends(get_db)):
     try:
-        return services_task.get_task(db, task_id)
+        cache_key = f"task:{task_id}"
+
+        try:
+            cached_data = redis_client.get(cache_key)
+        except Exception:
+            cached_data = None
+
+        if cached_data:
+            print("✅ CACHE HIT (task)")
+            try:
+                return json.loads(cached_data)
+            except Exception:
+                redis_client.delete(cache_key)
+
+        print("❌ CACHE MISS (task)")
+
+        task = services_task.get_task(db, task_id)
+
+        if task:
+            try:
+                redis_client.setex(
+                    cache_key,
+                    60,
+                    json.dumps(TaskResponse.model_validate(task).model_dump()),
+                )
+            except Exception:
+                pass
+
+        return task
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -76,7 +175,16 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
 @router.patch("/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
     try:
-        return services_task.update_task(db, task_id, task)
+        result = services_task.update_task(db, task_id, task)
+
+        # ✅ invalidate cache
+        for key in redis_client.scan_iter("tasks:*"):
+            redis_client.delete(key)
+        redis_client.delete(f"task:{task_id}")
+        redis_client.delete("tasks:sprints")
+
+        return result
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -84,6 +192,15 @@ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
 @router.delete("/{task_id}")
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     try:
-        return services_task.delete_task(db, task_id)
+        result = services_task.delete_task(db, task_id)
+
+        # ✅ invalidate cache
+        for key in redis_client.scan_iter("tasks:*"):
+            redis_client.delete(key)
+        redis_client.delete(f"task:{task_id}")
+        redis_client.delete("tasks:sprints")
+
+        return result
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
