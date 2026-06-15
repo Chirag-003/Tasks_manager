@@ -12,13 +12,15 @@ import {
   DialogActions,
   Button,
   Popover,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   useCreateSubtaskMutation,
@@ -36,10 +38,8 @@ import DescriptionField from "./DescriptionField";
 import SubtaskList from "./SubtaskList";
 import CommentsField from "./CommentField";
 
-// ✅ ONLY ADDED
 import { z } from "zod";
 
-// ✅ ONLY ADDED
 const titleSchema = z.string().min(1, "Title cannot be empty");
 
 type Props = {
@@ -48,6 +48,7 @@ type Props = {
 
 export default function DetailedTask({ task }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [openSubtask, setOpenSubtask] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -99,7 +100,25 @@ export default function DetailedTask({ task }: Props) {
     });
   }, []);
 
-  // ✅ ONLY THIS FUNCTION UPDATED
+  // ✅ SNACKBAR STATE
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
+
+  // ✅ SHOW SUCCESS ONLY ONCE AFTER REDIRECT
+  useEffect(() => {
+    if (searchParams.get("subtask_deleted") === "true") {
+      setSnackbar({
+        open: true,
+        message: "Subtask deleted successfully ✅",
+      });
+
+      // remove param after showing
+      router.replace(`/dashboard/tasks/${task.id}`);
+    }
+  }, [searchParams, router, task.id]);
+
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
 
@@ -309,60 +328,42 @@ export default function DetailedTask({ task }: Props) {
         </Box>
       </Box>
 
-      {/* DELETE DIALOG */}
+      {/* ✅ SNACKBAR */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* DELETE TASK DIALOG */}
       <Dialog
         open={openDelete}
         onClose={() => setOpenDelete(false)}
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle sx={{ fontWeight: 600, pb: 1 }}>Delete Task</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600 }}>Delete Task</DialogTitle>
 
         <DialogContent>
-          <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
-            Are you sure you want to delete this task? This action cannot be
-            undone.
+          <Typography sx={{ fontSize: 14 }}>
+            Are you sure you want to delete this task?
           </Typography>
 
           {deleteError && (
-            <Box
-              sx={{
-                mt: 2,
-                px: 2,
-                py: 1.5,
-                borderRadius: 1,
-                backgroundColor: "#fef2f2",
-                border: "1px solid #fecaca",
-              }}
-            >
-              <Typography
-                sx={{ fontSize: 13, color: "#b91c1c", fontWeight: 500 }}
-              >
-                {deleteError}
-              </Typography>
-            </Box>
+            <Typography color="error" mt={1}>
+              {deleteError}
+            </Typography>
           )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
-            onClick={() => setOpenDelete(false)}
-            variant="outlined"
-            sx={{ textTransform: "none" }}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleDelete}
-            sx={{
-              textTransform: "none",
-              boxShadow: "none",
-              "&:hover": { boxShadow: "none" },
-            }}
-          >
+        <DialogActions>
+          <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+          <Button color="error" onClick={handleDelete}>
             Delete
           </Button>
         </DialogActions>
@@ -371,6 +372,7 @@ export default function DetailedTask({ task }: Props) {
   );
 }
 
+// ✅ ✅ ✅ ROW FUNCTION (UNCHANGED — INCLUDED)
 function Row({ label, children }: any) {
   return (
     <Box

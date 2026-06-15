@@ -260,6 +260,7 @@ export default function TasksPage() {
         </Popover>
 
         {/* FIXED TASK LIST */}
+
         <Box
           sx={{
             flex: 1,
@@ -267,6 +268,22 @@ export default function TasksPage() {
             overflowX: "auto",
             overflowY: "hidden",
             pb: 1,
+
+            // ✅ HORIZONTAL SCROLLBAR
+            "&::-webkit-scrollbar": {
+              height: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#e2e8f0",
+              borderRadius: "10px",
+              transition: "background-color 0.2s ease",
+            },
+            "&:hover::-webkit-scrollbar-thumb": {
+              backgroundColor: "#cbd5e1",
+            },
           }}
         >
           {isFetching ? (
@@ -323,6 +340,7 @@ export default function TasksPage() {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="success" variant="filled">
           {snackbar.message}

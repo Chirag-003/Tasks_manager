@@ -1,14 +1,28 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { IconButton, Tooltip, TextField, Button } from "@mui/material";
+import {
+  IconButton,
+  Tooltip,
+  TextField,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar, // ✅ NEW
+  Alert, // ✅ NEW
+} from "@mui/material";
+
 import AddIcon from "@mui/icons-material/Add";
-import { Chip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import UILoader from "@/components/Loader";
+import { useDeleteSubtaskMutation } from "@/services/api";
 
 type Props = {
   subtasks: any[];
@@ -25,7 +39,8 @@ export default function SubtaskList({
 }: Props) {
   const router = useRouter();
 
-  // ✅ PERSIST EXPANSION STATE
+  const [deleteSubtask] = useDeleteSubtaskMutation();
+
   const [showAll, setShowAll] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("subtasks-expanded") === "true";
@@ -35,14 +50,23 @@ export default function SubtaskList({
 
   const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
 
-  // ✅ ✅ NEW: CONTROLLED SEARCH INPUT
   const [searchInput, setSearchInput] = useState("");
 
-  // ✅ ✅ DEBOUNCE + TRIM HANDLING
+  // ✅ DELETE STATE
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+
+  // ✅ ✅ ✅ NEW SNACKBAR STATE
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const trimmed = searchInput.trim();
-      onSearch?.(trimmed || ""); // ✅ send clean value
+      onSearch?.(trimmed || "");
     }, 300);
 
     return () => clearTimeout(timer);
@@ -69,9 +93,37 @@ export default function SubtaskList({
     }
   };
 
+  // ✅ DELETE FUNCTION (UPDATED WITH SNACKBAR)
+  const handleDelete = async () => {
+    if (!selectedId) return;
+
+    setDeleteError("");
+
+    try {
+      await deleteSubtask(selectedId).unwrap();
+
+      setOpenDelete(false);
+      setSelectedId(null);
+
+      // ✅ ✅ ✅ SHOW SUCCESS MESSAGE
+      setSnackbar({
+        open: true,
+        message: "Subtask deleted successfully ✅",
+      });
+    } catch (err: any) {
+      let message = err?.data?.detail || "Cannot delete subtask";
+
+      if (typeof message === "string") {
+        message = message.replace(/^\d+:\s*/, "").trim();
+      }
+
+      setDeleteError(message);
+    }
+  };
+
   return (
     <Box>
-      {/* ✅ LOADER */}
+      {/* LOADER */}
       {loadingSubtaskId && (
         <Box
           sx={{
@@ -89,7 +141,7 @@ export default function SubtaskList({
         </Box>
       )}
 
-      {/* ✅ HEADER */}
+      {/* HEADER */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -98,13 +150,7 @@ export default function SubtaskList({
         gap={2}
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              color: "#111827",
-            }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Subtasks
           </Typography>
 
@@ -117,7 +163,7 @@ export default function SubtaskList({
 
         <Box display="flex" gap={1}>
           <TextField
-            placeholder="Search subtasks by title..."
+            placeholder="Search subtasks..."
             size="small"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -130,9 +176,9 @@ export default function SubtaskList({
         </Box>
       </Box>
 
-      {/* ✅ ✅ EMPTY STATE WITH SEARCH AWARENESS */}
+      {/* LIST */}
       {!subtasks?.length ? (
-        <Typography sx={{ color: "text.secondary" }}>
+        <Typography color="text.secondary">
           {searchInput.trim()
             ? `No results found for "${searchInput.trim()}"`
             : "No subtasks"}
@@ -154,66 +200,68 @@ export default function SubtaskList({
                 backgroundColor: "#f8fafc",
                 mb: 1,
                 cursor: "pointer",
-                transition: "all 0.2s ease",
                 display: "flex",
                 alignItems: "center",
-
-                "&:hover": {
-                  backgroundColor: "#eef2f7",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                  transform: "translateY(-1px)",
-                },
+                gap: 1,
               }}
             >
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  color: "#334155",
-                  flex: 1,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {subtask.title}
-              </Typography>
+              <Typography sx={{ flex: 1 }}>{subtask.title}</Typography>
 
               <Chip
                 label={subtask.status}
                 size="small"
                 color={getStatusColor(subtask.status)}
-                sx={{
-                  textTransform: "capitalize",
-                  fontSize: "11px",
-                }}
               />
+
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(subtask.id);
+                  setOpenDelete(true);
+                }}
+              >
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
             </Box>
           ))}
-
-          {/* ✅ SHOW MORE */}
-          {subtasks.length > 1 && (
-            <Typography
-              onClick={() => {
-                setShowAll((prev) => {
-                  const next = !prev;
-                  localStorage.setItem("subtasks-expanded", String(next));
-                  return next;
-                });
-              }}
-              sx={{
-                fontSize: 13,
-                cursor: "pointer",
-                color: "#2563eb",
-                "&:hover": {
-                  textDecoration: "underline",
-                },
-              }}
-            >
-              {showAll ? "Show less ▲" : `See ${subtasks.length - 1} more ▼`}
-            </Typography>
-          )}
         </>
       )}
+
+      {/* DELETE DIALOG */}
+      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+        <DialogTitle>Delete Subtask</DialogTitle>
+
+        <DialogContent>
+          <Typography>Are you sure you want to delete this subtask?</Typography>
+
+          {deleteError && (
+            <Typography color="error" mt={1}>
+              {deleteError}
+            </Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+
+          <Button color="error" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ✅ ✅ ✅ SNACKBAR */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2500}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

@@ -108,7 +108,9 @@ export default function DetailedSubtask({ subtask }: Props) {
 
     try {
       await deleteSubtask(subtask.id).unwrap();
-      router.replace(`/dashboard/tasks/${subtask.task_id}`);
+      router.replace(
+        `/dashboard/tasks/${subtask.task_id}?subtask_deleted=true`,
+      );
       router.refresh();
     } catch (err: any) {
       let message = err?.data?.detail || "Cannot delete subtask";
