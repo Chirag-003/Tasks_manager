@@ -13,16 +13,22 @@ import {
   Divider,
   Snackbar,
   Alert,
+  InputAdornment,
 } from "@mui/material";
 
 import { useState } from "react";
 
-// ✅ NEW IMPORTS
+import TitleIcon from "@mui/icons-material/Title";
+import FlagIcon from "@mui/icons-material/Flag";
+import GroupIcon from "@mui/icons-material/Group";
+
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// ✅ ZOD SCHEMA
+import { useGetUsersQuery } from "@/services/api";
+
+// ✅ SCHEMA
 const subtaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   status: z.string(),
@@ -32,11 +38,9 @@ const subtaskSchema = z.object({
 type SubtaskFormData = z.infer<typeof subtaskSchema>;
 
 export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
-  // ✅ REPLACED useState FORM
   const {
     control,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<SubtaskFormData>({
@@ -57,31 +61,15 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
   const [userError, setUserError] = useState("");
   const [titleError, setTitleError] = useState("");
 
-  // ✅ USERS HANDLING (CONNECTED TO RHF)
-  const handleUsersChange = (e: any) => {
-    const value = e.target.value;
+  const { data: users = [] } = useGetUsersQuery();
 
-    if (!value) {
-      setValue("users", []);
-      setUserError("");
-      return;
-    }
-
-    const ids = value.split(",");
-    const invalid = ids.some((id: string) => isNaN(Number(id.trim())));
-
-    if (invalid) {
-      setUserError("Enter valid numeric user IDs (e.g. 1,2,3)");
-    } else {
-      setUserError("");
-      setValue(
-        "users",
-        ids.map((id: string) => Number(id.trim())),
-      );
-    }
+  // ✅ map ID -> username
+  const getUserNameById = (id: number) => {
+    const user = users.find((u: any) => u.id === id);
+    return user?.username || "";
   };
 
-  // ✅ UPDATED SUBMIT
+  // ✅ SUBMIT
   const onSubmit = async (data: SubtaskFormData) => {
     if (userError) return;
 
@@ -94,7 +82,7 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         severity: "success",
       });
 
-      reset(); // ✅ replaces manual reset
+      reset();
       setUserError("");
       setTitleError("");
 
@@ -119,75 +107,156 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: 600 }}>Create Subtask</DialogTitle>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            boxShadow: "0px 20px 50px rgba(0,0,0,0.15)",
+          },
+        }}
+      >
+        {/* ✅ HEADER */}
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography fontWeight={700} fontSize={18}>
+            Create Subtask
+          </Typography>
+          <Typography fontSize={13} color="text.secondary">
+            Add details for your subtask
+          </Typography>
+        </DialogTitle>
 
         <Divider />
 
         <DialogContent sx={{ mt: 2 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box display="flex" flexDirection="column" gap={2.5}>
             {/* ✅ TITLE */}
-            <Box>
-              <Typography sx={{ fontSize: 13, mb: 0.5 }}>
-                Title <span style={{ color: "red" }}>*</span>
-              </Typography>
-
-              <Controller
-                name="title"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    placeholder="Enter subtask title"
-                    error={!!errors.title || !!titleError}
-                    helperText={errors.title?.message || titleError}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      setTitleError("");
-                    }}
-                  />
-                )}
-              />
-            </Box>
+            <Controller
+              name="title"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Title"
+                  size="small"
+                  fullWidth
+                  error={!!errors.title || !!titleError}
+                  helperText={errors.title?.message || titleError}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setTitleError("");
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <TitleIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
+                />
+              )}
+            />
 
             {/* ✅ STATUS */}
-            <Box>
-              <Typography sx={{ fontSize: 13, mb: 0.5 }}>
-                Status <span style={{ color: "red" }}>*</span>
-              </Typography>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  {...field}
+                  label="Status"
+                  size="small"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FlagIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
+                >
+                  <MenuItem value="backlog">Backlog</MenuItem>
+                  <MenuItem value="todo">Todo</MenuItem>
+                  <MenuItem value="in progress">In Progress</MenuItem>
+                  <MenuItem value="in review">In Review</MenuItem>
+                  <MenuItem value="qa">QA</MenuItem>
+                  <MenuItem value="completed">Completed</MenuItem>
+                </TextField>
+              )}
+            />
 
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <TextField select {...field} fullWidth>
-                    <MenuItem value="backlog">Backlog</MenuItem>
-                    <MenuItem value="todo">Todo</MenuItem>
-                    <MenuItem value="in progress">In Progress</MenuItem>
-                    <MenuItem value="in review">In Review</MenuItem>
-                    <MenuItem value="qa">QA</MenuItem>
-                    <MenuItem value="completed">Completed</MenuItem>
-                  </TextField>
-                )}
-              />
-            </Box>
-
-            {/* ✅ USERS */}
-            <Box>
-              <Typography sx={{ fontSize: 13, mb: 0.5 }}>Users</Typography>
-
-              <TextField
-                fullWidth
-                placeholder="Enter user IDs (1,2)"
-                onChange={handleUsersChange}
-                error={!!userError}
-                helperText={userError}
-              />
-            </Box>
+            {/* ✅ USERS (SAME METHOD AS TASK) */}
+            <Controller
+              name="users"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  label="Users"
+                  fullWidth
+                  size="small"
+                  value={field.value || []}
+                  onChange={field.onChange}
+                  SelectProps={{
+                    multiple: true,
+                    MenuProps: {
+                      PaperProps: {
+                        sx: {
+                          maxHeight: 260,
+                          mt: 1,
+                          borderRadius: 2,
+                          p: 1,
+                        },
+                      },
+                      MenuListProps: {
+                        sx: {
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr", // ✅ 2 column
+                          gap: 1,
+                        },
+                      },
+                    },
+                    renderValue: (selected) =>
+                      (selected as number[]).map(getUserNameById).join(", "),
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <GroupIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    backgroundColor: "#f9fafb",
+                    borderRadius: 2,
+                  }}
+                >
+                  {users.map((user: any) => (
+                    <MenuItem
+                      key={user.id}
+                      value={user.id}
+                      sx={{
+                        borderRadius: 2,
+                        textAlign: "center",
+                        fontSize: 13,
+                      }}
+                    >
+                      {user.username}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
           </Box>
         </DialogContent>
 
+        {/* ✅ ACTIONS */}
         <DialogActions sx={{ px: 3, py: 2 }}>
           <Button sx={{ textTransform: "none" }} onClick={onClose}>
             Cancel
@@ -195,23 +264,24 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
 
           <Button
             variant="contained"
-            onClick={handleSubmit(onSubmit)} // ✅ UPDATED
+            onClick={handleSubmit(onSubmit)}
             disabled={!!userError}
-            sx={{ textTransform: "none" }}
+            sx={{ textTransform: "none", borderRadius: 2 }}
           >
             Create
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* ✅ SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
           severity={snackbar.severity}
           variant="filled"
         >

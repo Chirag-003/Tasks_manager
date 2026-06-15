@@ -14,22 +14,31 @@ import {
   Grow,
   Snackbar,
   Alert,
+  InputAdornment,
 } from "@mui/material";
 
 import { useState } from "react";
 
-// ✅ NEW IMPORTS
+import TitleIcon from "@mui/icons-material/Title";
+import DescriptionIcon from "@mui/icons-material/Description";
+import FlagIcon from "@mui/icons-material/Flag";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import GroupIcon from "@mui/icons-material/Group";
+
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useGetUsersQuery } from "@/services/api";
+
+// ✅ TYPES
 type Props = {
   open: boolean;
   onClose: () => void;
   onCreate: (data: any) => Promise<void>;
 };
 
-// ✅ ZOD SCHEMA
+// ✅ SCHEMA
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
@@ -41,7 +50,6 @@ const taskSchema = z.object({
 type TaskFormData = z.infer<typeof taskSchema>;
 
 export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
-  // ✅ REPLACED useState form WITH RHF
   const {
     control,
     handleSubmit,
@@ -68,31 +76,13 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
     severity: "success" as "success" | "error",
   });
 
-  // ✅ USERS FIELD HANDLING (KEPT, just wired to RHF)
-  const handleUsersChange = (e: any) => {
-    const value = e.target.value;
+  const { data: users = [] } = useGetUsersQuery();
 
-    if (!value) {
-      setValue("users", []);
-      setUserError("");
-      return;
-    }
-
-    const ids = value.split(",");
-    const invalid = ids.some((id: string) => isNaN(Number(id.trim())));
-
-    if (invalid) {
-      setUserError("Enter valid numeric user IDs (e.g. 1,2,3)");
-    } else {
-      setUserError("");
-      setValue(
-        "users",
-        ids.map((id: string) => Number(id.trim())),
-      );
-    }
+  const getUserNameById = (id: number) => {
+    const user = users.find((u: any) => u.id === id);
+    return user?.username || "";
   };
 
-  // ✅ UPDATED SUBMIT
   const onSubmit = async (data: TaskFormData) => {
     if (userError) return;
 
@@ -105,7 +95,7 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
         severity: "success",
       });
 
-      reset(); // ✅ replaces manual reset
+      reset();
       setUserError("");
       setTitleError("");
 
@@ -113,15 +103,10 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
     } catch (err: any) {
       let message = err?.data?.detail || "Failed to create task";
 
-      if (Array.isArray(message)) {
-        message = message[0];
-      }
+      if (Array.isArray(message)) message = message[0];
 
       if (typeof message === "string") {
-        message = message
-          .replace(/^\d+:\s*/, "")
-          .replace(/\(\d+\)/g, "")
-          .trim();
+        message = message.replace(/^\d+:\s*/, "").trim();
       }
 
       setTitleError(message);
@@ -136,150 +121,234 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
         fullWidth
         maxWidth="sm"
         TransitionComponent={Grow}
-        transitionDuration={300}
         PaperProps={{
           sx: {
-            borderRadius: "16px",
-            transition: "all 0.25s ease",
+            borderRadius: 4,
+            boxShadow: "0px 20px 50px rgba(0,0,0,0.15)",
           },
         }}
         BackdropProps={{
           sx: {
             backdropFilter: "blur(8px)",
-            backgroundColor: "rgba(0,0,0,0.3)",
+            backgroundColor: "rgba(0,0,0,0.25)",
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 600 }}>Create Task</DialogTitle>
+        {/* ✅ HEADER */}
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography fontWeight={700} fontSize={18}>
+            Create Task
+          </Typography>
+          <Typography fontSize={13} color="text.secondary">
+            Add details for your task
+          </Typography>
+        </DialogTitle>
 
         <Divider />
 
         <DialogContent sx={{ mt: 2 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box display="flex" flexDirection="column" gap={2.5}>
             {/* ✅ TITLE */}
-            <Box>
-              <Typography sx={{ fontSize: 13, mb: 0.5 }}>
-                Title <span style={{ color: "red" }}>*</span>
-              </Typography>
+            <Controller
+              name="title"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Title"
+                  size="small"
+                  fullWidth
+                  error={!!errors.title || !!titleError}
+                  helperText={errors.title?.message || titleError}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setTitleError("");
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <TitleIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
+                />
+              )}
+            />
 
+            {/* ✅ DESCRIPTION */}
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Description"
+                  size="small"
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <DescriptionIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
+                />
+              )}
+            />
+
+            {/* ✅ STATUS + SPRINT */}
+            <Box display="flex" gap={2}>
               <Controller
-                name="title"
+                name="status"
                 control={control}
                 render={({ field }) => (
                   <TextField
+                    select
                     {...field}
+                    label="Status"
+                    size="small"
                     fullWidth
-                    placeholder="Enter task title"
-                    error={!!errors.title || !!titleError}
-                    helperText={errors.title?.message || titleError}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      setTitleError("");
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <FlagIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
                     }}
-                  />
+                    sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
+                  >
+                    <MenuItem value="backlog">Backlog</MenuItem>
+                    <MenuItem value="todo">Todo</MenuItem>
+                    <MenuItem value="in progress">In Progress</MenuItem>
+                    <MenuItem value="in review">In Review</MenuItem>
+                    <MenuItem value="qa">QA</MenuItem>
+                    <MenuItem value="completed">Completed</MenuItem>
+                  </TextField>
                 )}
               />
-            </Box>
-
-            {/* DESCRIPTION */}
-            <Box>
-              <Typography sx={{ fontSize: 13, mb: 0.5 }}>
-                Description
-              </Typography>
 
               <Controller
-                name="description"
+                name="sprint"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
+                    label="Sprint"
+                    size="small"
                     fullWidth
-                    multiline
-                    minRows={3}
-                    placeholder="Describe the task..."
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <TimelineIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
                   />
                 )}
               />
             </Box>
 
-            {/* STATUS & SPRINT */}
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography sx={{ fontSize: 13, mb: 0.5 }}>Status</Typography>
-
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField select {...field} fullWidth>
-                      <MenuItem value="backlog">Backlog</MenuItem>
-                      <MenuItem value="todo">Todo</MenuItem>
-                      <MenuItem value="in progress">In Progress</MenuItem>
-                      <MenuItem value="in review">In Review</MenuItem>
-                      <MenuItem value="qa">QA</MenuItem>
-                      <MenuItem value="completed">Completed</MenuItem>
-                    </TextField>
-                  )}
-                />
-              </Box>
-
-              <Box sx={{ flex: 1 }}>
-                <Typography sx={{ fontSize: 13, mb: 0.5 }}>Sprint</Typography>
-
-                <Controller
-                  name="sprint"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField {...field} fullWidth placeholder="Sprint name" />
-                  )}
-                />
-              </Box>
-            </Box>
-
-            {/* USERS */}
-            <Box>
-              <Typography sx={{ fontSize: 13, mb: 0.5 }}>Users</Typography>
-
-              <TextField
-                fullWidth
-                placeholder="Enter user IDs (1,2)"
-                onChange={handleUsersChange}
-                error={!!userError}
-                helperText={userError}
-              />
-            </Box>
+            {/* ✅ USERS (ONLY DESIGN UPDATED) */}
+            <Controller
+              name="users"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  label="Users"
+                  fullWidth
+                  size="small"
+                  value={field.value || []}
+                  onChange={field.onChange}
+                  SelectProps={{
+                    multiple: true,
+                    MenuProps: {
+                      PaperProps: {
+                        sx: {
+                          maxHeight: 260,
+                          mt: 1,
+                          borderRadius: 2,
+                          p: 1,
+                        },
+                      },
+                      MenuListProps: {
+                        sx: {
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr", // ✅ 2-column layout
+                          gap: 1,
+                        },
+                      },
+                    },
+                    renderValue: (selected) =>
+                      (selected as number[]).map(getUserNameById).join(", "),
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <GroupIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    backgroundColor: "#f9fafb",
+                    borderRadius: 2,
+                  }}
+                >
+                  {users.map((user: any) => (
+                    <MenuItem
+                      key={user.id}
+                      value={user.id}
+                      sx={{
+                        borderRadius: 2,
+                        textAlign: "center",
+                        fontSize: 13,
+                        "&:hover": {
+                          backgroundColor: "#f3f4f6",
+                        },
+                      }}
+                    >
+                      {user.username}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
           </Box>
         </DialogContent>
 
+        {/* ✅ ACTIONS */}
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button
-            sx={{ textTransform: "none", borderRadius: "20px" }}
-            onClick={onClose}
-          >
+          <Button onClick={onClose} sx={{ textTransform: "none" }}>
             Cancel
           </Button>
 
           <Button
             variant="contained"
-            onClick={handleSubmit(onSubmit)} // ✅ UPDATED
+            onClick={handleSubmit(onSubmit)}
             disabled={!!userError}
-            sx={{ borderRadius: "20px", px: 3, textTransform: "none" }}
+            sx={{ textTransform: "none", borderRadius: 2, px: 3 }}
           >
             Create Task
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* ✅ SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
           variant="filled"
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
         >
           {snackbar.message}
         </Alert>
