@@ -23,7 +23,7 @@ export default function TaskList({
     { key: "completed", title: "Completed" },
   ];
 
-  // ✅ ✅ ✅ FLAT VIEW (WITH SCROLLBAR)
+  // ✅ FLAT VIEW (UNCHANGED)
   if (!grouped) {
     return (
       <Box
@@ -31,24 +31,17 @@ export default function TaskList({
           height: "100%",
           overflowY: "auto",
           pr: 1,
-
           display: "flex",
           flexWrap: "wrap",
           gap: 2,
           alignContent: "flex-start",
 
-          /* ✅ custom scrollbar */
           "&::-webkit-scrollbar": {
             width: "8px",
-          },
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: "transparent",
           },
           "&::-webkit-scrollbar-thumb": {
             backgroundColor: "#e2e8f0",
             borderRadius: "10px",
-            minHeight: "40px",
-            transition: "background-color 0.2s ease",
           },
           "&:hover::-webkit-scrollbar-thumb": {
             backgroundColor: "#cbd5e1",
@@ -64,13 +57,14 @@ export default function TaskList({
     );
   }
 
-  // ✅ ✅ ✅ GROUPED VIEW (UNCHANGED)
+  // ✅ GROUPED VIEW (FINAL)
   return (
     <Box
       sx={{
         display: "flex",
         gap: 2,
         height: "100%",
+        px: 1,
       }}
     >
       {columns.map((col) => {
@@ -80,59 +74,115 @@ export default function TaskList({
           <Box
             key={col.key}
             sx={{
-              minWidth: 260,
+              minWidth: 270,
               flexShrink: 0,
-
               height: "100%",
-              display: "flex",
-              flexDirection: "column",
+              overflowY: "auto", // ✅ whole column scrolls
 
-              "&:hover .scroll-area::-webkit-scrollbar-thumb": {
+              backgroundColor: "#f8fafc",
+              borderRadius: 3,
+              px: 1,
+              py: 1,
+
+              border: "1px solid #eef2f7",
+
+              "&::-webkit-scrollbar": {
+                width: "6px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "transparent",
+                borderRadius: "10px",
+              },
+              "&:hover::-webkit-scrollbar-thumb": {
                 backgroundColor: "#cbd5e1",
               },
             }}
           >
-            <Typography
-              sx={{
-                fontWeight: 600,
-                mb: 1,
-                px: 0.5,
-              }}
-            >
-              {col.title}
-            </Typography>
-
+            {/* ✅ HEADER (STICKY) */}
             <Box
-              className="scroll-area"
               sx={{
-                flex: 1,
-                minHeight: 0,
-                overflowY: "auto",
-                pr: 1,
-
-                "&::-webkit-scrollbar": {
-                  width: "8px",
-                },
-
-                "&::-webkit-scrollbar-track": {
-                  backgroundColor: "transparent",
-                },
-
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "transparent",
-                  borderRadius: "10px",
-                  minHeight: "40px",
-                  transition: "background-color 0.2s ease",
-                },
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+                backgroundColor: "#f8fafc",
+                pb: 0.5,
+                mb: 1,
               }}
             >
-              {colTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onClick={() => onTaskClick(task)}
-                />
-              ))}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  px: 0.8,
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "14px",
+                    color: "#334155",
+                  }}
+                >
+                  {col.title}
+                </Typography>
+
+                <Box
+                  sx={{
+                    fontSize: "11px",
+                    px: 1,
+                    py: 0.2,
+                    borderRadius: "6px",
+                    backgroundColor: "#e2e8f0",
+                    color: "#475569",
+                  }}
+                >
+                  {colTasks.length}
+                </Box>
+              </Box>
+            </Box>
+
+            {/* ✅ CONTENT */}
+            <Box sx={{ pr: 1, pb: 2 }}>
+              {colTasks.length === 0 ? (
+                <Box
+                  sx={{
+                    mt: 2,
+                    textAlign: "center",
+                    fontSize: "12px",
+                    color: "#94a3b8",
+                  }}
+                >
+                  No tasks
+                </Box>
+              ) : (
+                colTasks.map((task) => (
+                  <Box key={task.id} sx={{ mb: 0.5 }}>
+                    <TaskCard task={task} onClick={() => onTaskClick(task)} />
+                  </Box>
+                ))
+              )}
+
+              {/* ✅ ADD TASK (SCROLLS NATURALLY) */}
+              <Box
+                sx={{
+                  mt: 1,
+                  px: 1,
+                  py: 0.6,
+                  borderRadius: 1.5,
+                  fontSize: "12px",
+                  color: "#64748b",
+                  textAlign: "center",
+                  cursor: "pointer",
+
+                  "&:hover": {
+                    backgroundColor: "#e2e8f0",
+                    color: "#334155",
+                  },
+                }}
+              >
+                + Add task
+              </Box>
             </Box>
           </Box>
         );

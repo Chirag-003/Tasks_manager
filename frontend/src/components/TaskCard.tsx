@@ -1,6 +1,14 @@
 "use client";
 
-import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  Box,
+  Avatar,
+  Stack,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -37,6 +45,8 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
 
   const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
 
+  const users = task.users || [];
+
   return (
     <>
       {loadingSubtaskId && (
@@ -59,41 +69,40 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
       <Card
         onClick={onClick}
         sx={{
-          mb: 2,
-          borderRadius: 3,
-
+          mb: 1.5,
+          borderRadius: 2.5,
           width: "280px",
-          minWidth: "280px",
-          maxWidth: "280px",
 
           backgroundColor: "#ffffff",
           border: "1px solid #e5e7eb",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+
+          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
 
           cursor: "pointer",
-          transition: "all 0.2s ease",
+          transition: "all 0.18s ease",
 
           "&:hover": {
-            boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
-            transform: "translateY(-3px)",
+            boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+            transform: "translateY(-2px)",
           },
         }}
       >
-        <CardContent sx={{ p: 2 }}>
+        <CardContent sx={{ p: 1.6 }}>
+          {/* HEADER */}
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
-              gap: 2,
+              alignItems: "flex-start",
+              gap: 1,
             }}
           >
             <Typography
               sx={{
                 fontWeight: 600,
-                fontSize: "15px",
+                fontSize: "14px",
+                lineHeight: 1.3,
                 color: "#111827",
-                flex: 1,
-                wordBreak: "break-word",
               }}
             >
               {task.title}
@@ -104,39 +113,109 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
               size="small"
               color={getStatusColor(task.status)}
               sx={{
-                textTransform: "capitalize",
-                fontSize: "11px",
+                height: "20px",
+                fontSize: "10px",
+                borderRadius: "6px",
+                fontWeight: 500,
               }}
             />
           </Box>
 
+          {/* DESCRIPTION */}
           {task.description && (
             <Typography
               sx={{
-                mt: 1,
-                fontSize: "13px",
+                mt: 0.6,
+                fontSize: "12px",
                 color: "#6b7280",
+                lineHeight: 1.3,
               }}
             >
               {task.description}
             </Typography>
           )}
 
-          <Typography
+          {/* ✅ ASSIGNEES (FIXED EMPTY STATE) */}
+          <Box
             sx={{
-              mt: 2,
-              fontSize: "12.5px",
-              color: "#6b7280",
+              mt: 1.2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            Assignees{" "}
-            <span style={{ color: "#111827", wordBreak: "break-word" }}>
-              {!task.users?.length
-                ? "No Assignees"
-                : task.users.map((u: any) => u.username).join(", ")}
-            </span>
-          </Typography>
+            <Typography
+              sx={{
+                fontSize: "11.5px",
+                color: "#94a3b8",
+              }}
+            >
+              Assignees
+            </Typography>
 
+            <Stack direction="row" spacing={-0.6} alignItems="center">
+              {users.length === 0 ? (
+                <>
+                  <Avatar
+                    sx={{
+                      width: 22,
+                      height: 22,
+                      fontSize: "10px",
+                      bgcolor: "#f1f5f9",
+                      color: "#94a3b8",
+                      border: "2px solid #fff",
+                    }}
+                  >
+                    —
+                  </Avatar>
+
+                  <Typography
+                    sx={{
+                      fontSize: "11px",
+                      color: "#94a3b8",
+                      ml: 0.5,
+                    }}
+                  >
+                    Unassigned
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  {users.slice(0, 3).map((user: any, i: number) => (
+                    <Avatar
+                      key={i}
+                      sx={{
+                        width: 22,
+                        height: 22,
+                        fontSize: "10px",
+                        bgcolor: "#e2e8f0",
+                        color: "#111827",
+                        border: "2px solid #fff",
+                      }}
+                    >
+                      {user.username[0]?.toUpperCase()}
+                    </Avatar>
+                  ))}
+
+                  {users.length > 3 && (
+                    <Avatar
+                      sx={{
+                        width: 22,
+                        height: 22,
+                        fontSize: "10px",
+                        bgcolor: "#cbd5f5",
+                        border: "2px solid #fff",
+                      }}
+                    >
+                      +{users.length - 3}
+                    </Avatar>
+                  )}
+                </>
+              )}
+            </Stack>
+          </Box>
+
+          {/* SUBTASK TOGGLE */}
           <Box
             onClick={(e) => {
               if (task.subtasks?.length > 0) {
@@ -145,23 +224,30 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
               }
             }}
             sx={{
-              mt: 1.5,
-              px: 1.5,
-              py: 1,
+              mt: 1,
+              px: 1.2,
+              py: 0.7,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              borderRadius: 2,
-              backgroundColor: "#f1f5f9",
-              cursor: task.subtasks?.length > 0 ? "pointer" : "default",
+              borderRadius: 1.8,
+              backgroundColor: "#f8fafc",
+
+              cursor: task.subtasks?.length ? "pointer" : "default",
 
               "&:hover": {
                 backgroundColor:
-                  task.subtasks?.length > 0 ? "#e2e8f0" : "#f1f5f9",
+                  task.subtasks?.length > 0 ? "#eef2f7" : "#f8fafc",
               },
             }}
           >
-            <Typography sx={{ fontSize: "13px", fontWeight: 500 }}>
+            <Typography
+              sx={{
+                fontSize: "12px",
+                fontWeight: 500,
+                color: "#334155",
+              }}
+            >
               {task.subtasks?.length > 0
                 ? `Subtasks • ${task.subtasks.length}`
                 : "No subtasks"}
@@ -170,40 +256,40 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             {task.subtasks?.length > 0 && (
               <ExpandMoreIcon
                 sx={{
-                  fontSize: 18,
+                  fontSize: 16,
                   color: "#64748b",
-                  transition: "transform 0.3s ease",
+                  transition: "transform 0.25s ease",
                   transform: expanded ? "rotate(180deg)" : "rotate(0)",
                 }}
               />
             )}
           </Box>
 
+          {/* SUBTASK LIST */}
           {task.subtasks?.length > 0 && (
             <Box
               sx={{
-                maxHeight: expanded ? 500 : 0,
+                maxHeight: expanded ? 280 : 0,
                 overflow: "hidden",
-                transition: "max-height 0.35s ease",
+                transition: "max-height 0.3s ease",
               }}
             >
-              <Box sx={{ mt: 1 }}>
+              <Box sx={{ mt: 0.8 }}>
                 {task.subtasks.map((sub: any) => (
                   <Box
                     key={sub.id}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setLoadingSubtaskId(sub.id); // ✅ ADDED
+                      setLoadingSubtaskId(sub.id);
                       router.push(`/dashboard/subtasks/${sub.id}`);
                     }}
                     sx={{
-                      px: 1.5,
-                      py: 0.8,
+                      px: 1.2,
+                      py: 0.6,
                       borderRadius: 1.5,
-                      backgroundColor: "#f8fafc",
+                      backgroundColor: "#f9fafb",
                       border: "1px solid #e5e7eb",
-                      mb: 0.6,
-                      overflow: "hidden",
+                      mb: 0.5,
                       cursor: "pointer",
 
                       "&:hover": {
@@ -212,11 +298,9 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
                     }}
                   >
                     <Typography
-                      title={sub.title}
                       sx={{
-                        fontSize: "13px",
+                        fontSize: "12px",
                         color: "#334155",
-
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
