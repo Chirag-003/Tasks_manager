@@ -81,32 +81,42 @@ export default function TaskList({
 
               backgroundColor: "#f8fafc",
               borderRadius: 3,
-              px: 1,
-              py: 1,
+
+              pt: 0, // ✅ FIX: remove top gap
+              pb: 1,
 
               border: "1px solid #eef2f7",
 
               "&::-webkit-scrollbar": {
-                width: "6px",
+                width: "0px", // ✅ completely hidden
               },
+
               "&::-webkit-scrollbar-thumb": {
                 backgroundColor: "transparent",
-                borderRadius: "10px",
-              },
-              "&:hover::-webkit-scrollbar-thumb": {
-                backgroundColor: "#cbd5e1",
               },
             }}
           >
             {/* ✅ HEADER (STICKY) */}
+            {/* ✅ HEADER (FIXED SOLID) */}
+
             <Box
               sx={{
                 position: "sticky",
                 top: 0,
                 zIndex: 2,
-                backgroundColor: "#f8fafc",
+
+                // ✅ FIX WIDTH (already done)
+                mx: -1,
+                px: 1.2,
+
+                // ✅ FIX TOP GAP (NEW)
+                mt: -1, // 🔥 pull header up
+                pt: 1, // 🔥 restore internal spacing
+
                 pb: 0.5,
-                mb: 1,
+
+                backgroundColor: "#f8fafc",
+                borderBottom: "1px solid #e5e7eb",
               }}
             >
               <Box
@@ -114,7 +124,6 @@ export default function TaskList({
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  px: 0.8,
                 }}
               >
                 <Typography
@@ -143,7 +152,7 @@ export default function TaskList({
             </Box>
 
             {/* ✅ CONTENT */}
-            <Box sx={{ pr: 1, pb: 2 }}>
+            <Box sx={{ px: 1, pb: 2 }}>
               {colTasks.length === 0 ? (
                 <Box
                   sx={{
