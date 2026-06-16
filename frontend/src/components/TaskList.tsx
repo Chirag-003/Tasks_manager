@@ -7,12 +7,14 @@ type TaskListProps = {
   tasks: any[];
   onTaskClick: (task: any) => void;
   grouped?: boolean;
+  onAddTask?: (status?: string) => void; // ✅ NEW
 };
 
 export default function TaskList({
   tasks,
   onTaskClick,
   grouped = true,
+  onAddTask, // ✅ NEW
 }: TaskListProps) {
   const columns = [
     { key: "backlog", title: "Backlog" },
@@ -35,10 +37,7 @@ export default function TaskList({
           flexWrap: "wrap",
           gap: 2,
           alignContent: "flex-start",
-
-          "&::-webkit-scrollbar": {
-            width: "8px",
-          },
+          "&::-webkit-scrollbar": { width: "8px" },
           "&::-webkit-scrollbar-thumb": {
             backgroundColor: "#e2e8f0",
             borderRadius: "10px",
@@ -57,7 +56,7 @@ export default function TaskList({
     );
   }
 
-  // ✅ GROUPED VIEW (FINAL)
+  // ✅ GROUPED VIEW
   return (
     <Box
       sx={{
@@ -76,47 +75,35 @@ export default function TaskList({
             sx={{
               minWidth: 270,
               flexShrink: 0,
-              height: "100%",
-              overflowY: "auto", // ✅ whole column scrolls
+              height: "calc(100% - 8px)",
+              overflowY: "auto",
+              overflowX: "hidden",
 
-              backgroundColor: "#f8fafc",
+              backgroundColor: "#f1f5f9",
               borderRadius: 3,
+              border: "1px solid #e2e8f0",
 
-              pt: 0, // ✅ FIX: remove top gap
+              pt: 0,
               pb: 1,
 
-              border: "1px solid #eef2f7",
+              boxShadow:
+                "0 1px 2px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.03)",
 
-              "&::-webkit-scrollbar": {
-                width: "0px", // ✅ completely hidden
-              },
-
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "transparent",
-              },
+              "&::-webkit-scrollbar": { width: "0px" },
             }}
           >
-            {/* ✅ HEADER (STICKY) */}
-            {/* ✅ HEADER (FIXED SOLID) */}
-
+            {/* HEADER */}
             <Box
               sx={{
                 position: "sticky",
                 top: 0,
                 zIndex: 2,
-
-                // ✅ FIX WIDTH (already done)
-                mx: -1,
-                px: 1.2,
-
-                // ✅ FIX TOP GAP (NEW)
-                mt: -1, // 🔥 pull header up
-                pt: 1, // 🔥 restore internal spacing
-
-                pb: 0.5,
-
-                backgroundColor: "#f8fafc",
-                borderBottom: "1px solid #e5e7eb",
+                px: 1.5,
+                mt: -1,
+                pt: 1.2,
+                pb: 0.8,
+                backgroundColor: "#f1f5f9",
+                borderBottom: "1px solid #e2e8f0",
               }}
             >
               <Box
@@ -129,8 +116,9 @@ export default function TaskList({
                 <Typography
                   sx={{
                     fontWeight: 600,
-                    fontSize: "14px",
-                    color: "#334155",
+                    fontSize: "13.5px",
+                    color: "#1e293b",
+                    letterSpacing: "0.2px",
                   }}
                 >
                   {col.title}
@@ -139,11 +127,12 @@ export default function TaskList({
                 <Box
                   sx={{
                     fontSize: "11px",
-                    px: 1,
-                    py: 0.2,
-                    borderRadius: "6px",
+                    px: 1.2,
+                    py: 0.3,
+                    borderRadius: "999px",
                     backgroundColor: "#e2e8f0",
-                    color: "#475569",
+                    color: "#334155",
+                    fontWeight: 500,
                   }}
                 >
                   {colTasks.length}
@@ -151,12 +140,12 @@ export default function TaskList({
               </Box>
             </Box>
 
-            {/* ✅ CONTENT */}
-            <Box sx={{ px: 1, pb: 2 }}>
+            {/* CONTENT */}
+            <Box sx={{ px: 1, pt: 2, pb: 2 }}>
               {colTasks.length === 0 ? (
                 <Box
                   sx={{
-                    mt: 2,
+                    mt: 3,
                     textAlign: "center",
                     fontSize: "12px",
                     color: "#94a3b8",
@@ -166,31 +155,47 @@ export default function TaskList({
                 </Box>
               ) : (
                 colTasks.map((task) => (
-                  <Box key={task.id} sx={{ mb: 0.5 }}>
+                  <Box
+                    key={task.id}
+                    sx={{
+                      mb: 1,
+                      transition: "transform 0.15s ease",
+                      "&:hover": {
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
                     <TaskCard task={task} onClick={() => onTaskClick(task)} />
                   </Box>
                 ))
               )}
 
-              {/* ✅ ADD TASK (SCROLLS NATURALLY) */}
+              {/* ✅ ADD TASK (CONNECTED) */}
               <Box
                 sx={{
                   mt: 1,
                   px: 1,
-                  py: 0.6,
+                  py: 0.8,
                   borderRadius: 1.5,
-                  fontSize: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  fontSize: "13px",
                   color: "#64748b",
-                  textAlign: "center",
                   cursor: "pointer",
-
+                  transition: "all 0.15s ease",
                   "&:hover": {
                     backgroundColor: "#e2e8f0",
-                    color: "#334155",
+                    color: "#1e293b",
                   },
                 }}
+                onClick={() => onAddTask?.(col.key)} // ✅ MAIN CHANGE
               >
-                + Add task
+                <Box sx={{ fontSize: "16px", lineHeight: 1, fontWeight: 500 }}>
+                  +
+                </Box>
+
+                <Box>Add task</Box>
               </Box>
             </Box>
           </Box>

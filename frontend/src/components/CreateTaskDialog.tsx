@@ -17,7 +17,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import TitleIcon from "@mui/icons-material/Title";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -36,6 +36,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onCreate: (data: any) => Promise<void>;
+  defaultStatus?: string; // ✅ already added earlier
 };
 
 // ✅ SCHEMA
@@ -49,7 +50,12 @@ const taskSchema = z.object({
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
-export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
+export default function CreateTaskDialog({
+  open,
+  onClose,
+  onCreate,
+  defaultStatus,
+}: Props) {
   const {
     control,
     handleSubmit,
@@ -69,6 +75,33 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
 
   const [userError, setUserError] = useState("");
   const [titleError, setTitleError] = useState("");
+
+  // ✅✅ FIX 1: Proper reset when dialog opens
+  useEffect(() => {
+    if (open) {
+      reset({
+        title: "",
+        description: "",
+        status: defaultStatus || "backlog",
+        sprint: "",
+        users: [],
+      });
+
+      setUserError("");
+      setTitleError("");
+    }
+  }, [open, defaultStatus, reset]);
+
+  // ✅✅ FIX 2: auto clear error after 3s
+  useEffect(() => {
+    if (!titleError) return;
+
+    const timer = setTimeout(() => {
+      setTitleError("");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [titleError]);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -158,11 +191,12 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
                   label="Title"
                   size="small"
                   fullWidth
+                  required // ✅✅ FIX 3: red star
                   error={!!errors.title || !!titleError}
                   helperText={errors.title?.message || titleError}
                   onChange={(e) => {
                     field.onChange(e);
-                    setTitleError("");
+                    setTitleError(""); // ✅ instant clear
                   }}
                   InputProps={{
                     startAdornment: (
@@ -253,7 +287,7 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
               />
             </Box>
 
-            {/* ✅ USERS (ONLY DESIGN UPDATED) */}
+            {/* ✅ USERS */}
             <Controller
               name="users"
               control={control}
@@ -279,7 +313,7 @@ export default function CreateTaskDialog({ open, onClose, onCreate }: Props) {
                       MenuListProps: {
                         sx: {
                           display: "grid",
-                          gridTemplateColumns: "1fr 1fr", // ✅ 2-column layout
+                          gridTemplateColumns: "1fr 1fr",
                           gap: 1,
                         },
                       },

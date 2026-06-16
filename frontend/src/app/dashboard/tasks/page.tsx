@@ -46,6 +46,10 @@ export default function TasksPage() {
     message: "",
   });
 
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
+    undefined,
+  );
+
   const openFilter = Boolean(anchorEl);
 
   useEffect(() => {
@@ -88,12 +92,16 @@ export default function TasksPage() {
 
   const [createTask] = useCreateTaskMutation();
 
-  const handleOpen = (e: any) => {
-    e.currentTarget.blur();
+  // ✅ ONLY CHANGE IS HERE
+  const handleOpen = (status?: string) => {
+    setSelectedStatus(status); // ✅ FIXED
     setOpen(true);
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedStatus(undefined); // ✅ cleanup (safe)
+  };
 
   const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -259,8 +267,7 @@ export default function TasksPage() {
           </Box>
         </Popover>
 
-        {/* FIXED TASK LIST */}
-
+        {/* TASK LIST */}
         <Box
           sx={{
             flex: 1,
@@ -268,8 +275,6 @@ export default function TasksPage() {
             overflowX: "auto",
             overflowY: "hidden",
             pb: 1,
-
-            // ✅ HORIZONTAL SCROLLBAR
             "&::-webkit-scrollbar": {
               height: "8px",
             },
@@ -306,6 +311,7 @@ export default function TasksPage() {
                 setLoadingTaskId(task.id);
                 router.push(`/dashboard/tasks/${task.id}`);
               }}
+              onAddTask={(status) => handleOpen(status)}
             />
           )}
         </Box>
@@ -313,7 +319,7 @@ export default function TasksPage() {
         {/* CREATE BUTTON */}
         <Button
           variant="contained"
-          onClick={handleOpen}
+          onClick={() => handleOpen()}
           sx={{
             position: "fixed",
             bottom: 30,
@@ -329,8 +335,12 @@ export default function TasksPage() {
         <CreateTaskDialog
           open={open}
           onClose={handleClose}
+          defaultStatus={selectedStatus}
           onCreate={async (formData) => {
-            await createTask(formData).unwrap();
+            await createTask({
+              ...formData,
+              status: selectedStatus || formData.status,
+            }).unwrap();
           }}
         />
       </Box>
