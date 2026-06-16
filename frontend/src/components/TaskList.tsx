@@ -2,19 +2,23 @@
 
 import { Box, Typography } from "@mui/material";
 import TaskCard from "./TaskCard";
+import { useGetTasksQuery } from "@/services/api";
+import { useState, useEffect } from "react";
 
 type TaskListProps = {
   tasks: any[];
   onTaskClick: (task: any) => void;
   grouped?: boolean;
-  onAddTask?: (status?: string) => void; // ✅ NEW
+  onAddTask?: (status?: string) => void;
+  filters?: any;
 };
 
 export default function TaskList({
   tasks,
   onTaskClick,
   grouped = true,
-  onAddTask, // ✅ NEW
+  onAddTask,
+  filters,
 }: TaskListProps) {
   const columns = [
     { key: "backlog", title: "Backlog" },
@@ -25,7 +29,133 @@ export default function TaskList({
     { key: "completed", title: "Completed" },
   ];
 
-  // ✅ FLAT VIEW (UNCHANGED)
+  const [columnPages, setColumnPages] = useState<Record<string, number>>({
+    backlog: 1,
+    todo: 1,
+    "in progress": 1,
+    "in review": 1,
+    qa: 1,
+    completed: 1,
+  });
+
+  const [columnDataState, setColumnDataState] = useState<Record<string, any[]>>(
+    {
+      backlog: [],
+      todo: [],
+      "in progress": [],
+      "in review": [],
+      qa: [],
+      completed: [],
+    },
+  );
+
+  const backlogQuery = useGetTasksQuery({
+    ...filters,
+    status: "backlog",
+    page: columnPages["backlog"],
+    page_size: 10,
+  });
+
+  const todoQuery = useGetTasksQuery({
+    ...filters,
+    status: "todo",
+    page: columnPages["todo"],
+    page_size: 10,
+  });
+
+  const inProgressQuery = useGetTasksQuery({
+    ...filters,
+    status: "in progress",
+    page: columnPages["in progress"],
+    page_size: 10,
+  });
+
+  const inReviewQuery = useGetTasksQuery({
+    ...filters,
+    status: "in review",
+    page: columnPages["in review"],
+    page_size: 10,
+  });
+
+  const qaQuery = useGetTasksQuery({
+    ...filters,
+    status: "qa",
+    page: columnPages["qa"],
+    page_size: 10,
+  });
+
+  const completedQuery = useGetTasksQuery({
+    ...filters,
+    status: "completed",
+    page: columnPages["completed"],
+    page_size: 10,
+  });
+
+  const mergeUnique = (oldList: any[], newList: any[]) => {
+    const map = new Map();
+
+    [...oldList, ...newList].forEach((item) => {
+      map.set(item.id, item);
+    });
+
+    return Array.from(map.values());
+  };
+
+  useEffect(() => {
+    setColumnDataState((prev) => ({
+      backlog:
+        columnPages.backlog === 1
+          ? backlogQuery.data?.results || []
+          : mergeUnique(prev.backlog, backlogQuery.data?.results || []),
+
+      todo:
+        columnPages.todo === 1
+          ? todoQuery.data?.results || []
+          : mergeUnique(prev.todo, backlogQuery.data?.results || []),
+
+      "in progress":
+        columnPages["in progress"] === 1
+          ? inProgressQuery.data?.results || []
+          : mergeUnique(
+              prev["in progress"],
+              inProgressQuery.data?.results || [],
+            ),
+
+      "in review":
+        columnPages["in review"] === 1
+          ? inReviewQuery.data?.results || []
+          : mergeUnique(prev["in review"], inReviewQuery.data?.results || []),
+
+      qa:
+        columnPages.qa === 1
+          ? qaQuery.data?.results || []
+          : mergeUnique(prev.qa, backlogQuery.data?.results || []),
+
+      completed:
+        columnPages.completed === 1
+          ? completedQuery.data?.results || []
+          : mergeUnique(prev.completed, backlogQuery.data?.results || []),
+    }));
+  }, [
+    backlogQuery.data,
+    todoQuery.data,
+    inProgressQuery.data,
+    inReviewQuery.data,
+    qaQuery.data,
+    completedQuery.data,
+  ]);
+
+  const columnData = columnDataState;
+
+  const columnLoading: Record<string, boolean> = {
+    backlog: backlogQuery.isLoading,
+    todo: todoQuery.isLoading,
+    "in progress": inProgressQuery.isLoading,
+    "in review": inReviewQuery.isLoading,
+    qa: qaQuery.isLoading,
+    completed: completedQuery.isLoading,
+  };
+
   if (!grouped) {
     return (
       <Box
@@ -47,7 +177,7 @@ export default function TaskList({
           },
         }}
       >
-        {tasks.map((task) => (
+        {tasks.map((task: any) => (
           <Box key={task.id} sx={{ width: 280 }}>
             <TaskCard task={task} onClick={() => onTaskClick(task)} />
           </Box>
@@ -56,7 +186,6 @@ export default function TaskList({
     );
   }
 
-  // ✅ GROUPED VIEW
   return (
     <Box
       sx={{
@@ -67,7 +196,19 @@ export default function TaskList({
       }}
     >
       {columns.map((col) => {
-        const colTasks = tasks.filter((t) => t.status === col.key);
+        const colTasks = columnData[col.key] || [];
+        const isLoading = columnLoading[col.key];
+
+        const queryMap: any = {
+          backlog: backlogQuery,
+          todo: todoQuery,
+          "in progress": inProgressQuery,
+          "in review": inReviewQuery,
+          qa: qaQuery,
+          completed: completedQuery,
+        };
+
+        const totalCount = queryMap[col.key].data?.count || 0;
 
         return (
           <Box
@@ -78,17 +219,13 @@ export default function TaskList({
               height: "calc(100% - 8px)",
               overflowY: "auto",
               overflowX: "hidden",
-
               backgroundColor: "#f1f5f9",
               borderRadius: 3,
               border: "1px solid #e2e8f0",
-
               pt: 0,
               pb: 1,
-
               boxShadow:
                 "0 1px 2px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.03)",
-
               "&::-webkit-scrollbar": { width: "0px" },
             }}
           >
@@ -107,96 +244,79 @@ export default function TaskList({
               }}
             >
               <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
               >
-                <Typography
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: "13.5px",
-                    color: "#1e293b",
-                    letterSpacing: "0.2px",
-                  }}
-                >
-                  {col.title}
-                </Typography>
+                {/* LEFT */}
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography sx={{ fontWeight: 600, fontSize: "13.5px" }}>
+                    {col.title}
+                  </Typography>
 
+                  <Box sx={{ fontSize: "11px", px: 1.2, py: 0.3 }}>
+                    {colTasks.length}
+                  </Box>
+                </Box>
+
+                {/* RIGHT (+ button) */}
                 <Box
                   sx={{
-                    fontSize: "11px",
-                    px: 1.2,
-                    py: 0.3,
-                    borderRadius: "999px",
-                    backgroundColor: "#e2e8f0",
-                    color: "#334155",
-                    fontWeight: 500,
+                    cursor: "pointer",
+                    px: 0.5,
+                    borderRadius: 1,
+                    "&:hover": {
+                      backgroundColor: "#e2e8f0",
+                    },
                   }}
+                  onClick={() => onAddTask?.(col.key)}
                 >
-                  {colTasks.length}
+                  +
                 </Box>
               </Box>
             </Box>
 
             {/* CONTENT */}
             <Box sx={{ px: 1, pt: 2, pb: 2 }}>
-              {colTasks.length === 0 ? (
-                <Box
-                  sx={{
-                    mt: 3,
-                    textAlign: "center",
-                    fontSize: "12px",
-                    color: "#94a3b8",
-                  }}
-                >
-                  No tasks
-                </Box>
+              {isLoading ? (
+                <Box>Loading...</Box>
+              ) : colTasks.length === 0 ? (
+                <Box>No tasks</Box>
               ) : (
-                colTasks.map((task) => (
-                  <Box
-                    key={task.id}
-                    sx={{
-                      mb: 1,
-                      transition: "transform 0.15s ease",
-                      "&:hover": {
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
+                colTasks.map((task: any) => (
+                  <Box key={task.id} sx={{ mb: 1 }}>
                     <TaskCard task={task} onClick={() => onTaskClick(task)} />
                   </Box>
                 ))
               )}
 
-              {/* ✅ ADD TASK (CONNECTED) */}
-              <Box
-                sx={{
-                  mt: 1,
-                  px: 1,
-                  py: 0.8,
-                  borderRadius: 1.5,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  fontSize: "13px",
-                  color: "#64748b",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  "&:hover": {
-                    backgroundColor: "#e2e8f0",
+              {/* SHOW MORE */}
+              {colTasks.length < totalCount && !isLoading && (
+                <Box
+                  sx={{
+                    mt: 1,
+                    px: 1,
+                    py: 0.8,
+                    borderRadius: 1.5,
+                    display: "flex",
+                    gap: 1,
+                    cursor: "pointer",
+                    fontSize: "15px",
                     color: "#1e293b",
-                  },
-                }}
-                onClick={() => onAddTask?.(col.key)} // ✅ MAIN CHANGE
-              >
-                <Box sx={{ fontSize: "16px", lineHeight: 1, fontWeight: 500 }}>
-                  +
+                    "&:hover": {
+                      backgroundColor: "#e2e8f0",
+                    },
+                  }}
+                  onClick={() =>
+                    setColumnPages((prev) => ({
+                      ...prev,
+                      [col.key]: prev[col.key] + 1,
+                    }))
+                  }
+                >
+                  <Box>Show more</Box>
                 </Box>
-
-                <Box>Add task</Box>
-              </Box>
+              )}
             </Box>
           </Box>
         );

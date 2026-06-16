@@ -98,6 +98,9 @@ def get_tasks(
     if search:
         query = query.filter(Task.title.ilike(f"%{search}%"))
 
+    # ✅ ✅ Total count
+    total = query.count()
+
     # ✅ Pagination
     tasks = query.offset(skip).limit(limit).all()
 
@@ -109,7 +112,7 @@ def get_tasks(
                 "id": task.id,
                 "title": task.title,
                 "description": task.description,
-                "status": task.status.value,  # ✅ keep enum value
+                "status": task.status.value,
                 "sprint": task.sprint,
                 "users": [
                     {
@@ -124,7 +127,7 @@ def get_tasks(
                     {
                         "id": subtask.id,
                         "title": subtask.title,
-                        "status": subtask.status.value,  # ✅ consistency
+                        "status": subtask.status.value,
                         "task_id": subtask.task_id,
                         "sprint": task.sprint,
                         "users": [
@@ -136,21 +139,38 @@ def get_tasks(
                             }
                             for user in subtask.users
                         ],
+                        # ✅ FIXED SUBTASK COMMENTS
                         "comments": {
-                            "count": len(subtask.comments),  # ✅ fixed
-                            "data": subtask.comments,
+                            "count": len(subtask.comments),
+                            "data": [
+                                {
+                                    "id": comment.id,
+                                    "content": comment.content,
+                                    "task_id": comment.task_id,
+                                }
+                                for comment in subtask.comments
+                            ],
                         },
                     }
                     for subtask in task.subtasks
                 ],
+                # ✅ FIXED TASK COMMENTS
                 "comments": {
-                    "count": len(task.comments),  # ✅ fixed
-                    "data": task.comments,
+                    "count": len(task.comments),
+                    "data": [
+                        {
+                            "id": comment.id,
+                            "content": comment.content,
+                            "task_id": comment.task_id,
+                        }
+                        for comment in task.comments
+                    ],
                 },
             }
         )
 
-    return result
+    # ✅ Return both
+    return result, total
 
 
 def get_task(db: Session, task_id: int):

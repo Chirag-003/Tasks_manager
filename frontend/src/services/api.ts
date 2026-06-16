@@ -14,10 +14,15 @@ export const api = createApi({
       query: (filters) => {
         const params = new URLSearchParams();
 
+        // ✅ EXISTING filters (unchanged)
         if (filters?.search) params.append("search", filters.search);
         if (filters?.status) params.append("status", filters.status);
         if (filters?.sprint) params.append("sprint", filters.sprint);
         if (filters?.user_id) params.append("user_id", filters.user_id);
+
+        // ✅ NEW: pagination
+        if (filters?.page) params.append("page", filters.page);
+        if (filters?.page_size) params.append("page_size", filters.page_size);
 
         return `/task1/?${params.toString()}`;
       },

@@ -17,6 +17,7 @@ import {
   Alert,
   TextField,
   Popover,
+  Pagination,
 } from "@mui/material";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -52,6 +53,9 @@ export default function TasksPage() {
 
   const openFilter = Boolean(anchorEl);
 
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
   useEffect(() => {
     const statusFromUrl = searchParams.get("status") || "";
     setActiveStatus(statusFromUrl);
@@ -77,6 +81,11 @@ export default function TasksPage() {
     }));
   }, [activeStatus]);
 
+  // ✅ RESET PAGE ON FILTER CHANGE
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
   useEffect(() => {
     if (searchParams.get("deleted") === "true") {
       setSnackbar({
@@ -88,19 +97,23 @@ export default function TasksPage() {
     }
   }, [searchParams, router]);
 
-  const { data, isLoading, isFetching, isError } = useGetTasksQuery(filters);
+  // ✅ ✅ FIXED (pagination + search now works)
+  const { data, isLoading, isFetching, isError } = useGetTasksQuery({
+    ...filters,
+    page,
+    page_size: pageSize,
+  });
 
   const [createTask] = useCreateTaskMutation();
 
-  // ✅ ONLY CHANGE IS HERE
   const handleOpen = (status?: string) => {
-    setSelectedStatus(status); // ✅ FIXED
+    setSelectedStatus(status);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setSelectedStatus(undefined); // ✅ cleanup (safe)
+    setSelectedStatus(undefined);
   };
 
   const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -243,6 +256,10 @@ export default function TasksPage() {
           onClose={handleCloseFilter}
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           transformOrigin={{ vertical: "top", horizontal: "left" }}
+          disableScrollLock // ✅ ✅ MAIN FIX
+          disableAutoFocus
+          disableEnforceFocus
+          disableRestoreFocus
         >
           <Box p={2} width={280}>
             <FilterMenu
@@ -297,7 +314,7 @@ export default function TasksPage() {
             ) : (
               <UILoader type="task" />
             )
-          ) : !data?.length ? (
+          ) : !data?.results?.length ? (
             <Typography sx={{ color: "text.secondary" }}>
               {searchInput.trim()
                 ? `No results found for "${searchInput.trim()}"`
@@ -305,8 +322,9 @@ export default function TasksPage() {
             </Typography>
           ) : (
             <TaskList
-              tasks={data}
+              tasks={data.results}
               grouped={!activeStatus}
+              filters={filters} // ✅ ✅ CRITICAL FIX
               onTaskClick={(task: any) => {
                 setLoadingTaskId(task.id);
                 router.push(`/dashboard/tasks/${task.id}`);
@@ -315,6 +333,21 @@ export default function TasksPage() {
             />
           )}
         </Box>
+
+        {/* PAGINATION */}
+        {activeStatus && data && (
+          <Box mt={2} display="flex" justifyContent="center">
+            <Pagination
+              count={Math.ceil(data.count / pageSize)}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              shape="rounded"
+              color="primary"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
+        )}
 
         {/* CREATE BUTTON */}
         <Button

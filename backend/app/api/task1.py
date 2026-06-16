@@ -43,10 +43,10 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/", response_model=list[TaskResponse])
+@router.get("/", response_model=dict)
 def get_tasks(
-    skip: int = 0,
-    limit: int = 100,
+    page: int = 1,
+    page_size: int = 10,
     status: Optional[StatusEnum] = Query(default=None),
     sprint: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
@@ -54,6 +54,10 @@ def get_tasks(
     db: Session = Depends(get_db),
 ):
     try:
+
+        # ✅ NEW: convert page → skip
+        skip = (page - 1) * page_size
+        limit = page_size
 
         def normalize(value):
             if value is None:
@@ -68,7 +72,7 @@ def get_tasks(
             f"{normalize(sprint)}:"
             f"{normalize(user_id)}:"
             f"{normalize(search)}:"
-            f"{skip}:{limit}"
+            f"{page}:{page_size}"  # ✅ UPDATED
         )
 
         cached_data = redis_client.get(cache_key)
@@ -82,7 +86,8 @@ def get_tasks(
 
         print("❌ CACHE MISS")
 
-        tasks = services_task.get_tasks(
+        # ✅ UPDATED: receives (tasks, total)
+        tasks, total = services_task.get_tasks(
             db,
             skip=skip,
             limit=limit,
@@ -92,16 +97,23 @@ def get_tasks(
             search=search,
         )
 
+        # ✅ NEW: structured response
+        response = {
+            "results": tasks,
+            "count": total,
+            "page": page,
+            "page_size": page_size,
+        }
+
+        # ✅ UPDATED: cache full response
         if tasks:
             redis_client.setex(
                 cache_key,
                 60,
-                json.dumps(
-                    [TaskResponse.model_validate(task).model_dump() for task in tasks]
-                ),
+                json.dumps(response),
             )
 
-        return tasks
+        return response
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
