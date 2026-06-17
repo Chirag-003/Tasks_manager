@@ -12,7 +12,7 @@ export default function Header() {
   return (
     <Box
       sx={{
-        height: "60px",
+        height: "45px",
         px: 3,
 
         display: "flex",

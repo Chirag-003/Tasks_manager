@@ -112,7 +112,17 @@ export default function TaskList({
       todo:
         columnPages.todo === 1
           ? todoQuery.data?.results || []
-          : mergeUnique(prev.todo, backlogQuery.data?.results || []),
+          : mergeUnique(prev.todo, todoQuery.data?.results || []),
+
+      qa:
+        columnPages.qa === 1
+          ? qaQuery.data?.results || []
+          : mergeUnique(prev.qa, qaQuery.data?.results || []),
+
+      completed:
+        columnPages.completed === 1
+          ? completedQuery.data?.results || []
+          : mergeUnique(prev.completed, completedQuery.data?.results || []),
 
       "in progress":
         columnPages["in progress"] === 1
@@ -126,16 +136,6 @@ export default function TaskList({
         columnPages["in review"] === 1
           ? inReviewQuery.data?.results || []
           : mergeUnique(prev["in review"], inReviewQuery.data?.results || []),
-
-      qa:
-        columnPages.qa === 1
-          ? qaQuery.data?.results || []
-          : mergeUnique(prev.qa, backlogQuery.data?.results || []),
-
-      completed:
-        columnPages.completed === 1
-          ? completedQuery.data?.results || []
-          : mergeUnique(prev.completed, backlogQuery.data?.results || []),
     }));
   }, [
     backlogQuery.data,

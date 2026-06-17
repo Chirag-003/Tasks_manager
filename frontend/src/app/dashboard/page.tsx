@@ -11,7 +11,12 @@ import { useGetUsersQuery, useGetTasksQuery } from "@/services/api";
 
 export default function DashboardPage() {
   const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
-  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery({});
+  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery({
+    page_size: 2000,
+  });
+
+  // ✅ ✅ FIX 1 — extract array
+  const taskList = tasks?.results || [];
 
   if (usersLoading || tasksLoading) {
     return (
@@ -22,7 +27,9 @@ export default function DashboardPage() {
   }
 
   const totalUsers = users.length;
-  const totalTasks = tasks.length;
+
+  // ✅ ✅ FIX 2 — use taskList instead of tasks
+  const totalTasks = taskList.length;
 
   const ALL_STATUSES = [
     "backlog",
@@ -34,7 +41,7 @@ export default function DashboardPage() {
   ];
 
   const statusCount = ALL_STATUSES.reduce((acc: any, status) => {
-    acc[status] = tasks.filter((t: any) => t.status === status).length;
+    acc[status] = taskList.filter((t: any) => t.status === status).length; // ✅ changed
     return acc;
   }, {});
 
@@ -114,17 +121,13 @@ function DashboardCard({ label, value }: any) {
       sx={{
         width: "200px",
         height: "100px",
-
         borderRadius: 3,
         border: "1px solid #e5e7eb",
         boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-
         transition: "all 0.2s ease",
-
         "&:hover": {
           boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           transform: "translateY(-2px)",

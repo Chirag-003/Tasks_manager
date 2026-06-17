@@ -16,8 +16,8 @@ export default function Sidebar() {
   return (
     <Box
       sx={{
-        width: 140,
-        minWidth: 140,
+        width: 180,
+        minWidth: 180,
         height: "100%",
         borderRight: "1px solid #e5e7eb",
         px: 2,

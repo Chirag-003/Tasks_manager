@@ -10,9 +10,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{
+        height: "100%", // ✅ use 100% instead of 100vh
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* HEADER */}
       <Header />
 
+      {/* MAIN LAYOUT */}
       <Box
         sx={{
           display: "flex",
@@ -20,13 +28,14 @@ export default function DashboardLayout({
           overflow: "hidden",
         }}
       >
+        {/* SIDEBAR */}
         <Sidebar />
 
+        {/* CONTENT */}
         <Box
           sx={{
             flex: 1,
-            overflowY: "hidden",
-            p: 2,
+            overflowY: "auto", // ✅ allows scrolling (important fix)
           }}
         >
           {children}

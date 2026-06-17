@@ -148,9 +148,10 @@ export default function TasksPage() {
 
       <Box
         sx={{
-          height: "95%",
-          px: 3,
-          py: 1.5,
+          height: "100%",
+          px: 1.5,
+          py: 0.5,
+          paddingTop: 1.5,
           backgroundColor: "#f8fafc",
           display: "flex",
           flexDirection: "column",
