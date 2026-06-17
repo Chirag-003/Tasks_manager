@@ -31,6 +31,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useGetUsersQuery } from "@/services/api";
 
+import InputField from "./InputField";
+
 // ✅ TYPES
 type Props = {
   open: boolean;
@@ -182,111 +184,53 @@ export default function CreateTaskDialog({
         <DialogContent sx={{ mt: 2 }}>
           <Box display="flex" flexDirection="column" gap={2.5}>
             {/* ✅ TITLE */}
-            <Controller
+            <InputField
               name="title"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Title"
-                  size="small"
-                  fullWidth
-                  required // ✅✅ FIX 3: red star
-                  error={!!errors.title || !!titleError}
-                  helperText={errors.title?.message || titleError}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setTitleError(""); // ✅ instant clear
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <TitleIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
-                />
-              )}
+              label="Title"
+              required
+              errors={errors}
+              extraError={titleError}
+              onChangeExtra={() => setTitleError("")}
+              icon={<TitleIcon fontSize="small" />}
             />
-
             {/* ✅ DESCRIPTION */}
-            <Controller
+            <InputField
               name="description"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Description"
-                  size="small"
-                  fullWidth
-                  multiline
-                  minRows={3}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <DescriptionIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
-                />
-              )}
+              label="Description"
+              type="textarea"
+              rows={3}
+              errors={errors}
+              icon={<DescriptionIcon fontSize="small" />}
             />
 
-            {/* ✅ STATUS + SPRINT */}
             <Box display="flex" gap={2}>
-              <Controller
+              <InputField
                 name="status"
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    select
-                    {...field}
-                    label="Status"
-                    size="small"
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <FlagIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
-                  >
-                    <MenuItem value="backlog">Backlog</MenuItem>
-                    <MenuItem value="todo">Todo</MenuItem>
-                    <MenuItem value="in progress">In Progress</MenuItem>
-                    <MenuItem value="in review">In Review</MenuItem>
-                    <MenuItem value="qa">QA</MenuItem>
-                    <MenuItem value="completed">Completed</MenuItem>
-                  </TextField>
-                )}
+                label="Status"
+                type="select"
+                errors={errors}
+                icon={<FlagIcon fontSize="small" />}
+                options={[
+                  { label: "Backlog", value: "backlog" },
+                  { label: "Todo", value: "todo" },
+                  { label: "In Progress", value: "in progress" },
+                  { label: "In Review", value: "in review" },
+                  { label: "QA", value: "qa" },
+                  { label: "Completed", value: "completed" },
+                ]}
               />
 
-              <Controller
+              <InputField
                 name="sprint"
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Sprint"
-                    size="small"
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <TimelineIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
-                  />
-                )}
+                label="Sprint"
+                errors={errors}
+                icon={<TimelineIcon fontSize="small" />}
               />
             </Box>
-
             {/* ✅ USERS */}
             <Controller
               name="users"

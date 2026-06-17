@@ -28,6 +28,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useGetUsersQuery } from "@/services/api";
 
+import InputField from "./InputField";
+
 // ✅ SCHEMA
 const subtaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -134,61 +136,33 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         <DialogContent sx={{ mt: 2 }}>
           <Box display="flex" flexDirection="column" gap={2.5}>
             {/* ✅ TITLE */}
-            <Controller
+            <InputField
               name="title"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Title"
-                  size="small"
-                  fullWidth
-                  error={!!errors.title || !!titleError}
-                  helperText={errors.title?.message || titleError}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setTitleError("");
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <TitleIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
-                />
-              )}
+              label="Title"
+              errors={errors}
+              extraError={titleError}
+              onChangeExtra={() => setTitleError("")}
+              icon={<TitleIcon fontSize="small" />}
             />
 
             {/* ✅ STATUS */}
-            <Controller
+
+            <InputField
               name="status"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  select
-                  {...field}
-                  label="Status"
-                  size="small"
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <FlagIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ backgroundColor: "#f9fafb", borderRadius: 2 }}
-                >
-                  <MenuItem value="backlog">Backlog</MenuItem>
-                  <MenuItem value="todo">Todo</MenuItem>
-                  <MenuItem value="in progress">In Progress</MenuItem>
-                  <MenuItem value="in review">In Review</MenuItem>
-                  <MenuItem value="qa">QA</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                </TextField>
-              )}
+              label="Status"
+              type="select"
+              errors={errors}
+              icon={<FlagIcon fontSize="small" />}
+              options={[
+                { label: "Backlog", value: "backlog" },
+                { label: "Todo", value: "todo" },
+                { label: "In Progress", value: "in progress" },
+                { label: "In Review", value: "in review" },
+                { label: "QA", value: "qa" },
+                { label: "Completed", value: "completed" },
+              ]}
             />
 
             {/* ✅ USERS (SAME METHOD AS TASK) */}
