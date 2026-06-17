@@ -148,6 +148,79 @@ export default function CreateTaskDialog({
     }
   };
 
+  const taskFormConfig = [
+    {
+      name: "title",
+      label: "Title",
+      type: "text",
+      required: true,
+      icon: <TitleIcon fontSize="small" />,
+      extraError: titleError,
+      onChangeExtra: () => setTitleError(""),
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "textarea",
+      rows: 3,
+      icon: <DescriptionIcon fontSize="small" />,
+    },
+
+    // ✅ grouped fields (very important)
+    {
+      type: "group",
+      fields: [
+        {
+          name: "status",
+          label: "Status",
+          type: "select",
+          icon: <FlagIcon fontSize="small" />,
+          options: [
+            { label: "Backlog", value: "backlog" },
+            { label: "Todo", value: "todo" },
+            { label: "In Progress", value: "in progress" },
+            { label: "In Review", value: "in review" },
+            { label: "QA", value: "qa" },
+            { label: "Completed", value: "completed" },
+          ],
+        },
+        {
+          name: "sprint",
+          label: "Sprint",
+          type: "text",
+          icon: <TimelineIcon fontSize="small" />,
+        },
+      ],
+    },
+  ];
+
+  const renderField = (field: any) => {
+    if (field.type === "group") {
+      return (
+        <Box key={field.name || Math.random()} display="flex" gap={2}>
+          {field.fields.map((subField: any) => renderField(subField))}
+        </Box>
+      );
+    }
+
+    return (
+      <InputField
+        key={field.name}
+        name={field.name}
+        control={control}
+        label={field.label}
+        type={field.type}
+        options={field.options}
+        required={field.required}
+        rows={field.rows}
+        icon={field.icon}
+        errors={errors}
+        extraError={field.extraError}
+        onChangeExtra={field.onChangeExtra}
+      />
+    );
+  };
+
   return (
     <>
       <Dialog
@@ -184,53 +257,7 @@ export default function CreateTaskDialog({
         <DialogContent sx={{ mt: 2 }}>
           <Box display="flex" flexDirection="column" gap={2.5}>
             {/* ✅ TITLE */}
-            <InputField
-              name="title"
-              control={control}
-              label="Title"
-              required
-              errors={errors}
-              extraError={titleError}
-              onChangeExtra={() => setTitleError("")}
-              icon={<TitleIcon fontSize="small" />}
-            />
-            {/* ✅ DESCRIPTION */}
-            <InputField
-              name="description"
-              control={control}
-              label="Description"
-              type="textarea"
-              rows={3}
-              errors={errors}
-              icon={<DescriptionIcon fontSize="small" />}
-            />
-
-            <Box display="flex" gap={2}>
-              <InputField
-                name="status"
-                control={control}
-                label="Status"
-                type="select"
-                errors={errors}
-                icon={<FlagIcon fontSize="small" />}
-                options={[
-                  { label: "Backlog", value: "backlog" },
-                  { label: "Todo", value: "todo" },
-                  { label: "In Progress", value: "in progress" },
-                  { label: "In Review", value: "in review" },
-                  { label: "QA", value: "qa" },
-                  { label: "Completed", value: "completed" },
-                ]}
-              />
-
-              <InputField
-                name="sprint"
-                control={control}
-                label="Sprint"
-                errors={errors}
-                icon={<TimelineIcon fontSize="small" />}
-              />
-            </Box>
+            {taskFormConfig.map(renderField)}
             {/* ✅ USERS */}
 
             <UserField name="users" control={control} />

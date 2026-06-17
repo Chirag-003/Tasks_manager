@@ -107,6 +107,50 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
     }
   };
 
+  const subtaskFormConfig = [
+    {
+      name: "title",
+      label: "Title",
+      type: "text",
+      required: true,
+      icon: <TitleIcon fontSize="small" />,
+      extraError: titleError,
+      onChangeExtra: () => setTitleError(""),
+    },
+    {
+      name: "status",
+      label: "Status",
+      type: "select",
+      icon: <FlagIcon fontSize="small" />,
+      options: [
+        { label: "Backlog", value: "backlog" },
+        { label: "Todo", value: "todo" },
+        { label: "In Progress", value: "in progress" },
+        { label: "In Review", value: "in review" },
+        { label: "QA", value: "qa" },
+        { label: "Completed", value: "completed" },
+      ],
+    },
+  ];
+
+  const renderField = (field: any) => {
+    return (
+      <InputField
+        key={field.name}
+        name={field.name}
+        control={control}
+        label={field.label}
+        type={field.type}
+        options={field.options}
+        required={field.required}
+        icon={field.icon}
+        errors={errors}
+        extraError={field.extraError}
+        onChangeExtra={field.onChangeExtra}
+      />
+    );
+  };
+
   return (
     <>
       <Dialog
@@ -136,34 +180,7 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         <DialogContent sx={{ mt: 2 }}>
           <Box display="flex" flexDirection="column" gap={2.5}>
             {/* ✅ TITLE */}
-            <InputField
-              name="title"
-              control={control}
-              label="Title"
-              errors={errors}
-              extraError={titleError}
-              onChangeExtra={() => setTitleError("")}
-              icon={<TitleIcon fontSize="small" />}
-            />
-
-            {/* ✅ STATUS */}
-
-            <InputField
-              name="status"
-              control={control}
-              label="Status"
-              type="select"
-              errors={errors}
-              icon={<FlagIcon fontSize="small" />}
-              options={[
-                { label: "Backlog", value: "backlog" },
-                { label: "Todo", value: "todo" },
-                { label: "In Progress", value: "in progress" },
-                { label: "In Review", value: "in review" },
-                { label: "QA", value: "qa" },
-                { label: "Completed", value: "completed" },
-              ]}
-            />
+            {subtaskFormConfig.map(renderField)}
 
             {/* ✅ USERS (SAME METHOD AS TASK) */}
             <UserField name="users" control={control} />
