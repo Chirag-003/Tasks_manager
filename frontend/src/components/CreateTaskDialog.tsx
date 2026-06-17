@@ -23,7 +23,6 @@ import TitleIcon from "@mui/icons-material/Title";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FlagIcon from "@mui/icons-material/Flag";
 import TimelineIcon from "@mui/icons-material/Timeline";
-import GroupIcon from "@mui/icons-material/Group";
 
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -32,6 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetUsersQuery } from "@/services/api";
 
 import InputField from "./InputField";
+import UserField from "./UserField";
 
 // ✅ TYPES
 type Props = {
@@ -232,70 +232,8 @@ export default function CreateTaskDialog({
               />
             </Box>
             {/* ✅ USERS */}
-            <Controller
-              name="users"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  select
-                  label="Users"
-                  fullWidth
-                  size="small"
-                  value={field.value || []}
-                  onChange={field.onChange}
-                  SelectProps={{
-                    multiple: true,
-                    MenuProps: {
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 260,
-                          mt: 1,
-                          borderRadius: 2,
-                          p: 1,
-                        },
-                      },
-                      MenuListProps: {
-                        sx: {
-                          display: "grid",
-                          gridTemplateColumns: "1fr 1fr",
-                          gap: 1,
-                        },
-                      },
-                    },
-                    renderValue: (selected) =>
-                      (selected as number[]).map(getUserNameById).join(", "),
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <GroupIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    backgroundColor: "#f9fafb",
-                    borderRadius: 2,
-                  }}
-                >
-                  {users.map((user: any) => (
-                    <MenuItem
-                      key={user.id}
-                      value={user.id}
-                      sx={{
-                        borderRadius: 2,
-                        textAlign: "center",
-                        fontSize: 13,
-                        "&:hover": {
-                          backgroundColor: "#f3f4f6",
-                        },
-                      }}
-                    >
-                      {user.username}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
+
+            <UserField name="users" control={control} />
           </Box>
         </DialogContent>
 
