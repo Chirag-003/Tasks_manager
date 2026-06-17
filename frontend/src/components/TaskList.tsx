@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import TaskCard from "./TaskCard";
 import { useGetTasksQuery } from "@/services/api";
 import { useState, useEffect } from "react";
+import UILoader from "./Loader";
 
 type TaskListProps = {
   tasks: any[];
@@ -279,7 +280,7 @@ export default function TaskList({
             {/* CONTENT */}
             <Box sx={{ px: 1, pt: 2, pb: 2 }}>
               {isLoading ? (
-                <Box>Loading...</Box>
+                <UILoader type="kanbanColumn" />
               ) : colTasks.length === 0 ? (
                 <Box>No tasks</Box>
               ) : (

@@ -3,7 +3,7 @@
 import { Box, Typography, Skeleton } from "@mui/material";
 
 type Props = {
-  type?: "full" | "task" | "subtask" | "detail" | "taskFlat";
+  type?: "full" | "task" | "subtask" | "detail" | "taskFlat" | "kanbanColumn";
   text?: string;
 };
 
@@ -161,6 +161,29 @@ export default function UILoader({
             <Skeleton height={20} width="70%" />
             <Skeleton height={15} width="90%" />
             <Skeleton height={15} width="60%" sx={{ mt: 1 }} />
+            <Skeleton height={30} sx={{ mt: 2 }} />
+          </Box>
+        ))}
+      </Box>
+    );
+  }
+  // ✅ KANBAN COLUMN SKELETON
+  if (type === "kanbanColumn") {
+    return (
+      <Box sx={{ px: 1 }}>
+        {[0, 1, 2].map((i) => (
+          <Box
+            key={i}
+            sx={{
+              p: 2,
+              mb: 1.5,
+              borderRadius: 2,
+              bgcolor: "#fff",
+            }}
+          >
+            <Skeleton height={18} width="70%" />
+            <Skeleton height={14} width="90%" />
+            <Skeleton height={14} width="60%" sx={{ mt: 1 }} />
             <Skeleton height={30} sx={{ mt: 2 }} />
           </Box>
         ))}
