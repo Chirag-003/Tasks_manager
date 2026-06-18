@@ -94,11 +94,9 @@ export default function TaskList({
 
   const mergeUnique = (oldList: any[], newList: any[]) => {
     const map = new Map();
-
     [...oldList, ...newList].forEach((item) => {
       map.set(item.id, item);
     });
-
     return Array.from(map.values());
   };
 
@@ -168,18 +166,20 @@ export default function TaskList({
           flexWrap: "wrap",
           gap: 2,
           alignContent: "flex-start",
-          "&::-webkit-scrollbar": { width: "8px" },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#e2e8f0",
-            borderRadius: "10px",
-          },
-          "&:hover::-webkit-scrollbar-thumb": {
-            backgroundColor: "#cbd5e1",
-          },
         }}
       >
         {tasks.map((task: any) => (
-          <Box key={task.id} sx={{ width: 280 }}>
+          <Box
+            key={task.id}
+            sx={{
+              width: {
+                xs: "100%",
+                sm: "280px",
+              },
+              flexGrow: 0,
+              flexShrink: 0,
+            }}
+          >
             <TaskCard task={task} onClick={() => onTaskClick(task)} />
           </Box>
         ))}
@@ -189,6 +189,7 @@ export default function TaskList({
 
   return (
     <Box
+      className="kanban-container"
       sx={{
         display: "flex",
         gap: 2,
@@ -213,13 +214,9 @@ export default function TaskList({
 
         return (
           <Box
+            className="kanban-column"
             key={col.key}
             sx={{
-              minWidth: 270,
-              flexShrink: 0,
-              height: "calc(100% - 8px)",
-              overflowY: "auto",
-              overflowX: "hidden",
               backgroundColor: "#f1f5f9",
               borderRadius: 3,
               border: "1px solid #e2e8f0",
@@ -244,31 +241,22 @@ export default function TaskList({
                 borderBottom: "1px solid #e2e8f0",
               }}
             >
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                {/* LEFT */}
+              <Box display="flex" justifyContent="space-between">
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography sx={{ fontWeight: 600, fontSize: "13.5px" }}>
                     {col.title}
                   </Typography>
-
                   <Box sx={{ fontSize: "11px", px: 1.2, py: 0.3 }}>
                     {colTasks.length}
                   </Box>
                 </Box>
 
-                {/* RIGHT (+ button) */}
                 <Box
                   sx={{
                     cursor: "pointer",
                     px: 0.5,
                     borderRadius: 1,
-                    "&:hover": {
-                      backgroundColor: "#e2e8f0",
-                    },
+                    "&:hover": { backgroundColor: "#e2e8f0" },
                   }}
                   onClick={() => onAddTask?.(col.key)}
                 >
@@ -284,14 +272,16 @@ export default function TaskList({
               ) : colTasks.length === 0 ? (
                 <Box>No tasks</Box>
               ) : (
-                colTasks.map((task: any) => (
-                  <Box key={task.id} sx={{ mb: 1 }}>
-                    <TaskCard task={task} onClick={() => onTaskClick(task)} />
-                  </Box>
-                ))
+                <Box className="kanban-tasks">
+                  {colTasks.map((task: any) => (
+                    <Box key={task.id} className="kanban-task-card">
+                      <TaskCard task={task} onClick={() => onTaskClick(task)} />
+                    </Box>
+                  ))}
+                </Box>
               )}
 
-              {/* SHOW MORE */}
+              {/* ✅ SHOW MORE (RESTORED EXACTLY) */}
               {colTasks.length < totalCount && !isLoading && (
                 <Box
                   sx={{

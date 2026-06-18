@@ -4,20 +4,35 @@ import { Box, Typography } from "@mui/material";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import TaskIcon from "@mui/icons-material/Assignment";
+import PeopleIcon from "@mui/icons-material/People";
+
 export default function Sidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Tasks", href: "/dashboard/tasks" },
-    { label: "Users", href: "/dashboard/users" },
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <DashboardIcon fontSize="small" />,
+    },
+    {
+      label: "Tasks",
+      href: "/dashboard/tasks",
+      icon: <TaskIcon fontSize="small" />,
+    },
+    {
+      label: "Users",
+      href: "/dashboard/users",
+      icon: <PeopleIcon fontSize="small" />,
+    },
   ];
 
   return (
     <Box
+      className="sidebar"
       sx={{
-        width: 180,
-        minWidth: 180,
         height: "100%",
         borderRight: "1px solid #e5e7eb",
         px: 2,
@@ -26,6 +41,7 @@ export default function Sidebar() {
       }}
     >
       <Typography
+        className="sidebar-title"
         variant="h6"
         sx={{
           mb: 4,
@@ -52,6 +68,7 @@ export default function Sidebar() {
               style={{ textDecoration: "none" }}
             >
               <Box
+                className="sidebar-item"
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -92,8 +109,16 @@ export default function Sidebar() {
                     }}
                   />
                 )}
-
-                {item.label}
+                <Box
+                  className="sidebar-item-icon"
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {item.icon}
+                </Box>
+                <Box className="sidebar-item-text">{item.label}</Box>
               </Box>
             </Link>
           );

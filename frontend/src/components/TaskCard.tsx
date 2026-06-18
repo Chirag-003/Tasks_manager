@@ -71,7 +71,8 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
         sx={{
           mb: 1.5,
           borderRadius: 2.5,
-          width: "280px",
+          width: "100%",
+          height: "100%",
 
           backgroundColor: "#ffffff",
           border: "1px solid #e5e7eb",

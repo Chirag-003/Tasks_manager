@@ -3,6 +3,7 @@
 import { Box } from "@mui/material";
 import Header from "@/components/Header";
 import Sidebar from "@/components/SideBar";
+import BottomNav from "@/components/BottomNav";
 
 export default function DashboardLayout({
   children,
@@ -12,7 +13,7 @@ export default function DashboardLayout({
   return (
     <Box
       sx={{
-        height: "100%", // ✅ use 100% instead of 100vh
+        height: "100%",
         display: "flex",
         flexDirection: "column",
       }}
@@ -20,27 +21,25 @@ export default function DashboardLayout({
       {/* HEADER */}
       <Header />
 
-      {/* MAIN LAYOUT */}
-      <Box
-        sx={{
-          display: "flex",
-          flex: 1,
-          overflow: "hidden",
-        }}
-      >
+      {/* MAIN */}
+      <Box className="dashboard-main">
         {/* SIDEBAR */}
         <Sidebar />
 
         {/* CONTENT */}
         <Box
+          className="dashboard-content"
           sx={{
             flex: 1,
-            overflowY: "auto", // ✅ allows scrolling (important fix)
+            overflowY: "auto",
           }}
         >
           {children}
         </Box>
       </Box>
+
+      {/* ✅ MOBILE NAV */}
+      <BottomNav />
     </Box>
   );
 }

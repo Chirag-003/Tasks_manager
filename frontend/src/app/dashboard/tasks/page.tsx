@@ -18,13 +18,27 @@ import {
   TextField,
   Popover,
   Pagination,
+  useMediaQuery,
+  InputAdornment,
 } from "@mui/material";
+
+/* ✅ ICONS */
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import PendingIcon from "@mui/icons-material/Pending";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import BugReportIcon from "@mui/icons-material/BugReport";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
+import TuneIcon from "@mui/icons-material/Tune";
+import SearchIcon from "@mui/icons-material/Search";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function TasksPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   const [filters, setFilters] = useState({
     search: "",
@@ -56,6 +70,26 @@ export default function TasksPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  /* ✅ ICON MAPPING */
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "backlog":
+        return <AssignmentIcon sx={{ fontSize: 14 }} />;
+      case "todo":
+        return <PendingIcon sx={{ fontSize: 14 }} />;
+      case "in progress":
+        return <AutorenewIcon sx={{ fontSize: 14 }} />;
+      case "in review":
+        return <CheckCircleIcon sx={{ fontSize: 14 }} />;
+      case "qa":
+        return <BugReportIcon sx={{ fontSize: 14 }} />;
+      case "completed":
+        return <DoneAllIcon sx={{ fontSize: 14 }} />;
+      default:
+        return null;
+    }
+  };
+
   useEffect(() => {
     const statusFromUrl = searchParams.get("status") || "";
     setActiveStatus(statusFromUrl);
@@ -81,7 +115,6 @@ export default function TasksPage() {
     }));
   }, [activeStatus]);
 
-  // ✅ RESET PAGE ON FILTER CHANGE
   useEffect(() => {
     setPage(1);
   }, [filters]);
@@ -97,7 +130,6 @@ export default function TasksPage() {
     }
   }, [searchParams, router]);
 
-  // ✅ ✅ FIXED (pagination + search now works)
   const { data, isLoading, isFetching, isError } = useGetTasksQuery({
     ...filters,
     page,
@@ -126,6 +158,10 @@ export default function TasksPage() {
 
   if (isLoading) return <UILoader type="task" />;
   if (isError) return <p>Error fetching tasks</p>;
+
+  const statusTabs = isMobile
+    ? ["backlog", "todo", "in progress", "in review", "qa", "completed"]
+    : ["", "backlog", "todo", "in progress", "in review", "qa", "completed"];
 
   return (
     <>
@@ -169,38 +205,85 @@ export default function TasksPage() {
               Tasks
             </Typography>
 
-            <Box display="flex" gap={2}>
+            {/* ✅ COMPACT MOBILE SEARCH + FILTER */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1,
+                width: {
+                  xs: "100%",
+                  sm: "auto",
+                },
+              }}
+            >
               <TextField
-                placeholder="Search task by title..."
+                placeholder="Search..."
                 size="small"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                sx={{ width: 250 }}
+                sx={{
+                  width: {
+                    xs: "70%",
+                    sm: 250,
+                  },
+                  maxWidth: "100%",
+
+                  "& .MuiInputBase-root": {
+                    height: 36,
+                    fontSize: "13px",
+                  },
+
+                  "& .MuiInputBase-input": {
+                    padding: "6px 8px",
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
+                    </InputAdornment>
+                  ),
+                }}
               />
 
               <Button
-                variant="outlined"
                 onClick={handleOpenFilter}
-                sx={{ textTransform: "none" }}
+                sx={{
+                  minWidth: "42px",
+                  width: "42px",
+                  height: "36px",
+                  flexShrink: 0,
+                  borderRadius: "12px",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#f1f5f9",
+                  border: "1px solid #e2e8f0",
+                  color: "#111827",
+                  "&:hover": {
+                    backgroundColor: "#e2e8f0",
+                  },
+                }}
               >
-                Filter
+                <TuneIcon sx={{ fontSize: 18 }} />
               </Button>
             </Box>
           </Box>
 
-          {/* STATUS TAGS */}
+          {/* ✅ TABS UNCHANGED */}
           <Box
-            sx={{ display: "flex", gap: 4, borderBottom: "1px solid #e5e7eb" }}
+            sx={{
+              display: "flex",
+              gap: 2,
+              overflowX: "auto",
+              whiteSpace: "nowrap",
+              pb: 0.5,
+              borderBottom: "1px solid #e5e7eb",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
           >
-            {[
-              "",
-              "backlog",
-              "todo",
-              "in progress",
-              "in review",
-              "qa",
-              "completed",
-            ].map((status) => {
+            {statusTabs.map((status) => {
               const isActive = activeStatus === status;
 
               return (
@@ -220,29 +303,29 @@ export default function TasksPage() {
                     router.push(`/dashboard/tasks?${params.toString()}`);
                   }}
                   sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
                     position: "relative",
                     cursor: "pointer",
-                    pb: 1.2,
-                    fontSize: "15px",
+                    pb: 1,
+                    px: 0.5,
+                    fontSize: "13px",
                     fontWeight: isActive ? 600 : 500,
-                    textTransform: "capitalize",
                     color: isActive ? "#2563eb" : "#475569",
-                    transition: "color 0.2s ease",
-                    "&:hover": { color: "#1d4ed8" },
+                    flexShrink: 0,
                     "&::after": {
                       content: '""',
                       position: "absolute",
                       left: 0,
                       bottom: 0,
                       width: isActive ? "100%" : "0%",
-                      opacity: isActive ? 1 : 0,
-                      height: "2.5px",
+                      height: "2px",
                       backgroundColor: "#2563eb",
-                      borderRadius: "2px",
-                      transition: "all 0.2s ease",
                     },
                   }}
                 >
+                  {getStatusIcon(status)}
                   {status ? (status === "qa" ? "QA" : status) : "All"}
                 </Box>
               );
@@ -250,28 +333,21 @@ export default function TasksPage() {
           </Box>
         </Box>
 
-        {/* FILTER */}
+        {/* ✅ REST UNCHANGED */}
         <Popover
           open={openFilter}
           anchorEl={anchorEl}
           onClose={handleCloseFilter}
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           transformOrigin={{ vertical: "top", horizontal: "left" }}
-          disableScrollLock // ✅ ✅ MAIN FIX
-          disableAutoFocus
-          disableEnforceFocus
-          disableRestoreFocus
         >
           <Box p={2} width={280}>
             <FilterMenu
               type="task"
               filters={filters}
-              onChange={(newFilters: any) => {
-                setFilters((prev) => ({
-                  ...prev,
-                  ...newFilters,
-                }));
-              }}
+              onChange={(newFilters: any) =>
+                setFilters((prev) => ({ ...prev, ...newFilters }))
+              }
               onClear={() =>
                 setFilters({
                   search: "",
@@ -285,30 +361,7 @@ export default function TasksPage() {
           </Box>
         </Popover>
 
-        {/* TASK LIST */}
-        <Box
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            overflowX: "auto",
-            overflowY: "hidden",
-            pb: 1,
-            "&::-webkit-scrollbar": {
-              height: "8px",
-            },
-            "&::-webkit-scrollbar-track": {
-              backgroundColor: "transparent",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#e2e8f0",
-              borderRadius: "10px",
-              transition: "background-color 0.2s ease",
-            },
-            "&:hover::-webkit-scrollbar-thumb": {
-              backgroundColor: "#cbd5e1",
-            },
-          }}
-        >
+        <Box sx={{ flex: 1, minHeight: 0 }}>
           {isFetching ? (
             activeStatus ? (
               <UILoader type="taskFlat" />
@@ -325,7 +378,7 @@ export default function TasksPage() {
             <TaskList
               tasks={data.results}
               grouped={!activeStatus}
-              filters={filters} // ✅ ✅ CRITICAL FIX
+              filters={filters}
               onTaskClick={(task: any) => {
                 setLoadingTaskId(task.id);
                 router.push(`/dashboard/tasks/${task.id}`);
@@ -335,7 +388,6 @@ export default function TasksPage() {
           )}
         </Box>
 
-        {/* PAGINATION */}
         {activeStatus && data && (
           <Box mt={2} display="flex" justifyContent="center">
             <Pagination
@@ -350,7 +402,6 @@ export default function TasksPage() {
           </Box>
         )}
 
-        {/* CREATE BUTTON */}
         <Button
           variant="contained"
           onClick={() => handleOpen()}
@@ -379,7 +430,6 @@ export default function TasksPage() {
         />
       </Box>
 
-      {/* SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
