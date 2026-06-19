@@ -78,7 +78,6 @@ export default function CreateTaskDialog({
   const [userError, setUserError] = useState("");
   const [titleError, setTitleError] = useState("");
 
-  // ✅✅ FIX 1: Proper reset when dialog opens
   useEffect(() => {
     if (open) {
       reset({
@@ -94,7 +93,6 @@ export default function CreateTaskDialog({
     }
   }, [open, defaultStatus, reset]);
 
-  // ✅✅ FIX 2: auto clear error after 3s
   useEffect(() => {
     if (!titleError) return;
 
@@ -256,10 +254,7 @@ export default function CreateTaskDialog({
 
         <DialogContent sx={{ mt: 2 }}>
           <Box display="flex" flexDirection="column" gap={2.5}>
-            {/* ✅ TITLE */}
             {taskFormConfig.map(renderField)}
-            {/* ✅ USERS */}
-
             <UserField name="users" control={control} />
           </Box>
         </DialogContent>

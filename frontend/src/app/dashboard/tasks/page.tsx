@@ -40,6 +40,8 @@ export default function TasksPage() {
 
   const isMobile = useMediaQuery("(max-width:768px)");
 
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
   const [filters, setFilters] = useState({
     search: "",
     status: "",
@@ -70,7 +72,6 @@ export default function TasksPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  /* ✅ ICON MAPPING */
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "backlog":
@@ -193,7 +194,7 @@ export default function TasksPage() {
           flexDirection: "column",
         }}
       >
-        {/* HEADER */}
+        {/* ✅ HEADER */}
         <Box mb={2}>
           <Box
             display="flex"
@@ -201,77 +202,106 @@ export default function TasksPage() {
             alignItems="center"
             mb={1.5}
           >
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Tasks
-            </Typography>
+            {isMobile ? (
+              showMobileSearch ? (
+                <Box display="flex" alignItems="center" gap={1} width="100%">
+                  <TextField
+                    autoFocus
+                    fullWidth
+                    placeholder="Search task by title..."
+                    size="small"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    variant="standard"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <Button onClick={() => setShowMobileSearch(false)}>✕</Button>
 
-            {/* ✅ COMPACT MOBILE SEARCH + FILTER */}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                width: {
-                  xs: "100%",
-                  sm: "auto",
-                },
-              }}
-            >
-              <TextField
-                placeholder="Search..."
-                size="small"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                sx={{
-                  width: {
-                    xs: "70%",
-                    sm: 250,
-                  },
-                  maxWidth: "100%",
+                  <Button onClick={handleOpenFilter}>
+                    <TuneIcon />
+                  </Button>
+                </Box>
+              ) : (
+                <>
+                  <Box>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 600,
+                        lineHeight: 1,
+                      }}
+                    >
+                      Tasks
+                    </Typography>
 
-                  "& .MuiInputBase-root": {
-                    height: 36,
-                    fontSize: "13px",
-                  },
+                    <Typography
+                      sx={{
+                        fontSize: "12px",
+                        color: "#64748b",
+                        mt: 0.2,
+                      }}
+                    >
+                      Manage and track your work
+                    </Typography>
+                  </Box>
 
-                  "& .MuiInputBase-input": {
-                    padding: "6px 8px",
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+                  <Box display="flex" gap={1}>
+                    <Button onClick={() => setShowMobileSearch(true)}>
+                      <SearchIcon
+                        sx={{
+                          color: showMobileSearch ? "#2563eb" : "#111827",
+                        }}
+                      />
+                    </Button>
 
-              <Button
-                onClick={handleOpenFilter}
-                sx={{
-                  minWidth: "42px",
-                  width: "42px",
-                  height: "36px",
-                  flexShrink: 0,
-                  borderRadius: "12px",
-                  padding: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#f1f5f9",
-                  border: "1px solid #e2e8f0",
-                  color: "#111827",
-                  "&:hover": {
-                    backgroundColor: "#e2e8f0",
-                  },
-                }}
-              >
-                <TuneIcon sx={{ fontSize: 18 }} />
-              </Button>
-            </Box>
+                    <Button onClick={handleOpenFilter}>
+                      <TuneIcon
+                        sx={{
+                          color: openFilter ? "#2563eb" : "#111827",
+                        }}
+                      />
+                    </Button>
+                  </Box>
+                </>
+              )
+            ) : (
+              <>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  Tasks
+                </Typography>
+
+                <Box display="flex" alignItems="center" gap={1.5}>
+                  <TextField
+                    placeholder="Search task by title..."
+                    size="small"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    sx={{ width: 240 }}
+                    variant="standard"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <Button onClick={handleOpenFilter}>
+                    <TuneIcon />
+                  </Button>
+                </Box>
+              </>
+            )}
           </Box>
 
-          {/* ✅ TABS UNCHANGED */}
+          {/* ✅ TABS */}
           <Box
             sx={{
               display: "flex",
@@ -294,11 +324,8 @@ export default function TasksPage() {
 
                     const params = new URLSearchParams(searchParams.toString());
 
-                    if (status) {
-                      params.set("status", status);
-                    } else {
-                      params.delete("status");
-                    }
+                    if (status) params.set("status", status);
+                    else params.delete("status");
 
                     router.push(`/dashboard/tasks?${params.toString()}`);
                   }}
@@ -333,7 +360,7 @@ export default function TasksPage() {
           </Box>
         </Box>
 
-        {/* ✅ REST UNCHANGED */}
+        {/* ✅ POPOVER */}
         <Popover
           open={openFilter}
           anchorEl={anchorEl}
@@ -361,7 +388,8 @@ export default function TasksPage() {
           </Box>
         </Popover>
 
-        <Box sx={{ flex: 1, minHeight: 0 }}>
+        {/* ✅ TASK LIST */}
+        <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
           {isFetching ? (
             activeStatus ? (
               <UILoader type="taskFlat" />
@@ -388,6 +416,7 @@ export default function TasksPage() {
           )}
         </Box>
 
+        {/* ✅ PAGINATION */}
         {activeStatus && data && (
           <Box mt={2} display="flex" justifyContent="center">
             <Pagination
@@ -402,6 +431,7 @@ export default function TasksPage() {
           </Box>
         )}
 
+        {/* ✅ BUTTON */}
         <Button
           variant="contained"
           onClick={() => handleOpen()}
@@ -417,6 +447,7 @@ export default function TasksPage() {
           Create Task
         </Button>
 
+        {/* ✅ DIALOG */}
         <CreateTaskDialog
           open={open}
           onClose={handleClose}
@@ -430,6 +461,7 @@ export default function TasksPage() {
         />
       </Box>
 
+      {/* ✅ SNACKBAR */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
