@@ -53,7 +53,10 @@ export default function TasksPage() {
   const [searchInput, setSearchInput] = useState("");
 
   const statusParam = searchParams.get("status") || "";
-  const [activeStatus, setActiveStatus] = useState(statusParam);
+
+  const [activeStatus, setActiveStatus] = useState(
+    statusParam || (isMobile ? "backlog" : ""),
+  );
 
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -90,11 +93,15 @@ export default function TasksPage() {
         return null;
     }
   };
-
   useEffect(() => {
-    const statusFromUrl = searchParams.get("status") || "";
-    setActiveStatus(statusFromUrl);
-  }, [searchParams]);
+    const statusFromUrl = searchParams.get("status");
+
+    if (statusFromUrl) {
+      setActiveStatus(statusFromUrl);
+    } else {
+      setActiveStatus(isMobile ? "backlog" : "");
+    }
+  }, [searchParams, isMobile]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -197,14 +204,25 @@ export default function TasksPage() {
         {/* ✅ HEADER */}
         <Box mb={2}>
           <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={1.5}
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1.5,
+              minHeight: "50px",
+            }}
           >
             {isMobile ? (
               showMobileSearch ? (
-                <Box display="flex" alignItems="center" gap={1} width="100%">
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    width: "100%",
+                    minHeight: "36px",
+                  }}
+                >
                   <TextField
                     autoFocus
                     fullWidth
