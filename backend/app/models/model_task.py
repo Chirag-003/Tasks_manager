@@ -13,7 +13,12 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False, unique=True)
     description = Column(Text, nullable=True)
-    status = Column(SQLEnum(StatusEnum), default=StatusEnum.backlog, nullable=False)
+    status = Column(
+        SQLEnum(StatusEnum, name="statusenum"),
+        default=StatusEnum.backlog,
+        nullable=False,
+    )
+
     sprint = Column(String, nullable=True)
 
     users = relationship(

@@ -14,7 +14,11 @@ class SubTask(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
-    status = Column(SQLEnum(StatusEnum), default=StatusEnum.backlog, nullable=False)
+    status = Column(
+        SQLEnum(StatusEnum, name="statusenum"),
+        default=StatusEnum.backlog,
+        nullable=False,
+    )
 
     task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
 
