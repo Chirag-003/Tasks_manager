@@ -1,35 +1,11 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
+from starlette import status
+
 
 from app.models.model_users import User
-
-
-def create_user(db: Session, user):
-
-    existing = db.query(User).filter(User.email == user.email).first()
-
-    if existing:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    db_user = User(**user.dict())
-
-    db.add(db_user)
-
-    try:
-        db.commit()
-
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Duplicate entry detected")
-
-    except Exception:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Error creating user")
-
-    db.refresh(db_user)
-
-    return db_user
+from app.core.security import hash_password
 
 
 def get_users(db: Session):

@@ -4,6 +4,7 @@ from app.api.task1 import router as task_router
 from app.api.subtasks import router as subtasks_router
 from app.api.comments import router as comments_router
 from app.api.users import router as users_router
+from app.api.auth import router as auth_router
 
 from app.models import model_task
 from app.models import model_subtasks
@@ -34,3 +35,5 @@ app.include_router(subtasks_router, prefix="/api")
 app.include_router(comments_router, prefix="/api")
 
 app.include_router(users_router, prefix="/api", tags=["Users"])
+
+app.include_router(auth_router, prefix="/api", tags=["Auth"])
