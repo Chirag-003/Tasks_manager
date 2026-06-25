@@ -9,6 +9,7 @@ from app.api.auth import router as auth_router
 from app.models import model_task
 from app.models import model_subtasks
 
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Task Management API", version="1.0.0")
