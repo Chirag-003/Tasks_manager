@@ -19,7 +19,7 @@ type InputFieldProps = {
 
   label: string;
 
-  type?: "text" | "textarea" | "select";
+  type?: "text" | "textarea" | "select" | "password";
   options?: Option[];
 
   icon?: React.ReactNode;
@@ -71,6 +71,7 @@ export default function InputField({
           select={type === "select"}
           multiline={type === "textarea"}
           minRows={type === "textarea" ? rows : undefined}
+          type={type === "select" || type === "textarea" ? undefined : type}
           error={!!errors?.[name] || !!extraError}
           helperText={errors?.[name]?.message || extraError}
           onChange={(e) => {

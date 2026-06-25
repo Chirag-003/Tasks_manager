@@ -1,0 +1,73 @@
+/* ✅ Page Container */
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(135deg, #eef2ff, #f8fafc);
+}
+
+
+/* ✅ Card */
+
+.card {
+  width: 380px;
+  padding: 36px;
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0px 10px 25px rgba(0, 0, 0, 0.08),
+    0px 20px 50px rgba(0, 0, 0, 0.12);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0px 20px 40px rgba(0, 0, 0, 0.12),
+    0px 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #111827;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 28px;
+}
+
+.formInner {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ✅ Form (optional wrapper) */
+.form {
+  width: 100%;
+}
+
+/* ✅ Button */
+
+.button {
+  margin-top: 10px;
+  border-radius: 12px;
+  text-transform: none;
+  font-weight: 600;
+  padding: 10px;
+}
+
+.button:hover {
+  opacity: 0.95;
+}

@@ -134,6 +134,23 @@ export const api = createApi({
       }),
       invalidatesTags: ["Subtasks"],
     }),
+
+    // ✅ LOGIN
+    loginUser: builder.mutation<any, { email: string; password: string }>({
+      query: (data) => ({
+        url: "/auth/login",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    // prettier-ignore
+    registerUser: builder.mutation<any,{ username: string; email: string; password: string }>({
+      query: (data) => ({
+        url: "/auth/register",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -152,4 +169,6 @@ export const {
   useUpdateSubtaskMutation,
   useDeleteSubtaskMutation,
   useGetSprintsQuery,
+  useLoginUserMutation,
+  useRegisterUserMutation,
 } = api;
