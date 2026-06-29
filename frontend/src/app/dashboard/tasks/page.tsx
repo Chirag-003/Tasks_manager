@@ -81,9 +81,9 @@ export default function TasksPage() {
         return <AssignmentIcon sx={{ fontSize: 14 }} />;
       case "todo":
         return <PendingIcon sx={{ fontSize: 14 }} />;
-      case "in progress":
+      case "in_progress":
         return <AutorenewIcon sx={{ fontSize: 14 }} />;
-      case "in review":
+      case "in_review":
         return <CheckCircleIcon sx={{ fontSize: 14 }} />;
       case "qa":
         return <BugReportIcon sx={{ fontSize: 14 }} />;
@@ -168,8 +168,8 @@ export default function TasksPage() {
   if (isError) return <p>Error fetching tasks</p>;
 
   const statusTabs = isMobile
-    ? ["backlog", "todo", "in progress", "in review", "qa", "completed"]
-    : ["", "backlog", "todo", "in progress", "in review", "qa", "completed"];
+    ? ["backlog", "todo", "in_progress", "in_review", "qa", "completed"]
+    : ["", "backlog", "todo", "in_progress", "in_review", "qa", "completed"];
 
   return (
     <>
@@ -371,7 +371,11 @@ export default function TasksPage() {
                   }}
                 >
                   {getStatusIcon(status)}
-                  {status ? (status === "qa" ? "QA" : status) : "All"}
+                  {status
+                    ? status === "qa"
+                      ? "QA"
+                      : status.replaceAll("_", " ")
+                    : "All"}
                 </Box>
               );
             })}

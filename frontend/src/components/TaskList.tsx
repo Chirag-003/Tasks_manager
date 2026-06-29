@@ -24,8 +24,8 @@ export default function TaskList({
   const columns = [
     { key: "backlog", title: "Backlog" },
     { key: "todo", title: "Todo" },
-    { key: "in progress", title: "In Progress" },
-    { key: "in review", title: "In Review" },
+    { key: "in_progress", title: "In Progress" },
+    { key: "in_review", title: "In Review" },
     { key: "qa", title: "QA" },
     { key: "completed", title: "Completed" },
   ];
@@ -33,8 +33,8 @@ export default function TaskList({
   const [columnPages, setColumnPages] = useState<Record<string, number>>({
     backlog: 1,
     todo: 1,
-    "in progress": 1,
-    "in review": 1,
+    in_progress: 1,
+    in_review: 1,
     qa: 1,
     completed: 1,
   });
@@ -43,8 +43,8 @@ export default function TaskList({
     {
       backlog: [],
       todo: [],
-      "in progress": [],
-      "in review": [],
+      in_progress: [],
+      in_review: [],
       qa: [],
       completed: [],
     },
@@ -66,15 +66,15 @@ export default function TaskList({
 
   const inProgressQuery = useGetTasksQuery({
     ...filters,
-    status: "in progress",
-    page: columnPages["in progress"],
+    status: "in_progress",
+    page: columnPages["in_progress"],
     page_size: 10,
   });
 
   const inReviewQuery = useGetTasksQuery({
     ...filters,
-    status: "in review",
-    page: columnPages["in review"],
+    status: "in_review",
+    page: columnPages["in_review"],
     page_size: 10,
   });
 
@@ -92,7 +92,7 @@ export default function TaskList({
     page_size: 10,
   });
 
-  const mergeUnique = (oldList: any[], newList: any[]) => {
+  const mergeUnique = (oldList: any[] = [], newList: any[] = []) => {
     const map = new Map();
     [...oldList, ...newList].forEach((item) => {
       map.set(item.id, item);
@@ -122,18 +122,15 @@ export default function TaskList({
           ? completedQuery.data?.results || []
           : mergeUnique(prev.completed, completedQuery.data?.results || []),
 
-      "in progress":
-        columnPages["in progress"] === 1
+      in_progress:
+        columnPages.in_progress === 1
           ? inProgressQuery.data?.results || []
-          : mergeUnique(
-              prev["in progress"],
-              inProgressQuery.data?.results || [],
-            ),
+          : mergeUnique(prev.in_progress, inProgressQuery.data?.results || []),
 
-      "in review":
-        columnPages["in review"] === 1
+      in_review:
+        columnPages.in_review === 1
           ? inReviewQuery.data?.results || []
-          : mergeUnique(prev["in review"], inReviewQuery.data?.results || []),
+          : mergeUnique(prev.in_review, inReviewQuery.data?.results || []),
     }));
   }, [
     backlogQuery.data,
@@ -149,8 +146,8 @@ export default function TaskList({
   const columnLoading: Record<string, boolean> = {
     backlog: backlogQuery.isLoading,
     todo: todoQuery.isLoading,
-    "in progress": inProgressQuery.isLoading,
-    "in review": inReviewQuery.isLoading,
+    in_progress: inProgressQuery.isLoading,
+    in_review: inReviewQuery.isLoading,
     qa: qaQuery.isLoading,
     completed: completedQuery.isLoading,
   };
@@ -204,8 +201,8 @@ export default function TaskList({
         const queryMap: any = {
           backlog: backlogQuery,
           todo: todoQuery,
-          "in progress": inProgressQuery,
-          "in review": inReviewQuery,
+          in_progress: inProgressQuery,
+          in_review: inReviewQuery,
           qa: qaQuery,
           completed: completedQuery,
         };
