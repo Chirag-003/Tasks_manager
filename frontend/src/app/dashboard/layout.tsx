@@ -4,12 +4,24 @@ import { Box } from "@mui/material";
 import Header from "@/components/Header";
 import Sidebar from "@/components/SideBar";
 import BottomNav from "@/components/BottomNav";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    }
+  }, [router]);
+
   return (
     <Box
       sx={{

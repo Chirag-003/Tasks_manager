@@ -33,7 +33,9 @@ type InputFieldProps = {
 
   onChangeExtra?: () => void;
 
-  textFieldProps?: TextFieldProps; // ✅ for extra customization
+  textFieldProps?: TextFieldProps;
+
+  rules?: any; // ✅ ADD THIS
 };
 
 export default function InputField({
@@ -56,11 +58,14 @@ export default function InputField({
   onChangeExtra,
 
   textFieldProps,
+
+  rules, // ✅ RECEIVE HERE
 }: InputFieldProps) {
   return (
     <Controller
       name={name}
       control={control}
+      rules={rules} // ✅ APPLY HERE
       render={({ field }) => (
         <TextField
           {...field}
@@ -92,7 +97,7 @@ export default function InputField({
             borderRadius: 2,
             ...textFieldProps?.sx,
           }}
-          {...textFieldProps} // ✅ allows overrides
+          {...textFieldProps}
         >
           {type === "select" &&
             options.map((opt) => (
