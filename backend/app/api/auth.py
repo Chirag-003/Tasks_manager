@@ -44,3 +44,8 @@ def login(user: LoginRequest, db: Session = Depends(get_db)):
         raise e
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/auth/logout")
+def logout():
+    return {"message": "Logged out successfully"}

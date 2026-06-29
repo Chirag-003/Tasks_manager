@@ -4,7 +4,13 @@ import styles from "./register.module.css";
 
 import InputField from "@/components/InputField";
 
-import { Box, Paper, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -25,6 +31,8 @@ export default function RegisterPage() {
 
   const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -32,6 +40,8 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterForm) => {
+    setLoading(true);
+
     try {
       const res = await fetch("http://127.0.0.1:8000/api/auth/register", {
         method: "POST",
@@ -42,6 +52,9 @@ export default function RegisterPage() {
       });
 
       const result = await res.json();
+
+      // ✅ artificial delay (important)
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
       if (!res.ok) {
         const errorMessage =
@@ -54,25 +67,29 @@ export default function RegisterPage() {
           message: errorMessage,
           severity: "error",
         });
+
+        setLoading(false);
         return;
       }
 
       setSnackbar({
         open: true,
-        message: "Account created successfully ✅",
+        message: "Account created successfully",
         severity: "success",
       });
 
       setTimeout(() => {
         router.push("/login");
       }, 1200);
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: "Something went wrong",
         severity: "error",
       });
     }
+
+    setLoading(false);
   };
 
   return (
@@ -145,15 +162,22 @@ export default function RegisterPage() {
                       },
                     }}
                   />
-
                   <Button
                     type="submit"
                     variant="contained"
                     fullWidth
                     disableElevation
+                    disabled={loading}
                     className={styles.button}
                   >
-                    Register
+                    {loading ? (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <CircularProgress size={16} sx={{ color: "white" }} />
+                        Creating...
+                      </Box>
+                    ) : (
+                      "Register"
+                    )}
                   </Button>
                 </Box>
               </form>

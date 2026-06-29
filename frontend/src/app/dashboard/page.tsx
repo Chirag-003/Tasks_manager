@@ -9,11 +9,38 @@ import {
 } from "@mui/material";
 import { useGetUsersQuery, useGetTasksQuery } from "@/services/api";
 
+import { useSearchParams, useRouter } from "next/navigation"; // ✅ added router
+import { useEffect, useState } from "react";
+import StatusSnackbar from "@/components/StatusSnackbar";
+
 export default function DashboardPage() {
   const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
   const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery({
     page_size: 2000,
   });
+
+  const searchParams = useSearchParams();
+  const router = useRouter(); // ✅ added
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+
+    if (status === "login") {
+      setSnackbar({
+        open: true,
+        message: "Login successful",
+        severity: "success",
+      });
+
+      router.replace("/dashboard"); // ✅ added (clean URL)
+    }
+  }, [searchParams, router]); // ✅ updated dependency
 
   // ✅ ✅ FIX 1 — extract array
   const taskList = tasks?.results || [];
@@ -41,7 +68,7 @@ export default function DashboardPage() {
   ];
 
   const statusCount = ALL_STATUSES.reduce((acc: any, status) => {
-    acc[status] = taskList.filter((t: any) => t.status === status).length; // ✅ changed
+    acc[status] = taskList.filter((t: any) => t.status === status).length; // ✅ unchanged
     return acc;
   }, {});
 
@@ -52,51 +79,62 @@ export default function DashboardPage() {
   }, {});
 
   return (
-    <Box
-      sx={{
-        height: "100%",
-        overflowY: "auto",
-        p: 3,
-        pb: 6,
-      }}
-    >
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-        Dashboard
-      </Typography>
-
-      <GridSection>
-        <DashboardCard label="Total Users" value={totalUsers} />
-        <DashboardCard label="Total Tasks" value={totalTasks} />
-      </GridSection>
-
-      <Box sx={{ mt: 4 }}>
-        <Typography sx={{ fontWeight: 600, mb: 2 }}>Tasks by Status</Typography>
+    <>
+      <Box
+        sx={{
+          height: "100%",
+          overflowY: "auto",
+          p: 3,
+          pb: 6,
+        }}
+      >
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+          Dashboard
+        </Typography>
 
         <GridSection>
-          {ALL_STATUSES.map((status) => {
-            const count = statusCount[status];
-
-            return (
-              <DashboardCard
-                key={status}
-                label={status}
-                value={count === 0 ? "No tasks" : count}
-              />
-            );
-          })}
+          <DashboardCard label="Total Users" value={totalUsers} />
+          <DashboardCard label="Total Tasks" value={totalTasks} />
         </GridSection>
+
+        <Box sx={{ mt: 4 }}>
+          <Typography sx={{ fontWeight: 600, mb: 2 }}>
+            Tasks by Status
+          </Typography>
+
+          <GridSection>
+            {ALL_STATUSES.map((status) => {
+              const count = statusCount[status];
+
+              return (
+                <DashboardCard
+                  key={status}
+                  label={status}
+                  value={count === 0 ? "No tasks" : count}
+                />
+              );
+            })}
+          </GridSection>
+        </Box>
+
+        <Box sx={{ mt: 4 }}>
+          <Typography sx={{ fontWeight: 600, mb: 2 }}>Teams</Typography>
+
+          <GridSection>
+            {Object.entries(teamCounts).map(([team, count]: any) => (
+              <DashboardCard key={team} label={team} value={count} />
+            ))}
+          </GridSection>
+        </Box>
       </Box>
 
-      <Box sx={{ mt: 4 }}>
-        <Typography sx={{ fontWeight: 600, mb: 2 }}>Teams</Typography>
-
-        <GridSection>
-          {Object.entries(teamCounts).map(([team, count]: any) => (
-            <DashboardCard key={team} label={team} value={count} />
-          ))}
-        </GridSection>
-      </Box>
-    </Box>
+      <StatusSnackbar
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      />
+    </>
   );
 }
 

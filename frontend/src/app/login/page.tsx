@@ -5,13 +5,19 @@ if (typeof window !== "undefined") {
 }
 
 import styles from "./login.module.css";
-import { Box, Button, Typography, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  CircularProgress,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 
 import InputField from "@/components/InputField";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import StatusSnackbar from "@/components/StatusSnackbar";
 
 type LoginForm = {
@@ -28,6 +34,21 @@ export default function LoginPage() {
 
   const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+
+    if (status === "logout") {
+      setSnackbar({
+        open: true,
+        message: "Logged out successfully",
+        severity: "success",
+      });
+    }
+  }, [searchParams]);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -35,6 +56,8 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginForm) => {
+    setLoading(true);
+
     try {
       const res = await fetch("http://127.0.0.1:8000/api/auth/login", {
         method: "POST",
@@ -47,41 +70,31 @@ export default function LoginPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        const errorMessage =
-          typeof result.detail === "string"
-            ? result.detail
-            : result.detail?.msg || "Login failed";
-
         setSnackbar({
           open: true,
-          message: errorMessage,
+          message: "Login failed",
           severity: "error",
         });
+
+        setLoading(false);
         return;
       }
 
-      // ✅ Store token
       localStorage.setItem("token", result.access_token);
 
-      setSnackbar({
-        open: true,
-        message: "Login successful ✅",
-        severity: "success",
-      });
+      router.push("/dashboard?status=login");
 
-      // ✅ delay redirect so user sees success toast
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1200);
-    } catch (error) {
+      // ✅ DO NOT setLoading(false) here
+    } catch {
       setSnackbar({
         open: true,
         message: "Something went wrong",
         severity: "error",
       });
+
+      setLoading(false);
     }
   };
-
   return (
     <>
       <Box className={styles.container}>
@@ -142,15 +155,21 @@ export default function LoginPage() {
                       },
                     }}
                   />
-
                   <Button
                     type="submit"
-                    variant="contained"
                     fullWidth
-                    disableElevation
+                    variant="contained"
+                    disabled={loading}
                     className={styles.button}
                   >
-                    Login
+                    {loading ? (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <CircularProgress size={16} sx={{ color: "white" }} />
+                        Logging in...
+                      </Box>
+                    ) : (
+                      "Login"
+                    )}
                   </Button>
                 </Box>
               </form>
