@@ -32,6 +32,7 @@ import { useGetUsersQuery } from "@/services/api";
 
 import InputField from "./InputField";
 import UserField from "./UserField";
+import StatusSnackbar from "./StatusSnackbar";
 
 // ✅ TYPES
 type Props = {
@@ -124,7 +125,7 @@ export default function CreateTaskDialog({
 
       setSnackbar({
         open: true,
-        message: "Task created ✅",
+        message: "Task created",
         severity: "success",
       });
 
@@ -275,22 +276,12 @@ export default function CreateTaskDialog({
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* ✅ SNACKBAR */}
-      <Snackbar
+      <StatusSnackbar
         open={snackbar.open}
-        autoHideDuration={3000}
+        message={snackbar.message}
+        severity={snackbar.severity}
         onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          severity={snackbar.severity}
-          variant="filled"
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      />
     </>
   );
 }

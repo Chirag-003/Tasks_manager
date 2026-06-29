@@ -29,6 +29,7 @@ import { useGetUsersQuery } from "@/services/api";
 
 import InputField from "./InputField";
 import UserField from "./UserField";
+import StatusSnackbar from "./StatusSnackbar";
 
 // ✅ SCHEMA
 const subtaskSchema = z.object({
@@ -80,7 +81,7 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
 
       setSnackbar({
         open: true,
-        message: "Subtask created ✅",
+        message: "Subtask created",
         severity: "success",
       });
 
@@ -204,21 +205,12 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         </DialogActions>
       </Dialog>
 
-      {/* ✅ SNACKBAR */}
-      <Snackbar
+      <StatusSnackbar
         open={snackbar.open}
-        autoHideDuration={3000}
+        message={snackbar.message}
+        severity={snackbar.severity}
         onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          variant="filled"
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      />
     </>
   );
 }
