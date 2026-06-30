@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -13,37 +13,25 @@ router = APIRouter()
 
 @router.post("/auth/register", response_model=UserResponse)
 def register(user: RegisterRequest, db: Session = Depends(get_db)):
-    try:
-        return services_auth.create_user(
-            db=db,
-            email=user.email,
-            username=user.username,
-            password=user.password,
-        )
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        # ✅ catch unexpected errors
-        raise HTTPException(status_code=500, detail=str(e))
+    return services_auth.create_user(
+        db=db,
+        email=user.email,
+        username=user.username,
+        password=user.password,
+    )
 
 
 @router.post("/auth/login")
 def login(user: LoginRequest, db: Session = Depends(get_db)):
-    try:
-        db_user = services_auth.login_user(
-            db=db,
-            email=user.email,
-            password=user.password,
-        )
+    db_user = services_auth.login_user(
+        db=db,
+        email=user.email,
+        password=user.password,
+    )
 
-        token = create_access_token({"sub": str(db_user.id)})
+    token = create_access_token({"sub": str(db_user.id)})
 
-        return {"access_token": token, "token_type": "bearer"}
-
-    except HTTPException as e:
-        raise e
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal server error")
+    return {"access_token": token, "token_type": "bearer"}
 
 
 @router.post("/auth/logout")

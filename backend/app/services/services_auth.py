@@ -28,7 +28,7 @@ def create_user(db: Session, email: str, username: str, password: str):
     try:
         db.commit()
         db.refresh(new_user)
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -39,28 +39,18 @@ def create_user(db: Session, email: str, username: str, password: str):
 
 
 def login_user(db: Session, email: str, password: str):
-    try:
-        # ✅ 1. Find user
-        user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == email).first()
 
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-            )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+        )
 
-        # ✅ 2. Verify password
-        if not verify_password(password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-            )
+    if not verify_password(password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+        )
 
-        # ✅ 3. Success
-        return user
-
-    except HTTPException as e:
-        # ✅ Pass known errors (like invalid credentials)
-        raise e
-
-    except Exception as e:
-        print("LOGIN ERROR:", e)
-        raise HTTPException(status_code=500, detail="Error during login")
+    return user
