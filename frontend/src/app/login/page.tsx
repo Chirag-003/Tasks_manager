@@ -46,6 +46,7 @@ export default function LoginPage() {
         message: "Logged out successfully",
         severity: "success",
       });
+      router.replace("/login");
     }
   }, [searchParams]);
 

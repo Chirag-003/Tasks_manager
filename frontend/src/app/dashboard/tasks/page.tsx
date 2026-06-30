@@ -30,6 +30,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import TuneIcon from "@mui/icons-material/Tune";
+import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -239,6 +240,7 @@ export default function TasksPage() {
                       ),
                     }}
                   />
+
                   <Button onClick={() => setShowMobileSearch(false)}>✕</Button>
 
                   <Button onClick={handleOpenFilter}>
@@ -247,7 +249,8 @@ export default function TasksPage() {
                 </Box>
               ) : (
                 <>
-                  <Box>
+                  {/* ✅ LEFT */}
+                  <Box display="flex" alignItems="center" gap={1}>
                     <Typography
                       variant="h5"
                       sx={{
@@ -258,42 +261,88 @@ export default function TasksPage() {
                       Tasks
                     </Typography>
 
-                    <Typography
+                    {/* ✅ CREATE BUTTON (mobile) */}
+                    <Box
+                      onClick={() => handleOpen()}
                       sx={{
-                        fontSize: "12px",
-                        color: "#64748b",
-                        mt: 0.2,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+
+                        width: 36,
+                        height: 36,
+
+                        borderRadius: 2,
+                        cursor: "pointer",
+
+                        color: "#111827",
+
+                        transition: "all 0.15s ease",
+
+                        "&:hover": {
+                          backgroundColor: "#f3f4f6",
+                          color: "#2563eb",
+                        },
                       }}
                     >
-                      Manage and track your work
-                    </Typography>
+                      <AddIcon sx={{ fontSize: 20 }} />
+                    </Box>
                   </Box>
 
+                  {/* ✅ RIGHT */}
                   <Box display="flex" gap={1}>
                     <Button onClick={() => setShowMobileSearch(true)}>
-                      <SearchIcon
-                        sx={{
-                          color: showMobileSearch ? "#2563eb" : "#111827",
-                        }}
-                      />
+                      <SearchIcon />
                     </Button>
 
                     <Button onClick={handleOpenFilter}>
-                      <TuneIcon
-                        sx={{
-                          color: openFilter ? "#2563eb" : "#111827",
-                        }}
-                      />
+                      <TuneIcon />
                     </Button>
                   </Box>
                 </>
               )
             ) : (
               <>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  Tasks
-                </Typography>
+                {/* ✅ LEFT SIDE */}
 
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 600,
+                    }}
+                  >
+                    Tasks
+                  </Typography>
+
+                  {/* ✅ INLINE ACTION */}
+                  <Box
+                    onClick={() => handleOpen()}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+
+                      width: 26,
+                      height: 26,
+
+                      borderRadius: "6px",
+                      cursor: "pointer",
+
+                      color: "#2563eb",
+
+                      transition: "all 0.15s ease",
+
+                      "&:hover": {
+                        backgroundColor: "rgba(37, 99, 235, 0.1)",
+                      },
+                    }}
+                  >
+                    <AddIcon sx={{ fontSize: 18, fontWeight: 700 }} />
+                  </Box>
+                </Box>
+
+                {/* ✅ RIGHT SIDE */}
                 <Box display="flex" alignItems="center" gap={1.5}>
                   <TextField
                     placeholder="Search task by title..."
@@ -454,7 +503,7 @@ export default function TasksPage() {
         )}
 
         {/* ✅ BUTTON */}
-        <Button
+        {/* <Button
           variant="contained"
           onClick={() => handleOpen()}
           sx={{
@@ -467,7 +516,7 @@ export default function TasksPage() {
           }}
         >
           Create Task
-        </Button>
+        </Button> */}
 
         {/* ✅ DIALOG */}
         <CreateTaskDialog
