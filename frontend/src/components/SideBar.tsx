@@ -4,9 +4,9 @@ import { Box, Typography } from "@mui/material";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import TaskIcon from "@mui/icons-material/Assignment";
-import PeopleIcon from "@mui/icons-material/People";
+import DashboardIcon from "@mui/icons-material/DashboardOutlined";
+import TaskIcon from "@mui/icons-material/AssignmentOutlined";
+import PeopleIcon from "@mui/icons-material/PeopleOutline";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -40,19 +40,6 @@ export default function Sidebar() {
         bgcolor: "#ffffff",
       }}
     >
-      <Typography
-        className="sidebar-title"
-        variant="h6"
-        sx={{
-          mb: 4,
-          fontWeight: 700,
-          fontSize: 18,
-          color: "#111827",
-        }}
-      >
-        Task App
-      </Typography>
-
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
         {menuItems.map((item) => {
           const isActive =
@@ -82,7 +69,7 @@ export default function Sidebar() {
 
                   position: "relative",
 
-                  color: isActive ? "#111827" : "#47494e",
+                  color: isActive ? "#313132" : "#6b7280",
                   fontWeight: isActive ? 600 : 400,
                   fontSize: 14,
 
@@ -114,6 +101,7 @@ export default function Sidebar() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
+                    color: isActive ? "#324f8f" : "#9ca3af", // ✅ active = blue
                   }}
                 >
                   {item.icon}
