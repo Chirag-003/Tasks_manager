@@ -23,7 +23,7 @@ def create_subtask(task_id: int, subtask: SubTaskCreate, db: Session = Depends(g
     try:
         redis_client.setex(
             f"subtask:{result['id']}",
-            60,
+            180,
             json.dumps(SubTaskResponse.model_validate(result).model_dump()),
         )
     except Exception:
@@ -88,7 +88,7 @@ def get_subtasks(
         try:
             redis_client.setex(
                 cache_key,
-                60,
+                180,
                 json.dumps(
                     [
                         SubTaskResponse.model_validate(subtask).model_dump()
@@ -127,7 +127,7 @@ def get_subtask_by_id(subtask_id: int, db: Session = Depends(get_db)):
     try:
         redis_client.setex(
             cache_key,
-            60,
+            300,
             json.dumps(SubTaskResponse.model_validate(subtask).model_dump()),
         )
     except Exception:

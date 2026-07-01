@@ -25,7 +25,7 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     try:
         redis_client.setex(
             f"task:{result['id']}",
-            60,
+            300,
             json.dumps(TaskResponse.model_validate(result).model_dump()),
         )
     except Exception:
@@ -104,7 +104,7 @@ def get_tasks(
     # ✅ cache write
     if tasks:
         try:
-            redis_client.setex(cache_key, 60, json.dumps(response))
+            redis_client.setex(cache_key, 180, json.dumps(response))
         except Exception:
             pass
 
@@ -135,7 +135,7 @@ def get_sprints(db: Session = Depends(get_db)):
     # ✅ safe cache write
     if sprint_list:
         try:
-            redis_client.setex(cache_key, 300, json.dumps(sprint_list))
+            redis_client.setex(cache_key, 900, json.dumps(sprint_list))
         except Exception:
             pass
 
@@ -166,7 +166,7 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     try:
         redis_client.setex(
             cache_key,
-            60,
+            300,
             json.dumps(TaskResponse.model_validate(task).model_dump()),
         )
     except Exception:
@@ -184,13 +184,12 @@ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
     try:
         redis_client.setex(
             f"task:{task_id}",
-            60,
+            300,
             json.dumps(TaskResponse.model_validate(result).model_dump()),
         )
     except Exception:
         pass
 
-    # ✅ invalidate caches
     try:
         for key in redis_client.scan_iter("tasks:*"):
             redis_client.delete(key)
