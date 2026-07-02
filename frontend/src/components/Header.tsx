@@ -6,6 +6,7 @@ import { Manrope } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import StatusSnackbar from "./StatusSnackbar";
+import { useGetCurrentUserQuery } from "@/services/api";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -29,7 +30,8 @@ export default function Header() {
   const handleLogout = async () => {
     handleClose();
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
+    const refreshToken = localStorage.getItem("refresh_token");
 
     try {
       await fetch("http://127.0.0.1:8000/api/auth/logout", {
@@ -40,10 +42,13 @@ export default function Header() {
       });
     } catch {}
 
-    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
 
     router.push("/login?status=logout");
   };
+
+  const { data, isLoading } = useGetCurrentUserQuery();
 
   return (
     <>
@@ -112,7 +117,7 @@ export default function Header() {
               backgroundColor: "#2563eb",
             }}
           >
-            C
+            {data?.username?.charAt(0).toUpperCase() || "U"}
           </Avatar>
 
           <Typography
@@ -123,7 +128,7 @@ export default function Header() {
               fontWeight: 500,
             }}
           >
-            Chirag
+            {isLoading ? "Loading..." : data?.username}
           </Typography>
         </Box>
 

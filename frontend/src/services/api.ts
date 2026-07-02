@@ -206,6 +206,10 @@ export const api = createApi({
         body: data,
       }),
     }),
+
+    getCurrentUser: builder.query<any, void>({
+      query: () => "/auth/me",
+    }),
   }),
 });
 
@@ -226,4 +230,5 @@ export const {
   useGetSprintsQuery,
   useLoginUserMutation,
   useRegisterUserMutation,
+  useGetCurrentUserQuery,
 } = api;

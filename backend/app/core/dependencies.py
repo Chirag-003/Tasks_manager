@@ -1,6 +1,9 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
 
+from app.db.session import get_db
+from app.models.model_users import User
 from app.core.jwt_handler import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -8,6 +11,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
 ):
     payload = decode_access_token(token)
 
@@ -19,4 +23,12 @@ def get_current_user(
             detail="Invalid token payload",
         )
 
-    return user_id
+    user = db.query(User).filter(User.id == int(user_id)).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    return user

@@ -13,6 +13,8 @@ from app.core.jwt_handler import (
     decode_refresh_token,
 )
 
+from app.core.dependencies import get_current_user
+
 router = APIRouter()
 
 
@@ -71,3 +73,14 @@ def refresh_access_token(data: dict, db: Session = Depends(get_db)):
     new_access_token = create_access_token({"sub": str(user_id)})
 
     return {"access_token": new_access_token, "token_type": "bearer"}
+
+
+@router.get("/auth/me")
+def get_me(
+    current_user=Depends(get_current_user),
+):
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+    }
