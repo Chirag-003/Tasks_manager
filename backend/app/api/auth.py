@@ -54,13 +54,11 @@ def logout():
 def refresh_access_token(data: dict, db: Session = Depends(get_db)):
     token = data.get("refresh_token")
 
-    # ✅ Step 1: validate presence
     if not token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Refresh token is required"
         )
 
-    # ✅ Step 2: decode + validate
     payload = decode_refresh_token(token)
 
     user_id = payload.get("sub")
@@ -70,8 +68,6 @@ def refresh_access_token(data: dict, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload"
         )
 
-    # ✅ Step 3: generate new access token
     new_access_token = create_access_token({"sub": str(user_id)})
 
-    # ✅ Step 4: return new token
     return {"access_token": new_access_token, "token_type": "bearer"}

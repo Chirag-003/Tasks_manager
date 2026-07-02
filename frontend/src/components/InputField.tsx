@@ -65,10 +65,11 @@ export default function InputField({
     <Controller
       name={name}
       control={control}
-      rules={rules} // ✅ APPLY HERE
+      rules={rules}
       render={({ field }) => (
         <TextField
           {...field}
+          value={field.value ?? ""} // ✅ FIX ADDED
           label={label}
           size="small"
           fullWidth

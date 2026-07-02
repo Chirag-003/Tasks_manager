@@ -81,7 +81,9 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem("token", result.access_token);
+      localStorage.setItem("access_token", result.access_token);
+
+      localStorage.setItem("refresh_token", result.refresh_token);
 
       router.push("/dashboard?status=login");
 

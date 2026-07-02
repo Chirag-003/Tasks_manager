@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 
+from fastapi import Depends
+
+from app.core.dependencies import get_current_user
+
 from app.api.task1 import router as task_router
 from app.api.subtasks import router as subtasks_router
 from app.api.comments import router as comments_router
@@ -39,12 +43,32 @@ def health_check():
     return {"status": "API is running"}
 
 
-app.include_router(task_router, prefix="/api/task1", tags=["Tasks"])
+app.include_router(
+    task_router,
+    prefix="/api/task1",
+    tags=["Tasks"],
+    dependencies=[Depends(get_current_user)],
+)
 
-app.include_router(subtasks_router, prefix="/api")
+app.include_router(
+    subtasks_router,
+    prefix="/api",
+    tags=["Subtasks"],
+    dependencies=[Depends(get_current_user)],
+)
 
-app.include_router(comments_router, prefix="/api")
+app.include_router(
+    comments_router,
+    prefix="/api",
+    tags=["Comments"],
+    dependencies=[Depends(get_current_user)],
+)
 
-app.include_router(users_router, prefix="/api", tags=["Users"])
+app.include_router(
+    users_router,
+    prefix="/api",
+    tags=["Users"],
+    dependencies=[Depends(get_current_user)],
+)
 
 app.include_router(auth_router, prefix="/api", tags=["Auth"])
