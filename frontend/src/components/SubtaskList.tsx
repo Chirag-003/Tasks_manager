@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
 import {
+  Box,
+  Typography,
   IconButton,
   Tooltip,
   TextField,
@@ -22,22 +23,35 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import UILoader from "@/components/Loader";
-import { useDeleteSubtaskMutation } from "@/services/api";
+import { useDeleteSubtaskMutation, useGetSubtasksQuery } from "@/services/api";
+
+import FilterMenu from "@/components/FilterMenu";
 
 type Props = {
-  subtasks: any[];
+  taskId: number;
   onAddClick: () => void;
-  onSearch?: (value: string) => void;
-  onFilterClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
-export default function SubtaskList({
-  subtasks,
-  onAddClick,
-  onSearch,
-  onFilterClick,
-}: Props) {
+export default function SubtaskList({ taskId, onAddClick }: Props) {
   const router = useRouter();
+
+  const [searchInput, setSearchInput] = useState("");
+
+  const [filters, setFilters] = useState({
+    status: "",
+    user_id: "",
+    search: "",
+  });
+
+  const { data: subtasks = [] } = useGetSubtasksQuery(
+    {
+      task_id: taskId,
+      ...filters,
+    },
+    {
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
   const [deleteSubtask] = useDeleteSubtaskMutation();
 
@@ -49,8 +63,6 @@ export default function SubtaskList({
   });
 
   const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
-
-  const [searchInput, setSearchInput] = useState("");
 
   // ✅ DELETE STATE
   const [openDelete, setOpenDelete] = useState(false);
@@ -66,11 +78,15 @@ export default function SubtaskList({
   useEffect(() => {
     const timer = setTimeout(() => {
       const trimmed = searchInput.trim();
-      onSearch?.(trimmed || "");
+
+      setFilters((prev) => ({
+        ...prev,
+        search: trimmed || "",
+      }));
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchInput, onSearch]);
+  }, [searchInput]);
 
   const visibleSubtasks = showAll ? subtasks : subtasks.slice(0, 1);
 
@@ -170,9 +186,18 @@ export default function SubtaskList({
             sx={{ width: 230 }}
           />
 
-          <Button size="small" onClick={onFilterClick}>
-            Filter
-          </Button>
+          <FilterMenu
+            type="subtask"
+            filters={filters}
+            onChange={setFilters}
+            onClear={() =>
+              setFilters({
+                status: "",
+                user_id: "",
+                search: "",
+              })
+            }
+          />
         </Box>
       </Box>
 
@@ -185,7 +210,7 @@ export default function SubtaskList({
         </Typography>
       ) : (
         <>
-          {visibleSubtasks.map((subtask) => (
+          {visibleSubtasks.map((subtask: any) => (
             <Box
               key={subtask.id}
               onClick={() => {

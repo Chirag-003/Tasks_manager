@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Popover,
   Snackbar,
   Alert,
 } from "@mui/material";
@@ -19,18 +18,16 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   useCreateSubtaskMutation,
   useDeleteTaskMutation,
   useUpdateTaskMutation,
-  useGetSubtasksQuery,
 } from "@/services/api";
 
 import CreateSubtaskDialog from "@/components/CreateSubtaskDialog";
-import FilterMenu from "@/components/FilterMenu";
 
 import AssigneeField from "./AssigneeField";
 import StatusField from "./StatusField";
@@ -61,44 +58,6 @@ export default function DetailedTask({ task }: Props) {
   const [title, setTitle] = useState(task.title);
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-
-  const [subtaskFilters, setSubtaskFilters] = useState({
-    status: "",
-    user_id: "",
-    search: "",
-  });
-
-  const { data: subtasks = [] } = useGetSubtasksQuery(
-    {
-      task_id: task.id,
-      ...subtaskFilters,
-    },
-    {
-      refetchOnMountOrArgChange: true,
-    },
-  );
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleOpenFilter = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(e.currentTarget);
-  };
-
-  const handleCloseFilter = () => setAnchorEl(null);
-  const openFilter = Boolean(anchorEl);
-
-  const handleSearch = useCallback((value: string) => {
-    const trimmed = value.trim();
-
-    setSubtaskFilters((prev) => {
-      if (prev.search === trimmed) return prev;
-
-      return {
-        ...prev,
-        search: trimmed || "",
-      };
-    });
-  }, []);
 
   // ✅ SNACKBAR STATE
   const [snackbar, setSnackbar] = useState({
@@ -267,32 +226,9 @@ export default function DetailedTask({ task }: Props) {
               <Divider />
 
               <SubtaskList
-                subtasks={subtasks}
+                taskId={task.id}
                 onAddClick={() => setOpenSubtask(true)}
-                onSearch={handleSearch}
-                onFilterClick={handleOpenFilter}
               />
-
-              <Popover
-                open={openFilter}
-                anchorEl={anchorEl}
-                onClose={handleCloseFilter}
-              >
-                <Box p={2} width={260}>
-                  <FilterMenu
-                    filters={subtaskFilters}
-                    type="subtask"
-                    onChange={(filters) => setSubtaskFilters(filters)}
-                    onClear={() =>
-                      setSubtaskFilters({
-                        status: "",
-                        user_id: "",
-                        search: "",
-                      })
-                    }
-                  />
-                </Box>
-              </Popover>
 
               <Divider />
             </Box>

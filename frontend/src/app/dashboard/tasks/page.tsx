@@ -6,6 +6,7 @@ import TaskList from "@/components/TaskList";
 import CreateTaskDialog from "@/components/CreateTaskDialog";
 import UILoader from "@/components/Loader";
 import FilterMenu from "@/components/FilterMenu";
+import StatusTabs from "@/components/StatusTabs";
 
 import { useState, useEffect } from "react";
 
@@ -16,20 +17,11 @@ import {
   Snackbar,
   Alert,
   TextField,
-  Popover,
   Pagination,
   useMediaQuery,
   InputAdornment,
 } from "@mui/material";
 
-/* ✅ ICONS */
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import PendingIcon from "@mui/icons-material/Pending";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import BugReportIcon from "@mui/icons-material/BugReport";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import TuneIcon from "@mui/icons-material/Tune";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -60,7 +52,6 @@ export default function TasksPage() {
   );
 
   const [open, setOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -71,29 +62,9 @@ export default function TasksPage() {
     undefined,
   );
 
-  const openFilter = Boolean(anchorEl);
-
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "backlog":
-        return <AssignmentIcon sx={{ fontSize: 14 }} />;
-      case "todo":
-        return <PendingIcon sx={{ fontSize: 14 }} />;
-      case "in_progress":
-        return <AutorenewIcon sx={{ fontSize: 14 }} />;
-      case "in_review":
-        return <CheckCircleIcon sx={{ fontSize: 14 }} />;
-      case "qa":
-        return <BugReportIcon sx={{ fontSize: 14 }} />;
-      case "completed":
-        return <DoneAllIcon sx={{ fontSize: 14 }} />;
-      default:
-        return null;
-    }
-  };
   useEffect(() => {
     const statusFromUrl = searchParams.get("status");
 
@@ -103,6 +74,20 @@ export default function TasksPage() {
       setActiveStatus(isMobile ? "backlog" : "");
     }
   }, [searchParams, isMobile]);
+
+  const handleStatusChange = (status: string) => {
+    setActiveStatus(status);
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (status) {
+      params.set("status", status);
+    } else {
+      params.delete("status");
+    }
+
+    router.push(`/dashboard/tasks?${params.toString()}`);
+  };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -157,20 +142,33 @@ export default function TasksPage() {
     setSelectedStatus(undefined);
   };
 
-  const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseFilter = () => {
-    setAnchorEl(null);
-  };
-
   if (isLoading) return <UILoader type="task" />;
   if (isError) return <p>Error fetching tasks</p>;
 
   const statusTabs = isMobile
     ? ["backlog", "todo", "in_progress", "in_review", "qa", "completed"]
     : ["", "backlog", "todo", "in_progress", "in_review", "qa", "completed"];
+
+  const taskFilters = (
+    <FilterMenu
+      type="task"
+      filters={filters}
+      onChange={(newFilters: any) =>
+        setFilters((prev) => ({
+          ...prev,
+          ...newFilters,
+        }))
+      }
+      onClear={() =>
+        setFilters({
+          search: "",
+          status: "",
+          sprint: "",
+          user_id: "",
+        })
+      }
+    />
+  );
 
   return (
     <>
@@ -243,13 +241,10 @@ export default function TasksPage() {
 
                   <Button onClick={() => setShowMobileSearch(false)}>✕</Button>
 
-                  <Button onClick={handleOpenFilter}>
-                    <TuneIcon />
-                  </Button>
+                  {taskFilters}
                 </Box>
               ) : (
                 <>
-                  {/* ✅ LEFT */}
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography
                       variant="h5"
@@ -261,7 +256,6 @@ export default function TasksPage() {
                       Tasks
                     </Typography>
 
-                    {/* ✅ CREATE BUTTON (mobile) */}
                     <Box
                       onClick={() => handleOpen()}
                       sx={{
@@ -289,22 +283,17 @@ export default function TasksPage() {
                     </Box>
                   </Box>
 
-                  {/* ✅ RIGHT */}
                   <Box display="flex" gap={1}>
                     <Button onClick={() => setShowMobileSearch(true)}>
                       <SearchIcon />
                     </Button>
 
-                    <Button onClick={handleOpenFilter}>
-                      <TuneIcon />
-                    </Button>
+                    {taskFilters}
                   </Box>
                 </>
               )
             ) : (
               <>
-                {/* ✅ LEFT SIDE */}
-
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography
                     variant="h5"
@@ -315,7 +304,6 @@ export default function TasksPage() {
                     Tasks
                   </Typography>
 
-                  {/* ✅ INLINE ACTION */}
                   <Box
                     onClick={() => handleOpen()}
                     sx={{
@@ -342,7 +330,6 @@ export default function TasksPage() {
                   </Box>
                 </Box>
 
-                {/* ✅ RIGHT SIDE */}
                 <Box display="flex" alignItems="center" gap={1.5}>
                   <TextField
                     placeholder="Search task by title..."
@@ -360,104 +347,22 @@ export default function TasksPage() {
                     }}
                   />
 
-                  <Button onClick={handleOpenFilter}>
-                    <TuneIcon />
-                  </Button>
+                  {taskFilters}
                 </Box>
               </>
             )}
           </Box>
 
           {/* ✅ TABS */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              overflowX: "auto",
-              whiteSpace: "nowrap",
-              pb: 0.5,
-              borderBottom: "1px solid #e5e7eb",
-              "&::-webkit-scrollbar": { display: "none" },
-            }}
-          >
-            {statusTabs.map((status) => {
-              const isActive = activeStatus === status;
 
-              return (
-                <Box
-                  key={status || "all"}
-                  onClick={() => {
-                    setActiveStatus(status);
-
-                    const params = new URLSearchParams(searchParams.toString());
-
-                    if (status) params.set("status", status);
-                    else params.delete("status");
-
-                    router.push(`/dashboard/tasks?${params.toString()}`);
-                  }}
-                  sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    position: "relative",
-                    cursor: "pointer",
-                    pb: 1,
-                    px: 0.5,
-                    fontSize: "13px",
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive ? "#2563eb" : "#475569",
-                    flexShrink: 0,
-                    "&::after": {
-                      content: '""',
-                      position: "absolute",
-                      left: 0,
-                      bottom: 0,
-                      width: isActive ? "100%" : "0%",
-                      height: "2px",
-                      backgroundColor: "#2563eb",
-                    },
-                  }}
-                >
-                  {getStatusIcon(status)}
-                  {status
-                    ? status === "qa"
-                      ? "QA"
-                      : status.replaceAll("_", " ")
-                    : "All"}
-                </Box>
-              );
-            })}
-          </Box>
+          <StatusTabs
+            statusTabs={statusTabs}
+            activeStatus={activeStatus}
+            onStatusChange={handleStatusChange}
+          />
         </Box>
 
         {/* ✅ POPOVER */}
-        <Popover
-          open={openFilter}
-          anchorEl={anchorEl}
-          onClose={handleCloseFilter}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          transformOrigin={{ vertical: "top", horizontal: "left" }}
-        >
-          <Box p={2} width={280}>
-            <FilterMenu
-              type="task"
-              filters={filters}
-              onChange={(newFilters: any) =>
-                setFilters((prev) => ({ ...prev, ...newFilters }))
-              }
-              onClear={() =>
-                setFilters({
-                  search: "",
-                  status: "",
-                  sprint: "",
-                  user_id: "",
-                })
-              }
-              onClose={handleCloseFilter}
-            />
-          </Box>
-        </Popover>
 
         {/* ✅ TASK LIST */}
         <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
@@ -501,22 +406,6 @@ export default function TasksPage() {
             />
           </Box>
         )}
-
-        {/* ✅ BUTTON */}
-        {/* <Button
-          variant="contained"
-          onClick={() => handleOpen()}
-          sx={{
-            position: "fixed",
-            bottom: 30,
-            right: 30,
-            borderRadius: "10px",
-            px: 3,
-            textTransform: "none",
-          }}
-        >
-          Create Task
-        </Button> */}
 
         {/* ✅ DIALOG */}
         <CreateTaskDialog
