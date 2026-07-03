@@ -2,9 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 import TaskCard from "./TaskCard";
-import { useGetTasksQuery } from "@/services/api";
-import { useState, useEffect } from "react";
+import { useGetKanbanTasksQuery } from "@/services/api";
 import UILoader from "./Loader";
+import { STATUS_COLUMNS } from "@/constants/status";
 
 type TaskListProps = {
   tasks: any[];
@@ -21,136 +21,23 @@ export default function TaskList({
   onAddTask,
   filters,
 }: TaskListProps) {
-  const columns = [
-    { key: "backlog", title: "Backlog" },
-    { key: "todo", title: "Todo" },
-    { key: "in_progress", title: "In Progress" },
-    { key: "in_review", title: "In Review" },
-    { key: "qa", title: "QA" },
-    { key: "completed", title: "Completed" },
-  ];
+  const columns = STATUS_COLUMNS;
 
-  const [columnPages, setColumnPages] = useState<Record<string, number>>({
-    backlog: 1,
-    todo: 1,
-    in_progress: 1,
-    in_review: 1,
-    qa: 1,
-    completed: 1,
-  });
+  const { data, isLoading, error } = useGetKanbanTasksQuery(filters);
 
-  const [columnDataState, setColumnDataState] = useState<Record<string, any[]>>(
-    {
-      backlog: [],
-      todo: [],
-      in_progress: [],
-      in_review: [],
-      qa: [],
-      completed: [],
-    },
-  );
-
-  const backlogQuery = useGetTasksQuery({
-    ...filters,
-    status: "backlog",
-    page: columnPages["backlog"],
-    page_size: 10,
-  });
-
-  const todoQuery = useGetTasksQuery({
-    ...filters,
-    status: "todo",
-    page: columnPages["todo"],
-    page_size: 10,
-  });
-
-  const inProgressQuery = useGetTasksQuery({
-    ...filters,
-    status: "in_progress",
-    page: columnPages["in_progress"],
-    page_size: 10,
-  });
-
-  const inReviewQuery = useGetTasksQuery({
-    ...filters,
-    status: "in_review",
-    page: columnPages["in_review"],
-    page_size: 10,
-  });
-
-  const qaQuery = useGetTasksQuery({
-    ...filters,
-    status: "qa",
-    page: columnPages["qa"],
-    page_size: 10,
-  });
-
-  const completedQuery = useGetTasksQuery({
-    ...filters,
-    status: "completed",
-    page: columnPages["completed"],
-    page_size: 10,
-  });
-
-  const mergeUnique = (oldList: any[] = [], newList: any[] = []) => {
-    const map = new Map();
-    [...oldList, ...newList].forEach((item) => {
-      map.set(item.id, item);
-    });
-    return Array.from(map.values());
-  };
-
-  useEffect(() => {
-    setColumnDataState((prev) => ({
-      backlog:
-        columnPages.backlog === 1
-          ? backlogQuery.data?.results || []
-          : mergeUnique(prev.backlog, backlogQuery.data?.results || []),
-
-      todo:
-        columnPages.todo === 1
-          ? todoQuery.data?.results || []
-          : mergeUnique(prev.todo, todoQuery.data?.results || []),
-
-      qa:
-        columnPages.qa === 1
-          ? qaQuery.data?.results || []
-          : mergeUnique(prev.qa, qaQuery.data?.results || []),
-
-      completed:
-        columnPages.completed === 1
-          ? completedQuery.data?.results || []
-          : mergeUnique(prev.completed, completedQuery.data?.results || []),
-
-      in_progress:
-        columnPages.in_progress === 1
-          ? inProgressQuery.data?.results || []
-          : mergeUnique(prev.in_progress, inProgressQuery.data?.results || []),
-
-      in_review:
-        columnPages.in_review === 1
-          ? inReviewQuery.data?.results || []
-          : mergeUnique(prev.in_review, inReviewQuery.data?.results || []),
-    }));
-  }, [
-    backlogQuery.data,
-    todoQuery.data,
-    inProgressQuery.data,
-    inReviewQuery.data,
-    qaQuery.data,
-    completedQuery.data,
-  ]);
-
-  const columnData = columnDataState;
-
-  const columnLoading: Record<string, boolean> = {
-    backlog: backlogQuery.isLoading,
-    todo: todoQuery.isLoading,
-    in_progress: inProgressQuery.isLoading,
-    in_review: inReviewQuery.isLoading,
-    qa: qaQuery.isLoading,
-    completed: completedQuery.isLoading,
-  };
+  if (error) {
+    return (
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        Failed to load tasks
+      </Box>
+    );
+  }
 
   if (!grouped) {
     return (
@@ -195,19 +82,8 @@ export default function TaskList({
       }}
     >
       {columns.map((col) => {
-        const colTasks = columnData[col.key] || [];
-        const isLoading = columnLoading[col.key];
-
-        const queryMap: any = {
-          backlog: backlogQuery,
-          todo: todoQuery,
-          in_progress: inProgressQuery,
-          in_review: inReviewQuery,
-          qa: qaQuery,
-          completed: completedQuery,
-        };
-
-        const totalCount = queryMap[col.key].data?.count || 0;
+        const colTasks = data?.[col.key]?.tasks ?? [];
+        const totalCount = data?.[col.key]?.count ?? 0;
 
         return (
           <Box
@@ -244,7 +120,7 @@ export default function TaskList({
                     {col.title}
                   </Typography>
                   <Box sx={{ fontSize: "11px", px: 1.2, py: 0.3 }}>
-                    {colTasks.length}
+                    {totalCount}
                   </Box>
                 </Box>
 
@@ -275,34 +151,6 @@ export default function TaskList({
                       <TaskCard task={task} onClick={() => onTaskClick(task)} />
                     </Box>
                   ))}
-                </Box>
-              )}
-
-              {/* ✅ SHOW MORE (RESTORED EXACTLY) */}
-              {colTasks.length < totalCount && !isLoading && (
-                <Box
-                  sx={{
-                    mt: 1,
-                    px: 1,
-                    py: 0.8,
-                    borderRadius: 1.5,
-                    display: "flex",
-                    gap: 1,
-                    cursor: "pointer",
-                    fontSize: "15px",
-                    color: "#1e293b",
-                    "&:hover": {
-                      backgroundColor: "#e2e8f0",
-                    },
-                  }}
-                  onClick={() =>
-                    setColumnPages((prev) => ({
-                      ...prev,
-                      [col.key]: prev[col.key] + 1,
-                    }))
-                  }
-                >
-                  <Box>Show more</Box>
                 </Box>
               )}
             </Box>

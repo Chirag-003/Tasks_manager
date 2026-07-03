@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, Dict, List
 from app.schemas.schemas_subtasks import SubTaskResponse
 from app.schemas.schemas_comments import CommentResponse, CommentListResponse
 from app.schemas.schemas_users import UserResponse
@@ -40,3 +40,17 @@ class TaskResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class KanbanColumnResponse(BaseModel):
+    count: int
+    tasks: List[TaskResponse]
+
+
+class KanbanResponse(BaseModel):
+    backlog: KanbanColumnResponse
+    todo: KanbanColumnResponse
+    in_progress: KanbanColumnResponse
+    in_review: KanbanColumnResponse
+    qa: KanbanColumnResponse
+    completed: KanbanColumnResponse

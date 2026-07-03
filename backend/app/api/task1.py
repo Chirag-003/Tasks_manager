@@ -3,7 +3,12 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.db.session import get_db
-from app.schemas.schemas_task import TaskCreate, TaskUpdate, TaskResponse
+from app.schemas.schemas_task import (
+    KanbanResponse,
+    TaskCreate,
+    TaskUpdate,
+    TaskResponse,
+)
 from app.schemas.schemas_enums import StatusEnum
 
 from app.services import services_task
@@ -140,6 +145,21 @@ def get_sprints(db: Session = Depends(get_db)):
             pass
 
     return sprint_list
+
+
+@router.get("/kanban", response_model=KanbanResponse)
+def get_kanban_tasks(
+    sprint: Optional[str] = Query(default=None),
+    user_id: Optional[int] = Query(default=None),
+    search: Optional[str] = Query(default=None),
+    db: Session = Depends(get_db),
+):
+    return services_task.get_kanban_tasks(
+        db=db,
+        sprint=sprint,
+        user_id=user_id,
+        search=search,
+    )
 
 
 @router.get("/{task_id}", response_model=TaskResponse)

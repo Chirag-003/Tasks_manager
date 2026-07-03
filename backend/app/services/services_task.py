@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.schemas.schemas_enums import StatusEnum
 
+
 from sqlalchemy import func  # ✅ ADD THIS IMPORT
 
 
@@ -378,4 +379,40 @@ def get_tasks_by_user(db: Session, user_id: int):
                 },
             }
         )
+    return result
+
+
+def get_kanban_tasks(
+    db: Session,
+    sprint=None,
+    user_id=None,
+    search=None,
+):
+    result = {}
+
+    statuses = [
+        StatusEnum.backlog,
+        StatusEnum.todo,
+        StatusEnum.in_progress,
+        StatusEnum.in_review,
+        StatusEnum.qa,
+        StatusEnum.completed,
+    ]
+
+    for status in statuses:
+        tasks, total = get_tasks(
+            db=db,
+            skip=0,
+            limit=10,
+            status=status,
+            sprint=sprint,
+            user_id=user_id,
+            search=search,
+        )
+
+        result[status.value] = {
+            "count": total,
+            "tasks": tasks,
+        }
+
     return result

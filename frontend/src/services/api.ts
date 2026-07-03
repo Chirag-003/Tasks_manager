@@ -210,6 +210,21 @@ export const api = createApi({
     getCurrentUser: builder.query<any, void>({
       query: () => "/auth/me",
     }),
+
+    getKanbanTasks: builder.query<any, any>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+
+        if (filters?.search) params.append("search", filters.search);
+        if (filters?.sprint) params.append("sprint", filters.sprint);
+        if (filters?.user_id) params.append("user_id", filters.user_id);
+
+        return `/task1/kanban?${params.toString()}`;
+      },
+      providesTags: ["Tasks"],
+    }),
+
+    // end
   }),
 });
 
@@ -231,4 +246,5 @@ export const {
   useLoginUserMutation,
   useRegisterUserMutation,
   useGetCurrentUserQuery,
+  useGetKanbanTasksQuery,
 } = api;
