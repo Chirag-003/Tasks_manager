@@ -2,6 +2,8 @@ import { Select, MenuItem } from "@mui/material";
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
+import { STATUS_OPTIONS } from "@/constants/status";
+
 import {
   useUpdateTaskMutation,
   useUpdateSubtaskMutation,
@@ -12,15 +14,6 @@ type Props = {
   entityType: "task" | "subtask";
   value: string;
 };
-
-const statusOptions = [
-  { value: "backlog", label: "Backlog" },
-  { value: "todo", label: "Todo" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "in_review", label: "In Review" },
-  { value: "qa", label: "QA" },
-  { value: "completed", label: "Completed" },
-];
 
 export default function StatusField({ entityId, entityType, value }: Props) {
   const [updateTask] = useUpdateTaskMutation();
@@ -80,7 +73,7 @@ export default function StatusField({ entityId, entityType, value }: Props) {
         minWidth: "auto",
       }}
     >
-      {statusOptions.map((status) => (
+      {STATUS_OPTIONS.map((status) => (
         <MenuItem key={status.value} value={status.value}>
           {status.label}
         </MenuItem>

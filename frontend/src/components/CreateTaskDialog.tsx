@@ -6,15 +6,10 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField,
   Divider,
   Box,
   Typography,
-  MenuItem,
   Grow,
-  Snackbar,
-  Alert,
-  InputAdornment,
 } from "@mui/material";
 
 import { useState, useEffect } from "react";
@@ -24,7 +19,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import FlagIcon from "@mui/icons-material/Flag";
 import TimelineIcon from "@mui/icons-material/Timeline";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -33,6 +28,7 @@ import { useGetUsersQuery } from "@/services/api";
 import InputField from "./InputField";
 import UserField from "./UserField";
 import StatusSnackbar from "./StatusSnackbar";
+import { STATUS_OPTIONS } from "@/constants/status";
 
 // ✅ TYPES
 type Props = {
@@ -174,14 +170,7 @@ export default function CreateTaskDialog({
           label: "Status",
           type: "select",
           icon: <FlagIcon fontSize="small" />,
-          options: [
-            { label: "Backlog", value: "backlog" },
-            { label: "Todo", value: "todo" },
-            { label: "In Progress", value: "in progress" },
-            { label: "In Review", value: "in review" },
-            { label: "QA", value: "qa" },
-            { label: "Completed", value: "completed" },
-          ],
+          options: STATUS_OPTIONS,
         },
         {
           name: "sprint",

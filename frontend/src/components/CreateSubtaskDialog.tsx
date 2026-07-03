@@ -6,14 +6,9 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField,
   Box,
   Typography,
-  MenuItem,
   Divider,
-  Snackbar,
-  Alert,
-  InputAdornment,
 } from "@mui/material";
 
 import { useState } from "react";
@@ -30,6 +25,7 @@ import { useGetUsersQuery } from "@/services/api";
 import InputField from "./InputField";
 import UserField from "./UserField";
 import StatusSnackbar from "./StatusSnackbar";
+import { STATUS_OPTIONS } from "@/constants/status";
 
 // ✅ SCHEMA
 const subtaskSchema = z.object({
@@ -123,14 +119,7 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
       label: "Status",
       type: "select",
       icon: <FlagIcon fontSize="small" />,
-      options: [
-        { label: "Backlog", value: "backlog" },
-        { label: "Todo", value: "todo" },
-        { label: "In Progress", value: "in progress" },
-        { label: "In Review", value: "in review" },
-        { label: "QA", value: "qa" },
-        { label: "Completed", value: "completed" },
-      ],
+      options: STATUS_OPTIONS,
     },
   ];
 

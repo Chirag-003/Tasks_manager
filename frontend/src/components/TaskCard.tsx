@@ -14,29 +14,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import UILoader from "@/components/Loader";
+import { STATUS_CONFIG } from "@/constants/status";
 
 type TaskCardProps = {
   task: any;
   onClick?: () => void;
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "backlog":
-      return "warning";
-    case "todo":
-      return "default";
-    case "in_progress":
-      return "primary";
-    case "in_review":
-      return "info";
-    case "qa":
-      return "secondary";
-    case "completed":
-      return "success";
-    default:
-      return "default";
-  }
 };
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
@@ -46,6 +28,8 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
   const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
 
   const users = task.users || [];
+
+  const statusConfig = STATUS_CONFIG[task.status as keyof typeof STATUS_CONFIG];
 
   return (
     <>
@@ -110,9 +94,9 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             </Typography>
 
             <Chip
-              label={task.status}
+              label={statusConfig?.label ?? task.status}
+              color={statusConfig?.color ?? "default"}
               size="small"
-              color={getStatusColor(task.status)}
               sx={{
                 height: "20px",
                 fontSize: "10px",

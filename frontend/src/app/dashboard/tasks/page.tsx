@@ -7,25 +7,21 @@ import CreateTaskDialog from "@/components/CreateTaskDialog";
 import UILoader from "@/components/Loader";
 import FilterMenu from "@/components/FilterMenu";
 import StatusTabs from "@/components/StatusTabs";
+import TasksHeader from "@/components/TaskHeader";
 
 import { useState, useEffect } from "react";
 
 import {
   Box,
   Typography,
-  Button,
   Snackbar,
   Alert,
-  TextField,
   Pagination,
   useMediaQuery,
-  InputAdornment,
 } from "@mui/material";
 
-import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-
 import { useRouter, useSearchParams } from "next/navigation";
+import { STATUS_VALUES } from "@/constants/status";
 
 export default function TasksPage() {
   const router = useRouter();
@@ -145,9 +141,7 @@ export default function TasksPage() {
   if (isLoading) return <UILoader type="task" />;
   if (isError) return <p>Error fetching tasks</p>;
 
-  const statusTabs = isMobile
-    ? ["backlog", "todo", "in_progress", "in_review", "qa", "completed"]
-    : ["", "backlog", "todo", "in_progress", "in_review", "qa", "completed"];
+  const statusTabs = isMobile ? STATUS_VALUES : ["", ...STATUS_VALUES];
 
   const taskFilters = (
     <FilterMenu
@@ -201,168 +195,25 @@ export default function TasksPage() {
         }}
       >
         {/* ✅ HEADER */}
-        <Box mb={2}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1.5,
-              minHeight: "50px",
-            }}
-          >
-            {isMobile ? (
-              showMobileSearch ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    width: "100%",
-                    minHeight: "36px",
-                  }}
-                >
-                  <TextField
-                    autoFocus
-                    fullWidth
-                    placeholder="Search task by title..."
-                    size="small"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    variant="standard"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
 
-                  <Button onClick={() => setShowMobileSearch(false)}>✕</Button>
-
-                  {taskFilters}
-                </Box>
-              ) : (
-                <>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        fontWeight: 600,
-                        lineHeight: 1,
-                      }}
-                    >
-                      Tasks
-                    </Typography>
-
-                    <Box
-                      onClick={() => handleOpen()}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-
-                        width: 36,
-                        height: 36,
-
-                        borderRadius: 2,
-                        cursor: "pointer",
-
-                        color: "#111827",
-
-                        transition: "all 0.15s ease",
-
-                        "&:hover": {
-                          backgroundColor: "#f3f4f6",
-                          color: "#2563eb",
-                        },
-                      }}
-                    >
-                      <AddIcon sx={{ fontSize: 20 }} />
-                    </Box>
-                  </Box>
-
-                  <Box display="flex" gap={1}>
-                    <Button onClick={() => setShowMobileSearch(true)}>
-                      <SearchIcon />
-                    </Button>
-
-                    {taskFilters}
-                  </Box>
-                </>
-              )
-            ) : (
-              <>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontWeight: 600,
-                    }}
-                  >
-                    Tasks
-                  </Typography>
-
-                  <Box
-                    onClick={() => handleOpen()}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-
-                      width: 26,
-                      height: 26,
-
-                      borderRadius: "6px",
-                      cursor: "pointer",
-
-                      color: "#2563eb",
-
-                      transition: "all 0.15s ease",
-
-                      "&:hover": {
-                        backgroundColor: "rgba(37, 99, 235, 0.1)",
-                      },
-                    }}
-                  >
-                    <AddIcon sx={{ fontSize: 18, fontWeight: 700 }} />
-                  </Box>
-                </Box>
-
-                <Box display="flex" alignItems="center" gap={1.5}>
-                  <TextField
-                    placeholder="Search task by title..."
-                    size="small"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    sx={{ width: 240 }}
-                    variant="standard"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon sx={{ fontSize: 16, color: "#94a3b8" }} />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  {taskFilters}
-                </Box>
-              </>
-            )}
-          </Box>
-
-          {/* ✅ TABS */}
-
+        <Box
+          sx={{ mb: 1.5, display: "flex", flexDirection: "column", gap: 1.5 }}
+        >
+          <TasksHeader
+            isMobile={isMobile}
+            showMobileSearch={showMobileSearch}
+            searchInput={searchInput}
+            onSearchChange={setSearchInput}
+            onToggleMobileSearch={setShowMobileSearch}
+            onCreateTask={() => handleOpen()}
+            filterComponent={taskFilters}
+          />
           <StatusTabs
             statusTabs={statusTabs}
             activeStatus={activeStatus}
             onStatusChange={handleStatusChange}
           />
         </Box>
-
-        {/* ✅ POPOVER */}
 
         {/* ✅ TASK LIST */}
         <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>

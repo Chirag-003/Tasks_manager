@@ -15,6 +15,7 @@ import TuneIcon from "@mui/icons-material/Tune";
 import Popover from "@mui/material/Popover";
 
 import { useGetUsersQuery, useGetSprintsQuery } from "@/services/api";
+import { STATUS_OPTIONS } from "@/constants/status";
 
 type Props = {
   filters?: any;
@@ -116,12 +117,12 @@ export default function FilterMenu({
                   onChange={(e) => handleChange("status", e.target.value)}
                 >
                   <MenuItem value="">All</MenuItem>
-                  <MenuItem value="backlog">Backlog</MenuItem>
-                  <MenuItem value="todo">Todo</MenuItem>
-                  <MenuItem value="in_progress">In Progress</MenuItem>
-                  <MenuItem value="in_review">In Review</MenuItem>
-                  <MenuItem value="qa">QA</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
+
+                  {STATUS_OPTIONS.map((status) => (
+                    <MenuItem key={status.value} value={status.value}>
+                      {status.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             )}

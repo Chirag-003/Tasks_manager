@@ -26,6 +26,7 @@ import UILoader from "@/components/Loader";
 import { useDeleteSubtaskMutation, useGetSubtasksQuery } from "@/services/api";
 
 import FilterMenu from "@/components/FilterMenu";
+import { STATUS_CONFIG } from "@/constants/status";
 
 type Props = {
   taskId: number;
@@ -89,25 +90,6 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
   }, [searchInput]);
 
   const visibleSubtasks = showAll ? subtasks : subtasks.slice(0, 1);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "backlog":
-        return "warning";
-      case "todo":
-        return "default";
-      case "in progress":
-        return "primary";
-      case "in review":
-        return "info";
-      case "qa":
-        return "secondary";
-      case "completed":
-        return "success";
-      default:
-        return "default";
-    }
-  };
 
   // ✅ DELETE FUNCTION (UPDATED WITH SNACKBAR)
   const handleDelete = async () => {
@@ -210,46 +192,50 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
         </Typography>
       ) : (
         <>
-          {visibleSubtasks.map((subtask: any) => (
-            <Box
-              key={subtask.id}
-              onClick={() => {
-                setLoadingSubtaskId(subtask.id);
-                router.push(`/dashboard/subtasks/${subtask.id}`);
-              }}
-              sx={{
-                px: 1.5,
-                py: 1.2,
-                borderRadius: 2,
-                border: "1px solid #e5e7eb",
-                backgroundColor: "#f8fafc",
-                mb: 1,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <Typography sx={{ flex: 1 }}>{subtask.title}</Typography>
-
-              <Chip
-                label={subtask.status}
-                size="small"
-                color={getStatusColor(subtask.status)}
-              />
-
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedId(subtask.id);
-                  setOpenDelete(true);
+          {visibleSubtasks.map((subtask: any) => {
+            const statusConfig =
+              STATUS_CONFIG[subtask.status as keyof typeof STATUS_CONFIG];
+            return (
+              <Box
+                key={subtask.id}
+                onClick={() => {
+                  setLoadingSubtaskId(subtask.id);
+                  router.push(`/dashboard/subtasks/${subtask.id}`);
+                }}
+                sx={{
+                  px: 1.5,
+                  py: 1.2,
+                  borderRadius: 2,
+                  border: "1px solid #e5e7eb",
+                  backgroundColor: "#f8fafc",
+                  mb: 1,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
                 }}
               >
-                <DeleteOutlineIcon fontSize="small" />
-              </IconButton>
-            </Box>
-          ))}
+                <Typography sx={{ flex: 1 }}>{subtask.title}</Typography>
+
+                <Chip
+                  label={statusConfig?.label ?? subtask.status}
+                  size="small"
+                  color={statusConfig?.color ?? "default"}
+                />
+
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedId(subtask.id);
+                    setOpenDelete(true);
+                  }}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            );
+          })}
         </>
       )}
 
