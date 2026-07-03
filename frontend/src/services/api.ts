@@ -95,12 +95,22 @@ export const api = createApi({
     }),
 
     getSubtasks: builder.query<any, any>({
-      query: ({ task_id, status, user_id, search }) => {
+      query: ({
+        task_id,
+        status,
+        user_id,
+        search,
+        page = 1,
+        page_size = 5,
+      }) => {
         const params = new URLSearchParams();
 
         if (status) params.append("status", status);
         if (user_id) params.append("user_id", user_id);
         if (search) params.append("search", search);
+
+        params.append("page", String(page));
+        params.append("page_size", String(page_size));
 
         return `/tasks/${task_id}/subtasks?${params.toString()}`;
       },

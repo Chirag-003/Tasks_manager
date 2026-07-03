@@ -80,7 +80,9 @@ def get_subtasks(
     status=None,
     user_id=None,
     search=None,
-    sprint=None,  # ✅ ADD
+    sprint=None,
+    skip: int = 0,
+    limit: int = 5,
 ):
     # Check if task exists
     task = db.query(Task).filter(Task.id == task_id).first()
@@ -104,7 +106,9 @@ def get_subtasks(
         if search:
             query = query.filter(SubTask.title.ilike(f"%{search}%"))
 
-    subtasks = query.all()
+    total_count = query.count()
+
+    subtasks = query.offset(skip).limit(limit).all()
 
     result = []
 
@@ -132,7 +136,7 @@ def get_subtasks(
             }
         )
 
-    return result
+    return result, total_count
 
 
 def get_subtask_by_id(db: Session, subtask_id: int):

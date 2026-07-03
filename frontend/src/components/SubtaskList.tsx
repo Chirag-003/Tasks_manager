@@ -44,24 +44,27 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
     search: "",
   });
 
-  const { data: subtasks = [] } = useGetSubtasksQuery(
+  const [pageSize, setPageSize] = useState(5);
+
+  const { data } = useGetSubtasksQuery(
     {
       task_id: taskId,
       ...filters,
+      page: 1,
+      page_size: pageSize,
     },
     {
       refetchOnMountOrArgChange: true,
     },
   );
 
-  const [deleteSubtask] = useDeleteSubtaskMutation();
+  const subtasks = data?.results ?? [];
 
-  const [showAll, setShowAll] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("subtasks-expanded") === "true";
-    }
-    return false;
-  });
+  useEffect(() => {
+    setPageSize(5);
+  }, [filters, taskId]);
+
+  const [deleteSubtask] = useDeleteSubtaskMutation();
 
   const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
 
@@ -89,8 +92,6 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const visibleSubtasks = showAll ? subtasks : subtasks.slice(0, 1);
-
   // ✅ DELETE FUNCTION (UPDATED WITH SNACKBAR)
   const handleDelete = async () => {
     if (!selectedId) return;
@@ -106,7 +107,7 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
       // ✅ ✅ ✅ SHOW SUCCESS MESSAGE
       setSnackbar({
         open: true,
-        message: "Subtask deleted successfully ✅",
+        message: "Subtask deleted successfully ",
       });
     } catch (err: any) {
       let message = err?.data?.detail || "Cannot delete subtask";
@@ -192,7 +193,7 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
         </Typography>
       ) : (
         <>
-          {visibleSubtasks.map((subtask: any) => {
+          {subtasks.map((subtask: any) => {
             const statusConfig =
               STATUS_CONFIG[subtask.status as keyof typeof STATUS_CONFIG];
             return (
@@ -236,6 +237,28 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
               </Box>
             );
           })}
+
+          {subtasks.length < (data?.count ?? 0) && (
+            <Box
+              sx={{
+                mt: 2,
+                py: 1,
+                textAlign: "center",
+                border: "1px dashed #cbd5e1",
+                borderRadius: 2,
+                cursor: "pointer",
+                fontWeight: 600,
+                color: "#475569",
+
+                "&:hover": {
+                  backgroundColor: "#f8fafc",
+                },
+              }}
+              onClick={() => setPageSize((prev) => prev + 5)}
+            >
+              Load More Subtasks
+            </Box>
+          )}
         </>
       )}
 

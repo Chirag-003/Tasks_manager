@@ -250,16 +250,24 @@ export default function TaskList({
             {colTasks.length < totalCount && !isLoading && (
               <Box
                 sx={{
-                  mt: 1,
-                  px: 1,
-                  py: 0.8,
-                  borderRadius: 1.5,
+                  mx: 1,
+                  py: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 2,
+                  border: "1px dashed #cbd5e1",
+                  backgroundColor: "#f8fafc",
                   cursor: "pointer",
-                  fontSize: "14px",
-                  color: "#1e293b",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  color: "#475569",
+                  transition: "all 0.2s ease",
 
                   "&:hover": {
                     backgroundColor: "#e2e8f0",
+                    borderColor: "#94a3b8",
+                    color: "#0f172a",
                   },
                 }}
                 onClick={() =>
@@ -269,7 +277,7 @@ export default function TaskList({
                   }))
                 }
               >
-                Show More
+                Load More Tasks
               </Box>
             )}
           </Box>

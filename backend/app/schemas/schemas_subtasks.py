@@ -33,3 +33,10 @@ class SubTaskResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SubTaskListResponse(BaseModel):
+    count: int
+    page: int
+    page_size: int
+    results: list[SubTaskResponse]

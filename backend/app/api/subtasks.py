@@ -4,7 +4,12 @@ from fastapi import Query
 from typing import Optional
 
 from app.db.session import get_db
-from app.schemas.schemas_subtasks import SubTaskCreate, SubTaskResponse, SubTaskUpdate
+from app.schemas.schemas_subtasks import (
+    SubTaskCreate,
+    SubTaskListResponse,
+    SubTaskResponse,
+    SubTaskUpdate,
+)
 from app.services import services_subtask
 from app.core.redis_client import redis_client
 import json
@@ -39,12 +44,14 @@ def create_subtask(task_id: int, subtask: SubTaskCreate, db: Session = Depends(g
     return result
 
 
-@router.get("/tasks/{task_id}/subtasks", response_model=list[SubTaskResponse])
+@router.get("/tasks/{task_id}/subtasks", response_model=SubTaskListResponse)
 def get_subtasks(
     task_id: int,
     status: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
     search: Optional[str] = Query(default=None),
+    page: int = Query(default=1),
+    page_size: int = Query(default=5),
     db: Session = Depends(get_db),
 ):
 
@@ -58,7 +65,9 @@ def get_subtasks(
         f"{task_id}:"
         f"{normalize(status)}:"
         f"{normalize(user_id)}:"
-        f"{normalize(search)}"
+        f"{normalize(search)}:"
+        f"{page}:"
+        f"{page_size}"
     )
 
     # ✅ safe cache read
@@ -75,13 +84,22 @@ def get_subtasks(
             redis_client.delete(cache_key)
 
     # ✅ service call
-    subtasks = services_subtask.get_subtasks(
+    subtasks, total_count = services_subtask.get_subtasks(
         db,
         task_id=task_id,
         status=status,
         user_id=user_id,
         search=search,
+        skip=(page - 1) * page_size,
+        limit=page_size,
     )
+
+    response = {
+        "count": total_count,
+        "page": page,
+        "page_size": page_size,
+        "results": subtasks,
+    }
 
     # ✅ safe cache write
     if subtasks:
@@ -89,17 +107,12 @@ def get_subtasks(
             redis_client.setex(
                 cache_key,
                 180,
-                json.dumps(
-                    [
-                        SubTaskResponse.model_validate(subtask).model_dump()
-                        for subtask in subtasks
-                    ]
-                ),
+                json.dumps(response),
             )
         except Exception:
             pass
 
-    return subtasks
+    return response
 
 
 @router.get("/subtasks/{subtask_id}", response_model=SubTaskResponse)
