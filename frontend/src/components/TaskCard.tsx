@@ -26,9 +26,9 @@ const getStatusColor = (status: string) => {
       return "warning";
     case "todo":
       return "default";
-    case "in progress":
+    case "in_progress":
       return "primary";
-    case "in review":
+    case "in_review":
       return "info";
     case "qa":
       return "secondary";

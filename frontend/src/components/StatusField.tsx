@@ -14,12 +14,12 @@ type Props = {
 };
 
 const statusOptions = [
-  "backlog",
-  "todo",
-  "in progress",
-  "in review",
-
-  "completed",
+  { value: "backlog", label: "Backlog" },
+  { value: "todo", label: "Todo" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "in_review", label: "In Review" },
+  { value: "qa", label: "QA" },
+  { value: "completed", label: "Completed" },
 ];
 
 export default function StatusField({ entityId, entityType, value }: Props) {
@@ -81,8 +81,8 @@ export default function StatusField({ entityId, entityType, value }: Props) {
       }}
     >
       {statusOptions.map((status) => (
-        <MenuItem key={status} value={status}>
-          {status.replace("_", " ")}
+        <MenuItem key={status.value} value={status.value}>
+          {status.label}
         </MenuItem>
       ))}
     </Select>

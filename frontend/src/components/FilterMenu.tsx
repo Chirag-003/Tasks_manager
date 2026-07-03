@@ -118,8 +118,8 @@ export default function FilterMenu({
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="backlog">Backlog</MenuItem>
                   <MenuItem value="todo">Todo</MenuItem>
-                  <MenuItem value="in progress">In Progress</MenuItem>
-                  <MenuItem value="in review">In Review</MenuItem>
+                  <MenuItem value="in_progress">In Progress</MenuItem>
+                  <MenuItem value="in_review">In Review</MenuItem>
                   <MenuItem value="qa">QA</MenuItem>
                   <MenuItem value="completed">Completed</MenuItem>
                 </Select>
