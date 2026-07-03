@@ -4,7 +4,8 @@ import { Box, Typography } from "@mui/material";
 import TaskCard from "./TaskCard";
 import { useGetKanbanTasksQuery } from "@/services/api";
 import UILoader from "./Loader";
-import { STATUS_COLUMNS } from "@/constants/status";
+import { STATUS_COLUMNS, StatusKey } from "@/constants/status";
+import { useEffect, useState } from "react";
 
 type TaskListProps = {
   tasks: any[];
@@ -23,7 +24,99 @@ export default function TaskList({
 }: TaskListProps) {
   const columns = STATUS_COLUMNS;
 
-  const { data, isLoading, error } = useGetKanbanTasksQuery(filters);
+  const [columnPages, setColumnPages] = useState<Record<StatusKey, number>>({
+    backlog: 1,
+    todo: 1,
+    in_progress: 1,
+    in_review: 1,
+    qa: 1,
+    completed: 1,
+  });
+
+  const [columnData, setColumnData] = useState<Record<StatusKey, any[]>>({
+    backlog: [],
+    todo: [],
+    in_progress: [],
+    in_review: [],
+    qa: [],
+    completed: [],
+  });
+
+  const { data, isLoading, error } = useGetKanbanTasksQuery({
+    ...filters,
+    backlog_page: columnPages.backlog,
+    todo_page: columnPages.todo,
+    in_progress_page: columnPages.in_progress,
+    in_review_page: columnPages.in_review,
+    qa_page: columnPages.qa,
+    completed_page: columnPages.completed,
+  });
+
+  const mergeUnique = (oldList: any[] = [], newList: any[] = []) => {
+    const map = new Map();
+
+    [...oldList, ...newList].forEach((item) => {
+      map.set(item.id, item);
+    });
+
+    return Array.from(map.values());
+  };
+
+  useEffect(() => {
+    if (!data) return;
+
+    setColumnData((prev) => ({
+      backlog:
+        columnPages.backlog === 1
+          ? data.backlog.tasks
+          : mergeUnique(prev.backlog, data.backlog.tasks),
+
+      todo:
+        columnPages.todo === 1
+          ? data.todo.tasks
+          : mergeUnique(prev.todo, data.todo.tasks),
+
+      in_progress:
+        columnPages.in_progress === 1
+          ? data.in_progress.tasks
+          : mergeUnique(prev.in_progress, data.in_progress.tasks),
+
+      in_review:
+        columnPages.in_review === 1
+          ? data.in_review.tasks
+          : mergeUnique(prev.in_review, data.in_review.tasks),
+
+      qa:
+        columnPages.qa === 1
+          ? data.qa.tasks
+          : mergeUnique(prev.qa, data.qa.tasks),
+
+      completed:
+        columnPages.completed === 1
+          ? data.completed.tasks
+          : mergeUnique(prev.completed, data.completed.tasks),
+    }));
+  }, [data, columnPages]);
+
+  useEffect(() => {
+    setColumnPages({
+      backlog: 1,
+      todo: 1,
+      in_progress: 1,
+      in_review: 1,
+      qa: 1,
+      completed: 1,
+    });
+
+    setColumnData({
+      backlog: [],
+      todo: [],
+      in_progress: [],
+      in_review: [],
+      qa: [],
+      completed: [],
+    });
+  }, [filters]);
 
   if (error) {
     return (
@@ -82,7 +175,7 @@ export default function TaskList({
       }}
     >
       {columns.map((col) => {
-        const colTasks = data?.[col.key]?.tasks ?? [];
+        const colTasks = columnData[col.key] ?? [];
         const totalCount = data?.[col.key]?.count ?? 0;
 
         return (
@@ -154,6 +247,31 @@ export default function TaskList({
                 </Box>
               )}
             </Box>
+            {colTasks.length < totalCount && !isLoading && (
+              <Box
+                sx={{
+                  mt: 1,
+                  px: 1,
+                  py: 0.8,
+                  borderRadius: 1.5,
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  color: "#1e293b",
+
+                  "&:hover": {
+                    backgroundColor: "#e2e8f0",
+                  },
+                }}
+                onClick={() =>
+                  setColumnPages((prev) => ({
+                    ...prev,
+                    [col.key]: prev[col.key] + 1,
+                  }))
+                }
+              >
+                Show More
+              </Box>
+            )}
           </Box>
         );
       })}

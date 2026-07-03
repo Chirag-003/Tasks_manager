@@ -44,6 +44,8 @@ class TaskResponse(BaseModel):
 
 class KanbanColumnResponse(BaseModel):
     count: int
+    page: int
+    page_size: int
     tasks: List[TaskResponse]
 
 

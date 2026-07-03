@@ -25,6 +25,8 @@ export const STATUS_CONFIG = {
   },
 } as const;
 
+export type StatusKey = keyof typeof STATUS_CONFIG;
+
 export const STATUS_OPTIONS = Object.entries(STATUS_CONFIG).map(
   ([value, config]) => ({
     value,
@@ -34,9 +36,10 @@ export const STATUS_OPTIONS = Object.entries(STATUS_CONFIG).map(
 
 export const STATUS_VALUES = Object.keys(STATUS_CONFIG);
 
-export const STATUS_COLUMNS = Object.entries(STATUS_CONFIG).map(
-  ([key, config]) => ({
-    key,
-    title: config.label,
-  }),
-);
+export const STATUS_COLUMNS: {
+  key: StatusKey;
+  title: string;
+}[] = Object.entries(STATUS_CONFIG).map(([key, config]) => ({
+  key: key as StatusKey,
+  title: config.label,
+}));

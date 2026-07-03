@@ -152,6 +152,12 @@ def get_kanban_tasks(
     sprint: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
     search: Optional[str] = Query(default=None),
+    backlog_page: int = Query(default=1),
+    todo_page: int = Query(default=1),
+    in_progress_page: int = Query(default=1),
+    in_review_page: int = Query(default=1),
+    qa_page: int = Query(default=1),
+    completed_page: int = Query(default=1),
     db: Session = Depends(get_db),
 ):
     return services_task.get_kanban_tasks(
@@ -159,6 +165,12 @@ def get_kanban_tasks(
         sprint=sprint,
         user_id=user_id,
         search=search,
+        backlog_page=backlog_page,
+        todo_page=todo_page,
+        in_progress_page=in_progress_page,
+        in_review_page=in_review_page,
+        qa_page=qa_page,
+        completed_page=completed_page,
     )
 
 

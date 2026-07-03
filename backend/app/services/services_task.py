@@ -387,6 +387,12 @@ def get_kanban_tasks(
     sprint=None,
     user_id=None,
     search=None,
+    backlog_page: int = 1,
+    todo_page: int = 1,
+    in_progress_page: int = 1,
+    in_review_page: int = 1,
+    qa_page: int = 1,
+    completed_page: int = 1,
 ):
     result = {}
 
@@ -399,10 +405,22 @@ def get_kanban_tasks(
         StatusEnum.completed,
     ]
 
+    page_map = {
+        StatusEnum.backlog: backlog_page,
+        StatusEnum.todo: todo_page,
+        StatusEnum.in_progress: in_progress_page,
+        StatusEnum.in_review: in_review_page,
+        StatusEnum.qa: qa_page,
+        StatusEnum.completed: completed_page,
+    }
+
     for status in statuses:
+
+        page = page_map[status]
+
         tasks, total = get_tasks(
             db=db,
-            skip=0,
+            skip=(page - 1) * 10,
             limit=10,
             status=status,
             sprint=sprint,
@@ -412,6 +430,8 @@ def get_kanban_tasks(
 
         result[status.value] = {
             "count": total,
+            "page": page,
+            "page_size": 10,
             "tasks": tasks,
         }
 

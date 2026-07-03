@@ -215,12 +215,45 @@ export const api = createApi({
       query: (filters) => {
         const params = new URLSearchParams();
 
-        if (filters?.search) params.append("search", filters.search);
-        if (filters?.sprint) params.append("sprint", filters.sprint);
-        if (filters?.user_id) params.append("user_id", filters.user_id);
+        if (filters?.search) {
+          params.append("search", filters.search);
+        }
+
+        if (filters?.sprint) {
+          params.append("sprint", filters.sprint);
+        }
+
+        if (filters?.user_id) {
+          params.append("user_id", filters.user_id);
+        }
+
+        if (filters?.backlog_page) {
+          params.append("backlog_page", filters.backlog_page);
+        }
+
+        if (filters?.todo_page) {
+          params.append("todo_page", filters.todo_page);
+        }
+
+        if (filters?.in_progress_page) {
+          params.append("in_progress_page", filters.in_progress_page);
+        }
+
+        if (filters?.in_review_page) {
+          params.append("in_review_page", filters.in_review_page);
+        }
+
+        if (filters?.qa_page) {
+          params.append("qa_page", filters.qa_page);
+        }
+
+        if (filters?.completed_page) {
+          params.append("completed_page", filters.completed_page);
+        }
 
         return `/task1/kanban?${params.toString()}`;
       },
+
       providesTags: ["Tasks"],
     }),
 
