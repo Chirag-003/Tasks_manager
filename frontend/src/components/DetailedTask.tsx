@@ -33,7 +33,8 @@ import AssigneeField from "./AssigneeField";
 import StatusField from "./StatusField";
 import DescriptionField from "./DescriptionField";
 import SubtaskList from "./SubtaskList";
-import CommentsField from "./CommentField";
+import CommentList from "./CommentList";
+import CommentInput from "./CommentInput";
 
 import { z } from "zod";
 
@@ -70,7 +71,7 @@ export default function DetailedTask({ task }: Props) {
     if (searchParams.get("subtask_deleted") === "true") {
       setSnackbar({
         open: true,
-        message: "Subtask deleted successfully ✅",
+        message: "Subtask deleted successfully ",
       });
 
       // remove param after showing
@@ -140,10 +141,13 @@ export default function DetailedTask({ task }: Props) {
         <Box
           sx={{
             width: "100%",
+            maxWidth: 1400,
+            mx: "auto",
             bgcolor: "#fff",
             borderRadius: 3,
             display: "flex",
             flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           {/* HEADER */}
@@ -151,10 +155,16 @@ export default function DetailedTask({ task }: Props) {
             sx={{
               px: 2,
               py: 1.5,
-              borderBottom: "1px solid #e5e7eb",
               display: "flex",
               alignItems: "center",
               gap: 1,
+
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+
+              backgroundColor: "#fff",
+              borderBottom: "1px solid #e5e7eb",
             }}
           >
             <IconButton onClick={() => router.back()}>
@@ -231,29 +241,46 @@ export default function DetailedTask({ task }: Props) {
               />
 
               <Divider />
-            </Box>
+              <Typography
+                sx={{
+                  fontSize: 16,
+                  color: "text.secondary",
+                  fontWeight: 500,
+                }}
+              >
+                Comments
+              </Typography>
 
-            <Box sx={{ mt: "auto" }}>
-              <CommentsField
-                entityId={task.id}
-                entityType="task"
-                comments={task.comments?.data || []}
-                rightSlot={
-                  <Button
-                    sx={{ textTransform: "capitalize" }}
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteOutlinedIcon />}
-                    onClick={() => {
-                      setDeleteError("");
-                      setOpenDelete(true);
-                    }}
-                  >
-                    Delete Task
-                  </Button>
-                }
-              />
+              <CommentList comments={task.comments?.data || []} />
             </Box>
+          </Box>
+
+          <Box
+            sx={{
+              borderTop: "1px solid #d8d8d8",
+              bgcolor: "#fafafa",
+              p: 1.2,
+              flexShrink: 0,
+            }}
+          >
+            <CommentInput
+              entityId={task.id}
+              entityType="task"
+              rightSlot={
+                <Button
+                  sx={{ textTransform: "capitalize", height: "auto" }}
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteOutlinedIcon />}
+                  onClick={() => {
+                    setDeleteError("");
+                    setOpenDelete(true);
+                  }}
+                >
+                  Delete Task
+                </Button>
+              }
+            />
           </Box>
 
           <CreateSubtaskDialog

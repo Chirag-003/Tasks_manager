@@ -187,7 +187,7 @@ export const api = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Tasks"], // ✅ optional (refresh tasks if needed)
+      invalidatesTags: ["Tasks"],
     }),
 
     // ✅ ADD SUBTASK COMMENT

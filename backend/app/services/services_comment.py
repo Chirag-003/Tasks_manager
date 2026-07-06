@@ -5,6 +5,7 @@ from app.models.model_comments import Comment
 from app.models.model_task import Task
 from app.models.model_subtasks import SubTask
 from app.models.model_users import User
+from app.core import redis_client
 
 
 def create_task_comment(db: Session, task_id: int, data):
@@ -28,6 +29,10 @@ def create_task_comment(db: Session, task_id: int, data):
         raise HTTPException(status_code=500, detail="Error creating comment")
 
     db.refresh(comment)
+    try:
+        redis_client.delete(f"task:{task_id}")
+    except Exception:
+        pass
 
     return {
         "id": comment.id,
@@ -68,6 +73,11 @@ def create_subtask_comment(db: Session, subtask_id: int, data):
         raise HTTPException(status_code=500, detail="Error creating comment")
 
     db.refresh(comment)
+
+    try:
+        redis_client.delete(f"task:{subtask.task_id}")
+    except Exception:
+        pass
 
     return {
         "id": comment.id,
