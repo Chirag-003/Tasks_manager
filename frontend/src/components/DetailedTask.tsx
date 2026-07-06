@@ -241,17 +241,18 @@ export default function DetailedTask({ task }: Props) {
               />
 
               <Divider />
-              <Typography
+
+              <Box
                 sx={{
-                  fontSize: 16,
-                  color: "text.secondary",
-                  fontWeight: 500,
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 3,
+                  p: 2,
+                  bgcolor: "#fafafa",
+                  mt: 1,
                 }}
               >
-                Comments
-              </Typography>
-
-              <CommentList comments={task.comments?.data || []} />
+                <CommentList comments={task.comments?.data || []} />
+              </Box>
             </Box>
           </Box>
 

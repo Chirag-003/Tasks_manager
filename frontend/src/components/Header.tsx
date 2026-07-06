@@ -6,7 +6,9 @@ import { Manrope } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import StatusSnackbar from "./StatusSnackbar";
-import { useGetCurrentUserQuery } from "@/services/api";
+import { api, useGetCurrentUserQuery } from "@/services/api";
+
+import { useDispatch } from "react-redux";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -15,6 +17,7 @@ const manrope = Manrope({
 
 export default function Header() {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -41,14 +44,14 @@ export default function Header() {
         },
       });
     } catch {}
-
+    dispatch(api.util.resetApiState());
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
 
-    router.push("/login?status=logout");
+    window.location.href = "/login?status=logout";
   };
 
-  const { data, isLoading } = useGetCurrentUserQuery();
+  const { data, isLoading } = useGetCurrentUserQuery(undefined);
 
   return (
     <>

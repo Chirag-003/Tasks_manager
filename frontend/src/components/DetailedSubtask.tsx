@@ -30,6 +30,8 @@ import CommentsField from "./CommentField";
 
 // ✅ ✅ ✅ ONLY ADDED
 import { z } from "zod";
+import CommentList from "./CommentList";
+import CommentInput from "./CommentInput";
 
 // ✅ ✅ ✅ ONLY ADDED
 const titleSchema = z.string().min(1, "Title cannot be empty");
@@ -252,33 +254,47 @@ export default function DetailedSubtask({ subtask }: Props) {
               <Divider />
             </Box>
 
-            <Box sx={{ mt: "auto" }}>
-              <CommentsField
-                entityId={subtask.id}
-                entityType="subtask"
-                comments={subtask.comments?.data || []}
-                rightSlot={
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteOutlinedIcon />}
-                    onClick={() => {
-                      setDeleteError("");
-                      setOpenDelete(true);
-                    }}
-                    sx={{
-                      borderRadius: 2,
-                      textTransform: "none",
-                      "&:hover": {
-                        backgroundColor: "#fee2e2",
-                      },
-                    }}
-                  >
-                    Delete Subtask
-                  </Button>
-                }
-              />
+            <Box
+              sx={{
+                border: "1px solid #e5e7eb",
+                borderRadius: 3,
+                p: 2,
+                bgcolor: "#fafafa",
+                mt: 2,
+              }}
+            >
+              <CommentList comments={subtask.comments?.data || []} />
             </Box>
+          </Box>
+          <Box
+            sx={{
+              borderTop: "1px solid #d8d8d8",
+              bgcolor: "#fafafa",
+              p: 1.2,
+              flexShrink: 0,
+            }}
+          >
+            <CommentInput
+              entityId={subtask.id}
+              entityType="subtask"
+              rightSlot={
+                <Button
+                  sx={{
+                    textTransform: "capitalize",
+                    height: "auto",
+                  }}
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteOutlinedIcon />}
+                  onClick={() => {
+                    setDeleteError("");
+                    setOpenDelete(true);
+                  }}
+                >
+                  Delete Subtask
+                </Button>
+              }
+            />
           </Box>
         </Box>
       </Box>

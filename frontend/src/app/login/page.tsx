@@ -14,6 +14,9 @@ import {
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 
+import { useDispatch } from "react-redux";
+import { api } from "@/services/api";
+
 import InputField from "@/components/InputField";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,6 +36,7 @@ export default function LoginPage() {
   } = useForm<LoginForm>();
 
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -84,6 +88,8 @@ export default function LoginPage() {
       localStorage.setItem("access_token", result.access_token);
 
       localStorage.setItem("refresh_token", result.refresh_token);
+
+      dispatch(api.util.resetApiState());
 
       router.push("/dashboard?status=login");
 

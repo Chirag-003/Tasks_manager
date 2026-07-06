@@ -62,7 +62,7 @@ export const api = createApi({
 
   baseQuery: baseQueryWithReauth,
 
-  tagTypes: ["Tasks", "Users", "Subtasks"],
+  tagTypes: ["Tasks", "Users", "Subtasks", "CurrentUser"],
 
   endpoints: (builder) => ({
     getTasks: builder.query<any, any>({
@@ -201,12 +201,13 @@ export const api = createApi({
     }),
 
     // ✅ LOGIN
-    loginUser: builder.mutation<any, { email: string; password: string }>({
+    loginUser: builder.mutation({
       query: (data) => ({
         url: "/auth/login",
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["CurrentUser"],
     }),
     // prettier-ignore
     registerUser: builder.mutation<any,{ username: string; email: string; password: string }>({
@@ -217,8 +218,9 @@ export const api = createApi({
       }),
     }),
 
-    getCurrentUser: builder.query<any, void>({
+    getCurrentUser: builder.query({
       query: () => "/auth/me",
+      providesTags: ["CurrentUser"],
     }),
 
     getKanbanTasks: builder.query<any, any>({

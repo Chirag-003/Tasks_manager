@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Avatar, Divider } from "@mui/material";
 
 type Props = {
   comments: any[];
@@ -9,14 +9,14 @@ type Props = {
 export default function CommentList({ comments }: Props) {
   if (!comments?.length) {
     return (
-      <Typography
+      <Box
         sx={{
-          color: "text.secondary",
-          mb: 1,
+          py: 3,
+          textAlign: "center",
         }}
       >
-        No comments
-      </Typography>
+        <Typography color="text.secondary">No discussion yet.</Typography>
+      </Box>
     );
   }
 
@@ -25,34 +25,90 @@ export default function CommentList({ comments }: Props) {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1,
-        mb: 2,
       }}
     >
-      {comments.map((comment: any) => (
-        <Box
-          key={comment.id}
-          sx={{
-            p: 1.5,
-            borderRadius: 2,
-            border: "1px solid #e5e7eb",
-            backgroundColor: "#fafafa",
-          }}
-        >
-          {comment.user?.username && (
-            <Typography
+      <Typography
+        sx={{
+          fontSize: 16,
+
+          mb: 2,
+          color: "#8f8f8f",
+        }}
+      >
+        Discussion ({comments.length})
+      </Typography>
+
+      {comments.map((comment, index) => (
+        <Box key={comment.id}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1.5,
+              py: 1,
+              alignItems: "flex-start",
+            }}
+          >
+            <Avatar
               sx={{
+                width: 24,
+                height: 24,
                 fontSize: 12,
-                fontWeight: 600,
-                color: "text.secondary",
-                mb: 0.5,
+                fontWeight: 700,
+                bgcolor: "#e5e7eb",
+                color: "#4b5563",
+                flexShrink: 0,
               }}
             >
-              {comment.user.username}
-            </Typography>
-          )}
+              {comment.user?.username?.charAt(0).toUpperCase()}
+            </Avatar>
 
-          <Typography>{comment.content}</Typography>
+            <Box sx={{ flex: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: 13,
+                    mt: "1px",
+
+                    fontWeight: 600,
+                    color: "#1f2937",
+                  }}
+                >
+                  {comment.user?.username}
+                </Typography>
+
+                <Typography
+                  sx={{
+                    fontSize: 11,
+                    color: "text.secondary",
+                    mt: 0.25,
+                  }}
+                >
+                  • just now
+                </Typography>
+              </Box>
+
+              <Typography
+                sx={{
+                  px: 1,
+                  mt: "2px",
+                  bgcolor: "#f8fafc",
+                  borderRadius: 2,
+                  fontSize: 15,
+                  lineHeight: 1.5,
+                }}
+              >
+                {comment.content}
+              </Typography>
+            </Box>
+          </Box>
+          {index < comments.length - 1 && <Divider />}
         </Box>
       ))}
     </Box>
