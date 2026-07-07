@@ -26,12 +26,12 @@ import {
 
 import AssigneeField from "../common/AssigneeField";
 import StatusField from "../common/StatusField";
-import CommentsField from "../common/CommentField";
+import CommentsField from "../comment/CommentField";
 
 // ✅ ✅ ✅ ONLY ADDED
 import { z } from "zod";
-import CommentList from "../common/CommentList";
-import CommentInput from "../common/CommentInput";
+import CommentList from "../comment/CommentList";
+import CommentInput from "../comment/CommentInput";
 
 // ✅ ✅ ✅ ONLY ADDED
 const titleSchema = z.string().min(1, "Title cannot be empty");

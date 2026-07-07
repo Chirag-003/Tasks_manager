@@ -22,9 +22,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useGetUsersQuery } from "@/services/api";
 
-import InputField from "./InputField";
-import UserField from "./UserField";
-import StatusSnackbar from "./StatusSnackbar";
+import InputField from "../common/InputField";
+import UserField from "../common/UserField";
+import StatusSnackbar from "../common/StatusSnackbar";
 import { STATUS_OPTIONS } from "@/constants/status";
 
 // ✅ SCHEMA

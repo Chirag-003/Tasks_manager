@@ -33,8 +33,8 @@ import AssigneeField from "../common/AssigneeField";
 import StatusField from "../common/StatusField";
 import DescriptionField from "./DescriptionField";
 import SubtaskList from "../subtasks/SubtaskList";
-import CommentList from "../common/CommentList";
-import CommentInput from "../common/CommentInput";
+import CommentList from "../comment/CommentList";
+import CommentInput from "../comment/CommentInput";
 
 import { z } from "zod";
 

@@ -5,11 +5,11 @@ import { Box, Typography, Avatar, Menu, MenuItem } from "@mui/material";
 import { Manrope } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import StatusSnackbar from "./common/StatusSnackbar";
+import StatusSnackbar from "../common/StatusSnackbar";
 import { api, useGetCurrentUserQuery } from "@/services/api";
 
 import { useDispatch } from "react-redux";
-import UILoader from "./common/Loader";
+import UILoader from "../common/Loader";
 import { hasToken } from "@/utils/auth";
 
 const manrope = Manrope({

@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import TaskCard from "./TaskCard";
 import { useGetKanbanTasksQuery } from "@/services/api";
-import UILoader from "./Loader";
+import UILoader from "../common/Loader";
 import { STATUS_COLUMNS, StatusKey } from "@/constants/status";
 import { useEffect, useState } from "react";
 
@@ -172,6 +172,7 @@ export default function TaskList({
         gap: 2,
         height: "100%",
         px: 1,
+        alignItems: "flex-start",
       }}
     >
       {columns.map((col) => {
@@ -190,7 +191,11 @@ export default function TaskList({
               pb: 1,
               boxShadow:
                 "0 1px 2px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.03)",
-              "&::-webkit-scrollbar": { width: "0px" },
+              alignSelf: "flex-start",
+
+              "&::-webkit-scrollbar": {
+                width: "0px",
+              },
             }}
           >
             {/* HEADER */}

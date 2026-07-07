@@ -1,9 +1,9 @@
 "use client";
 
 import { Box } from "@mui/material";
-import Header from "@/components/common/Header";
-import Sidebar from "@/components/common/SideBar";
-import BottomNav from "@/components/common/BottomNav";
+import Header from "@/components/layouts/Header";
+import Sidebar from "@/components/layouts/SideBar";
+import BottomNav from "@/components/layouts/BottomNav";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
