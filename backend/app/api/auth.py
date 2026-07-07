@@ -29,50 +29,37 @@ def register(user: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/auth/login")
-def login(user: LoginRequest, db: Session = Depends(get_db)):
-    db_user = services_auth.login_user(
+def login(
+    user: LoginRequest,
+    db: Session = Depends(get_db),
+):
+    return services_auth.authenticate_user(
         db=db,
         email=user.email,
         password=user.password,
     )
 
-    access_token = create_access_token({"sub": str(db_user.id)})
-
-    refresh_token = create_refresh_token({"sub": str(db_user.id)})
-
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
-
 
 @router.post("/auth/logout")
-def logout():
-    return {"message": "Logged out successfully"}
+def logout(
+    data: dict,
+    db: Session = Depends(get_db),
+):
+    return services_auth.logout_user(
+        db=db,
+        refresh_token=data.get("refresh_token"),
+    )
 
 
 @router.post("/auth/refresh")
-def refresh_access_token(data: dict, db: Session = Depends(get_db)):
-    token = data.get("refresh_token")
-
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Refresh token is required"
-        )
-
-    payload = decode_refresh_token(token)
-
-    user_id = payload.get("sub")
-
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload"
-        )
-
-    new_access_token = create_access_token({"sub": str(user_id)})
-
-    return {"access_token": new_access_token, "token_type": "bearer"}
+def refresh_access_token(
+    data: dict,
+    db: Session = Depends(get_db),
+):
+    return services_auth.refresh_access_token(
+        db=db,
+        refresh_token=data.get("refresh_token"),
+    )
 
 
 @router.get("/auth/me")

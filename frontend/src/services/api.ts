@@ -1,4 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { Mutex } from "async-mutex";
+
+const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://127.0.0.1:8000/api/",
@@ -15,6 +18,8 @@ const baseQuery = fetchBaseQuery({
 });
 
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+  await mutex.waitForUnlock();
+
   let result = await baseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
@@ -22,35 +27,53 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
     if (!refreshToken) {
       localStorage.removeItem("access_token");
-      window.location.href = "/login";
+      localStorage.removeItem("refresh_token");
+
+      window.location.replace("/login");
+
       return result;
     }
 
-    const refreshResult = await baseQuery(
-      {
-        url: "/auth/refresh",
-        method: "POST",
-        body: {
-          refresh_token: refreshToken,
-        },
-      },
-      api,
-      extraOptions,
-    );
+    if (!mutex.isLocked()) {
+      const release = await mutex.acquire();
 
-    if (refreshResult.data) {
-      const data = refreshResult.data as {
-        access_token: string;
-      };
+      try {
+        const refreshResult = await baseQuery(
+          {
+            url: "/auth/refresh",
+            method: "POST",
+            body: {
+              refresh_token: refreshToken,
+            },
+          },
+          api,
+          extraOptions,
+        );
 
-      localStorage.setItem("access_token", data.access_token);
+        if (refreshResult.data) {
+          const data = refreshResult.data as {
+            access_token: string;
+            refresh_token: string;
+          };
+
+          localStorage.setItem("access_token", data.access_token);
+
+          localStorage.setItem("refresh_token", data.refresh_token);
+
+          result = await baseQuery(args, api, extraOptions);
+        } else {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+
+          window.location.replace("/login");
+        }
+      } finally {
+        release();
+      }
+    } else {
+      await mutex.waitForUnlock();
 
       result = await baseQuery(args, api, extraOptions);
-    } else {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-
-      window.location.href = "/login";
     }
   }
 
