@@ -27,14 +27,14 @@ import {
   useUpdateTaskMutation,
 } from "@/services/api";
 
-import CreateSubtaskDialog from "@/components/CreateSubtaskDialog";
+import CreateSubtaskDialog from "@/components/subtasks/CreateSubtaskDialog";
 
-import AssigneeField from "./AssigneeField";
-import StatusField from "./StatusField";
+import AssigneeField from "../common/AssigneeField";
+import StatusField from "../common/StatusField";
 import DescriptionField from "./DescriptionField";
-import SubtaskList from "./SubtaskList";
-import CommentList from "./CommentList";
-import CommentInput from "./CommentInput";
+import SubtaskList from "../subtasks/SubtaskList";
+import CommentList from "../common/CommentList";
+import CommentInput from "../common/CommentInput";
 
 import { z } from "zod";
 

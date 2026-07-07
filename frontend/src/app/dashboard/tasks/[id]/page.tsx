@@ -2,9 +2,9 @@
 
 import { useParams } from "next/navigation";
 import { useGetTaskByIdQuery } from "@/services/api";
-import DetailedTask from "@/components/DetailedTask";
+import DetailedTask from "@/components/tasks/DetailedTask";
 
-import UILoader from "@/components/Loader";
+import UILoader from "@/components/common/Loader";
 
 export default function TaskDetailPage() {
   const params = useParams();

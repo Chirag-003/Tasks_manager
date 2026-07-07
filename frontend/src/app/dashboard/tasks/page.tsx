@@ -2,12 +2,12 @@
 
 import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
 
-import TaskList from "@/components/TaskList";
-import CreateTaskDialog from "@/components/CreateTaskDialog";
-import UILoader from "@/components/Loader";
-import FilterMenu from "@/components/FilterMenu";
-import StatusTabs from "@/components/StatusTabs";
-import TasksHeader from "@/components/TaskHeader";
+import TaskList from "@/components/tasks/TaskList";
+import CreateTaskDialog from "@/components/tasks/CreateTaskDialog";
+import UILoader from "@/components/common/Loader";
+import FilterMenu from "@/components/common/FilterMenu";
+import StatusTabs from "@/components/tasks/StatusTabs";
+import TasksHeader from "@/components/tasks/TaskHeader";
 
 import { useState, useEffect } from "react";
 

@@ -13,7 +13,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import UILoader from "@/components/Loader";
+import UILoader from "@/components/common/Loader";
 import { STATUS_CONFIG } from "@/constants/status";
 
 type TaskCardProps = {

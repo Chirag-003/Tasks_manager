@@ -22,10 +22,10 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-import UILoader from "@/components/Loader";
+import UILoader from "@/components/common/Loader";
 import { useDeleteSubtaskMutation, useGetSubtasksQuery } from "@/services/api";
 
-import FilterMenu from "@/components/FilterMenu";
+import FilterMenu from "@/components/common/FilterMenu";
 import { STATUS_CONFIG } from "@/constants/status";
 
 type Props = {

@@ -17,11 +17,11 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { api } from "@/services/api";
 
-import InputField from "@/components/InputField";
+import InputField from "@/components/common/InputField";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import StatusSnackbar from "@/components/StatusSnackbar";
+import StatusSnackbar from "@/components/common/StatusSnackbar";
 
 type LoginForm = {
   email: string;

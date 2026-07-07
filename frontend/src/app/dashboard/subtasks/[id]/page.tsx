@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useGetSubtaskByIdQuery } from "@/services/api";
-import DetailedSubtask from "@/components/DetailedSubtask";
+import DetailedSubtask from "@/components/subtasks/DetailedSubtask";
 
 export default function SubtaskPage() {
   const params = useParams();

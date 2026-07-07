@@ -24,14 +24,14 @@ import {
   useUpdateSubtaskMutation,
 } from "@/services/api";
 
-import AssigneeField from "./AssigneeField";
-import StatusField from "./StatusField";
-import CommentsField from "./CommentField";
+import AssigneeField from "../common/AssigneeField";
+import StatusField from "../common/StatusField";
+import CommentsField from "../common/CommentField";
 
 // ✅ ✅ ✅ ONLY ADDED
 import { z } from "zod";
-import CommentList from "./CommentList";
-import CommentInput from "./CommentInput";
+import CommentList from "../common/CommentList";
+import CommentInput from "../common/CommentInput";
 
 // ✅ ✅ ✅ ONLY ADDED
 const titleSchema = z.string().min(1, "Title cannot be empty");

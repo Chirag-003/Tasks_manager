@@ -11,7 +11,7 @@ import { useGetUsersQuery, useGetTasksQuery } from "@/services/api";
 
 import { useSearchParams, useRouter } from "next/navigation"; // ✅ added router
 import { useEffect, useState } from "react";
-import StatusSnackbar from "@/components/StatusSnackbar";
+import StatusSnackbar from "@/components/common/StatusSnackbar";
 import { hasToken } from "@/utils/auth";
 
 export default function DashboardPage() {

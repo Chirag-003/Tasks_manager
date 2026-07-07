@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import styles from "./register.module.css";
 
-import InputField from "@/components/InputField";
+import InputField from "@/components/common/InputField";
 
 import {
   Box,
@@ -14,7 +14,7 @@ import {
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import StatusSnackbar from "@/components/StatusSnackbar";
+import StatusSnackbar from "@/components/common/StatusSnackbar";
 
 type RegisterForm = {
   username: string;
