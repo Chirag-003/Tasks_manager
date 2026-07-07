@@ -9,6 +9,8 @@ import StatusSnackbar from "./StatusSnackbar";
 import { api, useGetCurrentUserQuery } from "@/services/api";
 
 import { useDispatch } from "react-redux";
+import UILoader from "./Loader";
+import { hasToken } from "@/utils/auth";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -22,6 +24,7 @@ export default function Header() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -30,9 +33,10 @@ export default function Header() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleLogout = async () => {
-    handleClose();
 
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    handleClose();
     const token = localStorage.getItem("access_token");
     const refreshToken = localStorage.getItem("refresh_token");
 
@@ -48,10 +52,16 @@ export default function Header() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
 
-    window.location.href = "/login?status=logout";
+    window.location.replace("/login?status=logout");
   };
 
-  const { data, isLoading } = useGetCurrentUserQuery(undefined);
+  const { data } = useGetCurrentUserQuery(undefined, {
+    skip: !hasToken(),
+  });
+
+  if (loggingOut) {
+    return <UILoader type="full" text="Logging out..." />;
+  }
 
   return (
     <>
@@ -93,47 +103,46 @@ export default function Header() {
         </Box>
 
         {/* ✅ PROFILE (CLICKABLE) */}
-        <Box
-          onClick={handleOpen}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-
-            px: 1.5,
-            py: 0.8,
-            borderRadius: 2,
-            cursor: "pointer",
-
-            transition: "all 0.15s ease",
-
-            "&:hover": {
-              backgroundColor: "#f3f4f6",
-            },
-          }}
-        >
-          <Avatar
+        {data && (
+          <Box
+            onClick={handleOpen}
             sx={{
-              width: 32,
-              height: 32,
-              fontSize: 14,
-              backgroundColor: "#2563eb",
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              px: 1.5,
+              py: 0.8,
+              borderRadius: 2,
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+              "&:hover": {
+                backgroundColor: "#f3f4f6",
+              },
             }}
           >
-            {data?.username?.charAt(0).toUpperCase() || "U"}
-          </Avatar>
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                fontSize: 14,
+                backgroundColor: "#2563eb",
+              }}
+            >
+              {data.username.charAt(0).toUpperCase()}
+            </Avatar>
 
-          <Typography
-            className={manrope.className}
-            sx={{
-              fontSize: "14px",
-              color: "#374151",
-              fontWeight: 500,
-            }}
-          >
-            {isLoading ? "Loading..." : data?.username}
-          </Typography>
-        </Box>
+            <Typography
+              className={manrope.className}
+              sx={{
+                fontSize: "14px",
+                color: "#374151",
+                fontWeight: 500,
+              }}
+            >
+              {data.username}
+            </Typography>
+          </Box>
+        )}
 
         {/* ✅ DROPDOWN MENU */}
         <Menu

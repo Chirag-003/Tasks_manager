@@ -22,6 +22,7 @@ import {
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { STATUS_VALUES } from "@/constants/status";
+import { hasToken } from "@/utils/auth";
 
 export default function TasksPage() {
   const router = useRouter();
@@ -120,11 +121,14 @@ export default function TasksPage() {
     }
   }, [searchParams, router]);
 
-  const { data, isLoading, isFetching, isError } = useGetTasksQuery({
-    ...filters,
-    page,
-    page_size: pageSize,
-  });
+  const { data, isLoading, isFetching, isError } = useGetTasksQuery(
+    {
+      ...filters,
+      page,
+      page_size: pageSize,
+    },
+    { skip: !hasToken() },
+  );
 
   const [createTask] = useCreateTaskMutation();
 

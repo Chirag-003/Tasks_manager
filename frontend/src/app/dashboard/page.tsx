@@ -12,12 +12,23 @@ import { useGetUsersQuery, useGetTasksQuery } from "@/services/api";
 import { useSearchParams, useRouter } from "next/navigation"; // ✅ added router
 import { useEffect, useState } from "react";
 import StatusSnackbar from "@/components/StatusSnackbar";
+import { hasToken } from "@/utils/auth";
 
 export default function DashboardPage() {
-  const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
-  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery({
-    page_size: 2000,
-  });
+  const { data: users = [], isLoading: usersLoading } = useGetUsersQuery(
+    undefined,
+    {
+      skip: !hasToken(),
+    },
+  );
+  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery(
+    {
+      page_size: 2000,
+    },
+    {
+      skip: !hasToken(),
+    },
+  );
 
   const searchParams = useSearchParams();
   const router = useRouter(); // ✅ added
