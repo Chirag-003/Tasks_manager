@@ -17,6 +17,7 @@ import {
   Snackbar,
   Alert,
   Pagination,
+  TablePagination,
   useMediaQuery,
 } from "@mui/material";
 
@@ -60,7 +61,7 @@ export default function TasksPage() {
   );
 
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const statusFromUrl = searchParams.get("status");
@@ -249,17 +250,20 @@ export default function TasksPage() {
 
         {/* ✅ PAGINATION */}
         {activeStatus && data && (
-          <Box mt={2} display="flex" justifyContent="center">
-            <Pagination
-              count={Math.ceil(data.count / pageSize)}
-              page={page}
-              onChange={(_, value) => setPage(value)}
-              shape="rounded"
-              color="primary"
-              showFirstButton
-              showLastButton
-            />
-          </Box>
+          <TablePagination
+            component="div"
+            count={data.count}
+            page={page - 1}
+            rowsPerPage={pageSize}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            onPageChange={(_, newPage) => {
+              setPage(newPage + 1);
+            }}
+            onRowsPerPageChange={(event) => {
+              setPageSize(Number(event.target.value));
+              setPage(1);
+            }}
+          />
         )}
 
         {/* ✅ DIALOG */}
