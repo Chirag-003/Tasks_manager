@@ -1,17 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
+
 
 from app.db.session import get_db
 from app.schemas.schemas_auth import RegisterRequest, LoginRequest
 from app.schemas.schemas_users import UserResponse
 from app.services import services_auth
 
-from app.core.jwt_handler import (
-    create_access_token,
-    create_refresh_token,
-    decode_refresh_token,
-)
 
 from app.core.dependencies import get_current_user
 
@@ -41,23 +36,13 @@ def login(
 
 
 @router.post("/auth/logout")
-def logout(
-    data: dict,
-    db: Session = Depends(get_db),
-):
-    return services_auth.logout_user(
-        db=db,
-        refresh_token=data.get("refresh_token"),
-    )
+def logout():
+    return services_auth.logout_user()
 
 
 @router.post("/auth/refresh")
-def refresh_access_token(
-    data: dict,
-    db: Session = Depends(get_db),
-):
+def refresh_access_token(data: dict):
     return services_auth.refresh_access_token(
-        db=db,
         refresh_token=data.get("refresh_token"),
     )
 
