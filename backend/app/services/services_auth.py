@@ -33,7 +33,7 @@ def create_user(db: Session, email: str, username: str, password: str):
     try:
         db.commit()
         db.refresh(new_user)
-    except Exception:
+    except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -49,7 +49,7 @@ def login_user(db: Session, email: str, password: str):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
+            detail="user does not exist",
         )
 
     if not verify_password(password, user.password_hash):

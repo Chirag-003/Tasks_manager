@@ -58,9 +58,9 @@ export default function RegisterPage() {
 
       if (!res.ok) {
         const errorMessage =
-          typeof result.detail === "string"
-            ? result.detail
-            : result.detail?.msg || "Register failed";
+          typeof result.message === "string"
+            ? result.message
+            : result.message?.msg || "Register failed";
 
         setSnackbar({
           open: true,

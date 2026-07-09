@@ -77,7 +77,7 @@ export default function LoginPage() {
       if (!res.ok) {
         setSnackbar({
           open: true,
-          message: "Login failed",
+          message: result.message || "Login failed",
           severity: "error",
         });
 
