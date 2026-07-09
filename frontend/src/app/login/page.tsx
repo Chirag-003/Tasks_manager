@@ -22,18 +22,29 @@ import InputField from "@/components/common/InputField";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import StatusSnackbar from "@/components/common/StatusSnackbar";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type LoginForm = {
-  email: string;
-  password: string;
-};
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>();
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -142,13 +153,6 @@ export default function LoginPage() {
                     control={control}
                     errors={errors}
                     type="text"
-                    rules={{
-                      required: "Email is required",
-                      pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: "Invalid email address",
-                      },
-                    }}
                   />
                   <InputField
                     name="password"
@@ -156,13 +160,6 @@ export default function LoginPage() {
                     control={control}
                     errors={errors}
                     type="password"
-                    rules={{
-                      required: "Password is required",
-                      minLength: {
-                        value: 6,
-                        message: "Minimum 6 characters required",
-                      },
-                    }}
                   />
                   <Button
                     type="submit"

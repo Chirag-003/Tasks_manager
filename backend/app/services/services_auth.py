@@ -11,14 +11,32 @@ from app.core.jwt_handler import (
     decode_refresh_token,
 )
 
+from app.core.validators import (
+    validate_email,
+    validate_username,
+    validate_password_strength,
+)
+
 
 def create_user(db: Session, email: str, username: str, password: str):
+
+    validate_email(email)
+    validate_username(username)
+    validate_password_strength(password)
+
     # ✅ 1. Check if user already exists
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email already exists",
+        )
+
+    existing_username = db.query(User).filter(User.username == username).first()
+    if existing_username:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this username already exists",
         )
 
     # ✅ 2. Hash password
@@ -33,7 +51,7 @@ def create_user(db: Session, email: str, username: str, password: str):
     try:
         db.commit()
         db.refresh(new_user)
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
