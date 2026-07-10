@@ -16,7 +16,6 @@ import {
   Typography,
   Snackbar,
   Alert,
-  Pagination,
   TablePagination,
   useMediaQuery,
 } from "@mui/material";
@@ -122,7 +121,7 @@ export default function TasksPage() {
     }
   }, [searchParams, router]);
 
-  const { data, isLoading, isFetching, isError } = useGetTasksQuery(
+  const { data, isFetching, isError } = useGetTasksQuery(
     {
       ...filters,
       page,
@@ -143,7 +142,6 @@ export default function TasksPage() {
     setSelectedStatus(undefined);
   };
 
-  if (isLoading) return <UILoader type="task" />;
   if (isError) return <p>Error fetching tasks</p>;
 
   const statusTabs = isMobile ? STATUS_VALUES : ["", ...STATUS_VALUES];
@@ -222,12 +220,19 @@ export default function TasksPage() {
 
         {/* ✅ TASK LIST */}
         <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-          {isFetching ? (
-            activeStatus ? (
-              <UILoader type="taskFlat" />
-            ) : (
-              <UILoader type="task" />
-            )
+          {!activeStatus ? (
+            <TaskList
+              tasks={data?.results ?? []}
+              grouped
+              filters={filters}
+              onTaskClick={(task: any) => {
+                setLoadingTaskId(task.id);
+                router.push(`/dashboard/tasks/${task.id}`);
+              }}
+              onAddTask={(status) => handleOpen(status)}
+            />
+          ) : isFetching ? (
+            <UILoader type="taskFlat" />
           ) : !data?.results?.length ? (
             <Typography sx={{ color: "text.secondary" }}>
               {searchInput.trim()
@@ -237,7 +242,7 @@ export default function TasksPage() {
           ) : (
             <TaskList
               tasks={data.results}
-              grouped={!activeStatus}
+              grouped={false}
               filters={filters}
               onTaskClick={(task: any) => {
                 setLoadingTaskId(task.id);

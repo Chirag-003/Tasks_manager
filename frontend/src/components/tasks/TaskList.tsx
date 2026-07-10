@@ -164,6 +164,10 @@ export default function TaskList({
     );
   }
 
+  if (isLoading && !data) {
+    return <UILoader type="task" text="Loading board..." />;
+  }
+
   return (
     <Box
       className="kanban-container"
@@ -238,9 +242,7 @@ export default function TaskList({
 
             {/* CONTENT */}
             <Box sx={{ px: 1, pt: 2, pb: 2 }}>
-              {isLoading ? (
-                <UILoader type="kanbanColumn" />
-              ) : colTasks.length === 0 ? (
+              {colTasks.length === 0 ? (
                 <Box>No tasks</Box>
               ) : (
                 <Box className="kanban-tasks">
@@ -252,7 +254,7 @@ export default function TaskList({
                 </Box>
               )}
             </Box>
-            {colTasks.length < totalCount && !isLoading && (
+            {colTasks.length < totalCount && (
               <Box
                 sx={{
                   mx: 1,
