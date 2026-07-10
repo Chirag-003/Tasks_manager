@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import TaskCard from "./TaskCard";
 import { useGetKanbanTasksQuery } from "@/services/api";
 import UILoader from "../common/Loader";
@@ -42,7 +42,9 @@ export default function TaskList({
     completed: [],
   });
 
-  const { data, isLoading, error } = useGetKanbanTasksQuery({
+  const [loadingColumn, setLoadingColumn] = useState<StatusKey | null>(null);
+
+  const { data, isLoading, isFetching, error } = useGetKanbanTasksQuery({
     ...filters,
     backlog_page: columnPages.backlog,
     todo_page: columnPages.todo,
@@ -51,6 +53,11 @@ export default function TaskList({
     qa_page: columnPages.qa,
     completed_page: columnPages.completed,
   });
+  useEffect(() => {
+    if (!isFetching) {
+      setLoadingColumn(null);
+    }
+  }, [isFetching]);
 
   const mergeUnique = (oldList: any[] = [], newList: any[] = []) => {
     const map = new Map();
@@ -262,29 +269,35 @@ export default function TaskList({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  gap: 1,
                   borderRadius: 2,
                   border: "1px dashed #cbd5e1",
                   backgroundColor: "#f8fafc",
-                  cursor: "pointer",
+                  cursor: loadingColumn === col.key ? "default" : "pointer",
                   fontSize: "13px",
                   fontWeight: 600,
                   color: "#475569",
-                  transition: "all 0.2s ease",
 
                   "&:hover": {
-                    backgroundColor: "#e2e8f0",
-                    borderColor: "#94a3b8",
-                    color: "#0f172a",
+                    backgroundColor:
+                      loadingColumn === col.key ? "#f8fafc" : "#e2e8f0",
+                    borderColor:
+                      loadingColumn === col.key ? "#cbd5e1" : "#94a3b8",
+                    color: loadingColumn === col.key ? "#475569" : "#0f172a",
                   },
                 }}
-                onClick={() =>
+                onClick={() => {
+                  if (loadingColumn) return;
+
+                  setLoadingColumn(col.key);
+
                   setColumnPages((prev) => ({
                     ...prev,
                     [col.key]: prev[col.key] + 1,
-                  }))
-                }
+                  }));
+                }}
               >
-                Load More Tasks
+                {loadingColumn === col.key ? "Loading" : "Load More Tasks"}
               </Box>
             )}
           </Box>
