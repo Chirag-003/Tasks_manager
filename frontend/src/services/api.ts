@@ -157,7 +157,11 @@ export const api = createApi({
         url: `/task1/${taskId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Tasks"],
+
+      invalidatesTags: (_result, _error, taskId) => [
+        "Tasks",
+        { type: "Task", id: taskId },
+      ],
     }),
 
     updateTask: builder.mutation({
@@ -166,7 +170,11 @@ export const api = createApi({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["Tasks"],
+
+      invalidatesTags: (_result, _error, { id }) => [
+        "Tasks",
+        { type: "Task", id },
+      ],
     }),
 
     getSprints: builder.query<string[], void>({

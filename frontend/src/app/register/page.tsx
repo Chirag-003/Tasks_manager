@@ -18,8 +18,11 @@ import {
 } from "@mui/material";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StatusSnackbar from "@/components/common/StatusSnackbar";
+
+import { useGetCurrentUserQuery } from "@/services/api";
+import { hasToken } from "@/utils/auth";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -67,6 +70,16 @@ export default function RegisterPage() {
   });
 
   const router = useRouter();
+
+  const { data: currentUser } = useGetCurrentUserQuery(undefined, {
+    skip: !hasToken(),
+  });
+
+  useEffect(() => {
+    if (currentUser) {
+      router.replace("/dashboard");
+    }
+  }, [currentUser, router]);
 
   const [loading, setLoading] = useState(false);
   const password = watch("password");
@@ -131,6 +144,10 @@ export default function RegisterPage() {
 
     setLoading(false);
   };
+
+  if (hasToken() && !currentUser) {
+    return <CircularProgress />;
+  }
 
   return (
     <>

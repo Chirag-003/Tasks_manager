@@ -236,9 +236,14 @@ def update_task(db: Session, task_id: int, task_data):
 
     # ✅ Duplicate title validation
     if "title" in update_data:
+        normalized_title = update_data["title"].strip().lower()
+
         existing_task = (
             db.query(Task)
-            .filter(Task.title == update_data["title"], Task.id != task_id)
+            .filter(
+                func.lower(Task.title) == normalized_title,
+                Task.id != task_id,
+            )
             .first()
         )
 
@@ -247,6 +252,8 @@ def update_task(db: Session, task_id: int, task_data):
                 status_code=400,
                 detail="Task title already exists",
             )
+
+        update_data["title"] = update_data["title"].strip()
 
     # ✅ Handle users (many-to-many)
     if "users" in update_data:

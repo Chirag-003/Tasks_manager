@@ -40,7 +40,11 @@ type Props = {
 
 // ✅ SCHEMA
 const taskSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(255, "Title cannot be that long"),
   description: z.string().optional(),
   status: z.string(),
   sprint: z.string().optional(),

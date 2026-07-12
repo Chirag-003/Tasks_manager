@@ -39,7 +39,11 @@ import CommentInput from "../comment/CommentInput";
 import { z } from "zod";
 import UILoader from "../common/Loader";
 
-const titleSchema = z.string().min(1, "Title cannot be empty");
+const titleSchema = z
+  .string()
+  .trim()
+  .min(1, "Title cannot be empty")
+  .max(255, "Title cannot exceed 255 characters");
 
 type Props = {
   task: any;
@@ -59,6 +63,7 @@ export default function DetailedTask({ task }: Props) {
   const [updateTask] = useUpdateTaskMutation();
 
   const [title, setTitle] = useState(task.title);
+  const [savedTitle, setSavedTitle] = useState(task.title);
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
@@ -100,11 +105,11 @@ export default function DetailedTask({ task }: Props) {
         id: task.id,
         data: { title: trimmed },
       }).unwrap();
-
+      setTitle(trimmed);
+      setSavedTitle(trimmed);
       setTitleError("");
       setIsEditingTitle(false);
     } catch (err: any) {
-      setTitle(task.title);
       setTitleError(err?.data?.detail || "Task title must be unique");
       setTimeout(() => setTitleError(""), 3000);
     }
@@ -187,21 +192,38 @@ export default function DetailedTask({ task }: Props) {
                 onClick={() => setIsEditingTitle(true)}
                 sx={{ fontWeight: 600, fontSize: 18, cursor: "pointer" }}
               >
-                {task.title}
+                {title}
               </Typography>
             ) : (
-              <TextField
-                autoFocus
-                variant="standard"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleUpdateTitle()}
-                onBlur={() => setIsEditingTitle(false)}
-                fullWidth
-                InputProps={{
-                  disableUnderline: true,
-                }}
-              />
+              <Box sx={{ width: "100%" }}>
+                <TextField
+                  autoFocus
+                  variant="standard"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleUpdateTitle()}
+                  onBlur={() => {
+                    setTitle(savedTitle);
+                    setIsEditingTitle(false);
+                  }}
+                  fullWidth
+                  InputProps={{
+                    disableUnderline: true,
+                  }}
+                />
+
+                {titleError && (
+                  <Typography
+                    color="error"
+                    sx={{
+                      fontSize: 12,
+                      mt: 0.5,
+                    }}
+                  >
+                    {titleError}
+                  </Typography>
+                )}
+              </Box>
             )}
           </Box>
 

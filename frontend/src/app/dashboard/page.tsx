@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { hasToken } from "@/utils/auth";
 import StatusSnackbar from "@/components/common/StatusSnackbar";
 import { STATUS_CONFIG } from "@/constants/status";
+import UILoader from "@/components/common/Loader";
 
 const STATUS_COLORS = {
   backlog: "#f59e0b",
@@ -19,11 +20,19 @@ const STATUS_COLORS = {
 };
 
 export default function DashboardPage() {
-  const { data: users = [] } = useGetUsersQuery(undefined, {
+  const {
+    data: users,
+    isLoading: usersLoading,
+    isError: usersError,
+  } = useGetUsersQuery(undefined, {
     skip: !hasToken(),
   });
 
-  const { data: tasks = [] } = useGetTasksQuery(
+  const {
+    data: tasks,
+    isLoading: tasksLoading,
+    isError: tasksError,
+  } = useGetTasksQuery(
     {
       page_size: 2000,
     },
@@ -55,9 +64,18 @@ export default function DashboardPage() {
     }
   }, [searchParams, router]);
 
-  const taskList = tasks?.results || [];
+  if (usersError || tasksError) {
+    return <Typography color="error">Failed to load dashboard data</Typography>;
+  }
+
+  if (!users || !tasks || usersLoading || tasksLoading) {
+    return <UILoader type="subtask" />;
+  }
+
+  const taskList = tasks.results ?? [];
 
   const totalUsers = users.length;
+
   const totalTasks = taskList.length;
 
   const ALL_STATUSES = Object.keys(STATUS_CONFIG);

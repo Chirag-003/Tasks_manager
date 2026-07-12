@@ -25,6 +25,9 @@ import StatusSnackbar from "@/components/common/StatusSnackbar";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useGetCurrentUserQuery } from "@/services/api";
+import { hasToken } from "@/utils/auth";
+
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
 
@@ -48,6 +51,16 @@ export default function LoginPage() {
 
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const { data: currentUser, isLoading } = useGetCurrentUserQuery(undefined, {
+    skip: !hasToken(),
+  });
+
+  useEffect(() => {
+    if (currentUser) {
+      router.replace("/dashboard");
+    }
+  }, [currentUser, router]);
 
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -115,6 +128,11 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  if (hasToken() && isLoading) {
+    return <CircularProgress />;
+  }
+
   return (
     <>
       <Box className={styles.container}>
