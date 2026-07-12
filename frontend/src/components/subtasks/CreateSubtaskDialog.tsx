@@ -29,7 +29,11 @@ import { STATUS_OPTIONS } from "@/constants/status";
 
 // ✅ SCHEMA
 const subtaskSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title cannot be empty")
+    .max(255, "Title cannot exceed 255 characters"),
   status: z.string(),
   users: z.array(z.number()).optional(),
 });

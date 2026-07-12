@@ -7,16 +7,36 @@ from app.models.model_users import User
 from app.schemas.schemas_enums import StatusEnum
 
 from sqlalchemy import or_
+from sqlalchemy import func
 
 
 def create_subtask(db: Session, task_id: int, subtask_data):
 
     task = db.query(Task).filter(Task.id == task_id).first()
+
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
+    clean_title = subtask_data.title.strip()
+    normalized_title = clean_title.lower()
+
+    existing_subtask = (
+        db.query(SubTask)
+        .filter(
+            SubTask.task_id == task_id,
+            func.lower(SubTask.title) == normalized_title,
+        )
+        .first()
+    )
+
+    if existing_subtask:
+        raise HTTPException(
+            status_code=400,
+            detail="Subtask with this title already exists",
+        )
+
     subtask = SubTask(
-        title=subtask_data.title,
+        title=clean_title,
         status=(subtask_data.status or StatusEnum.backlog),
         task_id=task_id,
     )
@@ -214,6 +234,29 @@ def update_subtask(db: Session, subtask_id: int, subtask_data):
 
             subtask.users = users
             del update_data["users"]
+
+        # ✅ NEW
+        if "title" in update_data:
+            clean_title = update_data["title"].strip()
+            normalized_title = clean_title.lower()
+
+            existing_subtask = (
+                db.query(SubTask)
+                .filter(
+                    SubTask.task_id == subtask.task_id,
+                    func.lower(SubTask.title) == normalized_title,
+                    SubTask.id != subtask_id,
+                )
+                .first()
+            )
+
+            if existing_subtask:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Subtask with this title already exists",
+                )
+
+            update_data["title"] = clean_title
 
         for key, value in update_data.items():
             setattr(subtask, key, value)

@@ -34,7 +34,11 @@ import CommentList from "../comment/CommentList";
 import CommentInput from "../comment/CommentInput";
 
 // ✅ ✅ ✅ ONLY ADDED
-const titleSchema = z.string().min(1, "Title cannot be empty");
+const titleSchema = z
+  .string()
+  .trim()
+  .min(1, "Title cannot be empty")
+  .max(255, "Title cannot exceed 255 characters");
 
 type Props = {
   subtask: any;
