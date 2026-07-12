@@ -1,27 +1,29 @@
 "use client";
 
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, Card, CardContent } from "@mui/material";
 import { useGetUsersQuery, useGetTasksQuery } from "@/services/api";
-
-import { useSearchParams, useRouter } from "next/navigation"; // ✅ added router
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import StatusSnackbar from "@/components/common/StatusSnackbar";
+
 import { hasToken } from "@/utils/auth";
+import StatusSnackbar from "@/components/common/StatusSnackbar";
+import { STATUS_CONFIG } from "@/constants/status";
+
+const STATUS_COLORS = {
+  backlog: "#f59e0b",
+  todo: "#64748b",
+  in_progress: "#2563eb",
+  in_review: "#06b6d4",
+  qa: "#8b5cf6",
+  completed: "#22c55e",
+};
 
 export default function DashboardPage() {
-  const { data: users = [], isLoading: usersLoading } = useGetUsersQuery(
-    undefined,
-    {
-      skip: !hasToken(),
-    },
-  );
-  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery(
+  const { data: users = [] } = useGetUsersQuery(undefined, {
+    skip: !hasToken(),
+  });
+
+  const { data: tasks = [] } = useGetTasksQuery(
     {
       page_size: 2000,
     },
@@ -31,7 +33,7 @@ export default function DashboardPage() {
   );
 
   const searchParams = useSearchParams();
-  const router = useRouter(); // ✅ added
+  const router = useRouter();
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -49,45 +51,27 @@ export default function DashboardPage() {
         severity: "success",
       });
 
-      router.replace("/dashboard"); // ✅ added (clean URL)
+      router.replace("/dashboard");
     }
-  }, [searchParams, router]); // ✅ updated dependency
+  }, [searchParams, router]);
 
-  // ✅ ✅ FIX 1 — extract array
   const taskList = tasks?.results || [];
 
-  if (usersLoading || tasksLoading) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   const totalUsers = users.length;
-
-  // ✅ ✅ FIX 2 — use taskList instead of tasks
   const totalTasks = taskList.length;
 
-  const ALL_STATUSES = [
-    "backlog",
-    "todo",
-    "in progress",
-    "in review",
-    "qa",
-    "completed",
-  ];
+  const ALL_STATUSES = Object.keys(STATUS_CONFIG);
 
-  const statusCount = ALL_STATUSES.reduce((acc: any, status) => {
-    acc[status] = taskList.filter((t: any) => t.status === status).length; // ✅ unchanged
-    return acc;
-  }, {});
+  const statusCount = ALL_STATUSES.reduce(
+    (acc: Record<string, number>, status) => {
+      acc[status] = taskList.filter(
+        (task: any) => task.status === status,
+      ).length;
 
-  const teamCounts = users.reduce((acc: any, user: any) => {
-    const team = user.team_name || "No Team";
-    acc[team] = (acc[team] || 0) + 1;
-    return acc;
-  }, {});
+      return acc;
+    },
+    {},
+  );
 
   return (
     <>
@@ -95,46 +79,92 @@ export default function DashboardPage() {
         sx={{
           height: "100%",
           overflowY: "auto",
-          p: 3,
+          p: 4,
           pb: 6,
+          backgroundColor: "#f8fafc",
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-          Dashboard
-        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+              color: "#0f172a",
+            }}
+          >
+            Dashboard
+          </Typography>
 
-        <GridSection>
-          <DashboardCard label="Total Users" value={totalUsers} />
-          <DashboardCard label="Total Tasks" value={totalTasks} />
-        </GridSection>
+          <Typography
+            sx={{
+              color: "#64748b",
+              fontSize: 14,
+            }}
+          >
+            Overview of users, tasks and project progress
+          </Typography>
+        </Box>
 
-        <Box sx={{ mt: 4 }}>
-          <Typography sx={{ fontWeight: 600, mb: 2 }}>
+        {/* OVERVIEW */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(240px, 320px))",
+            },
+            gap: 2,
+            mb: 4,
+          }}
+        >
+          <DashboardCard
+            label="Total Users"
+            value={totalUsers}
+            color="#2563eb"
+          />
+
+          <DashboardCard
+            label="Total Tasks"
+            value={totalTasks}
+            color="#22c55e"
+          />
+        </Box>
+
+        {/* STATUS SECTION */}
+        <Box
+          sx={{
+            p: 3,
+            borderRadius: 4,
+            bgcolor: "#ffffff",
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 2px 8px rgba(15,23,42,0.05)",
+          }}
+        >
+          <Typography
+            sx={{
+              fontWeight: 600,
+              mb: 3,
+              fontSize: 18,
+              color: "#0f172a",
+            }}
+          >
             Tasks by Status
           </Typography>
 
           <GridSection>
-            {ALL_STATUSES.map((status) => {
+            {Object.entries(STATUS_CONFIG).map(([status, config]) => {
               const count = statusCount[status];
 
               return (
                 <DashboardCard
                   key={status}
-                  label={status}
-                  value={count === 0 ? "No tasks" : count}
+                  label={config.label}
+                  value={count}
+                  color={STATUS_COLORS[status as keyof typeof STATUS_COLORS]}
                 />
               );
             })}
-          </GridSection>
-        </Box>
-
-        <Box sx={{ mt: 4 }}>
-          <Typography sx={{ fontWeight: 600, mb: 2 }}>Teams</Typography>
-
-          <GridSection>
-            {Object.entries(teamCounts).map(([team, count]: any) => (
-              <DashboardCard key={team} label={team} value={count} />
-            ))}
           </GridSection>
         </Box>
       </Box>
@@ -143,7 +173,12 @@ export default function DashboardPage() {
         open={snackbar.open}
         message={snackbar.message}
         severity={snackbar.severity}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        onClose={() =>
+          setSnackbar((prev) => ({
+            ...prev,
+            open: false,
+          }))
+        }
       />
     </>
   );
@@ -154,9 +189,8 @@ function GridSection({ children }: any) {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, 200px)",
+        gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
         gap: 2,
-        justifyContent: "flex-start",
       }}
     >
       {children}
@@ -164,33 +198,63 @@ function GridSection({ children }: any) {
   );
 }
 
-function DashboardCard({ label, value }: any) {
+function DashboardCard({
+  label,
+  value,
+  color = "#2563eb",
+}: {
+  label: string;
+  value: string | number;
+  color?: string;
+}) {
   return (
     <Card
       sx={{
-        width: "200px",
-        height: "100px",
-        borderRadius: 3,
-        border: "1px solid #e5e7eb",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
+        height: 120,
+        borderRadius: 4,
+        overflow: "hidden",
+        border: "1px solid #e2e8f0",
+        boxShadow: "0 2px 8px rgba(15,23,42,0.05)",
         transition: "all 0.2s ease",
+
         "&:hover": {
-          boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
-          transform: "translateY(-2px)",
+          transform: "translateY(-3px)",
+          boxShadow: "0 12px 24px rgba(15,23,42,0.08)",
         },
       }}
     >
-      <CardContent>
-        <Typography sx={{ fontSize: 13, color: "#6b7280" }}>{label}</Typography>
+      <Box
+        sx={{
+          height: 4,
+          bgcolor: color,
+        }}
+      />
+
+      <CardContent
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <Typography
+          sx={{
+            color: "#64748b",
+            fontSize: 13,
+            fontWeight: 500,
+            mb: 1,
+          }}
+        >
+          {label}
+        </Typography>
 
         <Typography
           sx={{
-            fontSize: 20,
-            fontWeight: 600,
-            mt: 0.5,
+            fontSize: 34,
+            fontWeight: 700,
+            lineHeight: 1,
+            color: "#0f172a",
           }}
         >
           {value}

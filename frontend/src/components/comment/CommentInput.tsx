@@ -30,7 +30,7 @@ export default function CommentInput({
 
   const [addSubtaskComment, { isLoading: isAddingSubtask }] =
     useAddSubtaskCommentMutation();
-  const { data: currentUser } = useGetCurrentUserQuery();
+  const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
   const isLoading = isAddingTask || isAddingSubtask;
 

@@ -13,7 +13,7 @@ export default function TaskDetailPage() {
   const { data, isLoading, isError } = useGetTaskByIdQuery(id);
 
   if (isLoading) return <UILoader type="detail" />;
-  if (isError) return <p style={{ padding: 20 }}>Error loading task</p>;
+  if (isError) return null;
   if (!data) return null;
 
   return <DetailedTask task={data} />;

@@ -1,18 +1,10 @@
 "use client";
 
-import { Box, Typography, Divider, CircularProgress } from "@mui/material";
+import { Box, Typography, Divider, Avatar } from "@mui/material";
 import { useGetUsersQuery } from "@/services/api";
 
 export default function UsersPage() {
-  const { data, isLoading, isError } = useGetUsersQuery();
-
-  if (isLoading) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const { data, isError } = useGetUsersQuery();
 
   if (isError) {
     return (
@@ -25,106 +17,134 @@ export default function UsersPage() {
   return (
     <Box
       sx={{
-        height: "95%",
-        px: 3,
-        py: 2,
+        height: "100%",
+        p: 3,
+        backgroundColor: "#f8fafc",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#f8fafc",
       }}
     >
       {/* HEADER */}
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-        Users
-      </Typography>
+      <Box sx={{ mb: 3 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 0.5,
+          }}
+        >
+          Users
+        </Typography>
 
-      {/* TABLE HEADER */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "60px 1fr 1.5fr 1fr",
-          px: 2,
-          py: 1,
-          fontSize: "13px",
-          color: "#6b7280",
-          borderBottom: "1px solid #e5e7eb",
-          backgroundColor: "#fff",
-          borderRadius: "8px 8px 0 0",
-        }}
-      >
-        <div>ID</div>
-        <div>Username</div>
-        <div>Email</div>
-        <div>Team</div>
+        <Typography
+          sx={{
+            color: "#64748b",
+            fontSize: 14,
+          }}
+        >
+          Manage and view all registered users
+        </Typography>
       </Box>
 
-      {/* ✅ SCROLLABLE LIST WITH PARTIAL SCROLL VISIBILITY */}
+      {/* CONTAINER */}
       <Box
         sx={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          pr: 1,
           backgroundColor: "#fff",
-          borderRadius: "0 0 8px 8px",
-
-          /* ✅ Scroll style */
-          "&::-webkit-scrollbar": {
-            width: "8px",
-          },
-
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: "transparent",
-          },
-
-          /* ✅ ✅ PARTIALLY VISIBLE */
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#e2e8f0", // ✅ faint visible
-            borderRadius: "10px",
-            minHeight: "40px",
-            transition: "background-color 0.2s ease",
-          },
-
-          /* ✅ Darker on hover */
-          "&:hover::-webkit-scrollbar-thumb": {
-            backgroundColor: "#cbd5e1",
-          },
+          border: "1px solid #e2e8f0",
+          borderRadius: 4,
+          overflow: "hidden",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "0 2px 8px rgba(15,23,42,0.05)",
         }}
       >
-        {data?.map((user: any) => (
-          <Box key={user.id}>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "60px 1fr 1.5fr 1fr",
-                px: 2,
-                py: 1.5,
-                alignItems: "center",
-                transition: "background 0.2s ease",
+        {/* HEADER */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "80px 1fr 1.5fr",
+            px: 3,
+            py: 2,
+            borderBottom: "1px solid #e2e8f0",
+            backgroundColor: "#f8fafc",
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#64748b",
+          }}
+        >
+          <Box>User</Box>
+          <Box>Username</Box>
+          <Box>Email</Box>
+        </Box>
 
-                "&:hover": {
-                  backgroundColor: "#f5f7fa",
-                },
-              }}
-            >
-              <Typography sx={{ fontSize: 13, color: "#6b7280" }}>
-                {user.id}
-              </Typography>
+        {/* LIST */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: "auto",
 
-              <Typography sx={{ fontWeight: 500 }}>{user.username}</Typography>
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
 
-              <Typography sx={{ color: "#6b7280", fontSize: 13 }}>
-                {user.email}
-              </Typography>
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#cbd5e1",
+              borderRadius: "999px",
+            },
+          }}
+        >
+          {data?.map((user: any) => (
+            <Box key={user.id}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "80px 1fr 1.5fr",
+                  alignItems: "center",
+                  px: 3,
+                  py: 1,
+                  transition: "all 0.2s ease",
 
-              <Typography sx={{ fontSize: 13 }}>
-                {user.team_name || "—"}
-              </Typography>
+                  "&:hover": {
+                    backgroundColor: "#f8fafc",
+                  },
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: "#2563eb",
+                    fontSize: 14,
+                    fontWeight: 600,
+                  }}
+                >
+                  {user.username?.charAt(0)?.toUpperCase()}
+                </Avatar>
+
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    color: "#0f172a",
+                  }}
+                >
+                  {user.username}
+                </Typography>
+
+                <Typography
+                  sx={{
+                    color: "#64748b",
+                    fontSize: 14,
+                  }}
+                >
+                  {user.email}
+                </Typography>
+              </Box>
+
+              <Divider />
             </Box>
-
-            <Divider />
-          </Box>
-        ))}
+          ))}
+        </Box>
       </Box>
     </Box>
   );

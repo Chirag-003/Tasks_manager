@@ -37,6 +37,7 @@ import CommentList from "../comment/CommentList";
 import CommentInput from "../comment/CommentInput";
 
 import { z } from "zod";
+import UILoader from "../common/Loader";
 
 const titleSchema = z.string().min(1, "Title cannot be empty");
 
@@ -51,6 +52,7 @@ export default function DetailedTask({ task }: Props) {
   const [openSubtask, setOpenSubtask] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [createSubtask] = useCreateSubtaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
@@ -108,15 +110,24 @@ export default function DetailedTask({ task }: Props) {
     }
   };
 
+  if (isDeleting) {
+    return <UILoader type="full" text="Deleting task..." />;
+  }
+
   if (!task) return null;
 
   const handleDelete = async () => {
     setDeleteError("");
 
     try {
+      setIsDeleting(true);
+
       await deleteTask(task.id).unwrap();
-      router.push("/dashboard/tasks?deleted=true");
+
+      router.replace("/dashboard/tasks?deleted=true");
     } catch (err: any) {
+      setIsDeleting(false);
+
       let message =
         err?.data?.detail || "Cannot delete task because it has subtasks";
 

@@ -82,7 +82,7 @@ export const api = createApi({
 
   baseQuery: baseQueryWithReauth,
 
-  tagTypes: ["Tasks", "Users", "Subtasks", "CurrentUser"],
+  tagTypes: ["Tasks", "Task", "Users", "Subtasks", "CurrentUser"],
 
   endpoints: (builder) => ({
     getTasks: builder.query<any, any>({
@@ -106,7 +106,7 @@ export const api = createApi({
 
     getTaskById: builder.query<any, number>({
       query: (taskId) => `/task1/${taskId}`,
-      providesTags: ["Tasks"],
+      providesTags: (_result, _error, id) => [{ type: "Task", id }],
     }),
 
     getUsers: builder.query<any, void>({
