@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, TextField, Button, Avatar } from "@mui/material";
+import { Box, TextField, Button, Avatar, Typography } from "@mui/material";
 import { useState } from "react";
 
 import SendIcon from "@mui/icons-material/Send";
@@ -32,10 +32,26 @@ export default function CommentInput({
     useAddSubtaskCommentMutation();
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
+  const [error, setError] = useState("");
+
   const isLoading = isAddingTask || isAddingSubtask;
 
   const handleAddComment = async () => {
     if (!text.trim()) return;
+
+    const trimmed = text.trim();
+
+    if (!trimmed) {
+      setError("Comment cannot be empty");
+      return;
+    }
+
+    if (trimmed.length > 500) {
+      setError("Comment cannot exceed 500 characters");
+      return;
+    }
+
+    setError("");
 
     try {
       if (entityType === "task") {
@@ -95,19 +111,40 @@ export default function CommentInput({
           maxRows={3}
           placeholder="Write a comment..."
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            setError("");
+          }}
           fullWidth
           size="small"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleAddComment();
-            }
+          error={!!error}
+          helperText={error}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <Typography
+                  sx={{
+                    fontSize: 11,
+                    color: "text.secondary",
+                    alignSelf: "flex-end",
+                    mb: 0.5,
+                  }}
+                >
+                  {text.length}/500
+                </Typography>
+              ),
+            },
           }}
         />
 
         <Button
-          sx={{ textTransform: "capitalize", height: "auto", minWidth: 120 }}
+          sx={{
+            textTransform: "capitalize",
+            height: 40,
+            mt: "4px",
+            minWidth: 120,
+            flexShrink: 0,
+          }}
           variant="contained"
           disabled={isLoading}
           onClick={handleAddComment}

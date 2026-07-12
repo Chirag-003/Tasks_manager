@@ -215,7 +215,11 @@ export const api = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Tasks"],
+
+      invalidatesTags: (_result, _error, { taskId }) => [
+        "Tasks",
+        { type: "Task", id: taskId },
+      ],
     }),
 
     // ✅ ADD SUBTASK COMMENT

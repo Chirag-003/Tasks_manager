@@ -302,7 +302,12 @@ export default function DetailedTask({ task }: Props) {
               entityType="task"
               rightSlot={
                 <Button
-                  sx={{ textTransform: "capitalize", height: "auto" }}
+                  sx={{
+                    textTransform: "capitalize",
+                    height: 40,
+                    flexShrink: 0,
+                    mt: "4px",
+                  }}
                   variant="outlined"
                   color="error"
                   startIcon={<DeleteOutlinedIcon />}

@@ -102,6 +102,7 @@ export default function CommentList({ comments }: Props) {
                   borderRadius: 2,
                   fontSize: 15,
                   lineHeight: 1.5,
+                  whiteSpace: "pre-wrap",
                 }}
               >
                 {comment.content}
