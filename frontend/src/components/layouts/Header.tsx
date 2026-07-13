@@ -6,7 +6,7 @@ import { Manrope } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import StatusSnackbar from "../common/StatusSnackbar";
-import { api, useGetCurrentUserQuery } from "@/services/api";
+import { useGetCurrentUserQuery, useLogoutUserMutation } from "@/services/api";
 
 import { useDispatch } from "react-redux";
 import UILoader from "../common/Loader";
@@ -19,7 +19,8 @@ const manrope = Manrope({
 
 export default function Header() {
   const router = useRouter();
-  const dispatch = useDispatch();
+
+  const [logoutUser] = useLogoutUserMutation();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -37,23 +38,13 @@ export default function Header() {
   const handleLogout = async () => {
     setLoggingOut(true);
     handleClose();
-    const token = localStorage.getItem("access_token");
+
     const refreshToken = localStorage.getItem("refresh_token");
 
     try {
-      await fetch("http://127.0.0.1:8000/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify({
-          refresh_token: refreshToken,
-        }),
-      });
+      await logoutUser(refreshToken).unwrap();
     } catch {}
-    // dispatch(api.util.resetApiState());
+
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
 

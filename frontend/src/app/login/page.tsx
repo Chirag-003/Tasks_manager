@@ -25,7 +25,7 @@ import StatusSnackbar from "@/components/common/StatusSnackbar";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useGetCurrentUserQuery } from "@/services/api";
+import { useGetCurrentUserQuery, useLoginUserMutation } from "@/services/api";
 import { hasToken } from "@/utils/auth";
 
 const loginSchema = z.object({
@@ -52,9 +52,12 @@ export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { data: currentUser, isLoading } = useGetCurrentUserQuery(undefined, {
-    skip: !hasToken(),
-  });
+  const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
+
+  const { data: currentUser, isLoading: isUserLoading } =
+    useGetCurrentUserQuery(undefined, {
+      skip: !hasToken(),
+    });
 
   useEffect(() => {
     if (currentUser) {
@@ -62,7 +65,6 @@ export default function LoginPage() {
     }
   }, [currentUser, router]);
 
-  const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -85,29 +87,8 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginForm) => {
-    setLoading(true);
-
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        setSnackbar({
-          open: true,
-          message: result.message || "Login failed",
-          severity: "error",
-        });
-
-        setLoading(false);
-        return;
-      }
+      const result = await loginUser(data).unwrap();
 
       localStorage.setItem("access_token", result.access_token);
 
@@ -118,18 +99,16 @@ export default function LoginPage() {
       router.push("/dashboard?status=login");
 
       // ✅ DO NOT setLoading(false) here
-    } catch {
+    } catch (err: any) {
       setSnackbar({
         open: true,
-        message: "Something went wrong",
+        message: err?.data?.message || err?.data?.detail || "Login failed",
         severity: "error",
       });
-
-      setLoading(false);
     }
   };
 
-  if (hasToken() && isLoading) {
+  if (hasToken() && isUserLoading) {
     return <CircularProgress />;
   }
 
@@ -183,10 +162,10 @@ export default function LoginPage() {
                     type="submit"
                     fullWidth
                     variant="contained"
-                    disabled={loading}
+                    disabled={isLoginLoading}
                     className={styles.button}
                   >
-                    {loading ? (
+                    {isLoginLoading ? (
                       <Box display="flex" alignItems="center" gap={1}>
                         <CircularProgress size={16} sx={{ color: "white" }} />
                         Logging in...

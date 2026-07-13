@@ -4,7 +4,7 @@ import { Mutex } from "async-mutex";
 const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://127.0.0.1:8000/api/",
+  baseUrl: "http://127.0.0.1:8000/api/v1/",
 
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("access_token");
@@ -250,6 +250,16 @@ export const api = createApi({
       }),
     }),
 
+    logoutUser: builder.mutation({
+      query: (refresh_token) => ({
+        url: "/auth/logout",
+        method: "POST",
+        body: {
+          refresh_token,
+        },
+      }),
+    }),
+
     getCurrentUser: builder.query({
       query: () => "/auth/me",
       providesTags: ["CurrentUser"],
@@ -324,4 +334,5 @@ export const {
   useRegisterUserMutation,
   useGetCurrentUserQuery,
   useGetKanbanTasksQuery,
+  useLogoutUserMutation,
 } = api;

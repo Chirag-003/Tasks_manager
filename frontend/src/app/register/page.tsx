@@ -21,7 +21,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import StatusSnackbar from "@/components/common/StatusSnackbar";
 
-import { useGetCurrentUserQuery } from "@/services/api";
+import {
+  useGetCurrentUserQuery,
+  useRegisterUserMutation,
+} from "@/services/api";
 import { hasToken } from "@/utils/auth";
 
 import { z } from "zod";
@@ -71,9 +74,13 @@ export default function RegisterPage() {
 
   const router = useRouter();
 
-  const { data: currentUser } = useGetCurrentUserQuery(undefined, {
-    skip: !hasToken(),
-  });
+  const [registerUser, { isLoading: isRegisterLoading }] =
+    useRegisterUserMutation();
+
+  const { data: currentUser, isLoading: isUserLoading } =
+    useGetCurrentUserQuery(undefined, {
+      skip: !hasToken(),
+    });
 
   useEffect(() => {
     if (currentUser) {
@@ -81,7 +88,6 @@ export default function RegisterPage() {
     }
   }, [currentUser, router]);
 
-  const [loading, setLoading] = useState(false);
   const password = watch("password");
   const passwordStrength = getPasswordStrength(password || "");
   const strength = getPasswordStrengthLabel(passwordStrength);
@@ -93,37 +99,13 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterForm) => {
-    setLoading(true);
     const { confirmPassword, ...payload } = data;
+
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      await registerUser(payload).unwrap();
 
-      const result = await res.json();
-
-      // ✅ artificial delay (important)
+      // optional delay for better UX
       await new Promise((resolve) => setTimeout(resolve, 600));
-
-      if (!res.ok) {
-        const errorMessage =
-          typeof result.message === "string"
-            ? result.message
-            : result.message?.msg || "Register failed";
-
-        setSnackbar({
-          open: true,
-          message: errorMessage,
-          severity: "error",
-        });
-
-        setLoading(false);
-        return;
-      }
 
       setSnackbar({
         open: true,
@@ -134,18 +116,16 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push("/login");
       }, 1200);
-    } catch {
+    } catch (err: any) {
       setSnackbar({
         open: true,
-        message: "Something went wrong",
+        message: err?.data?.message || err?.data?.detail || "Register failed",
         severity: "error",
       });
     }
-
-    setLoading(false);
   };
 
-  if (hasToken() && !currentUser) {
+  if (hasToken() && isUserLoading) {
     return <CircularProgress />;
   }
 
@@ -251,10 +231,10 @@ export default function RegisterPage() {
                     variant="contained"
                     fullWidth
                     disableElevation
-                    disabled={loading}
+                    disabled={isRegisterLoading}
                     className={styles.button}
                   >
-                    {loading ? (
+                    {isRegisterLoading ? (
                       <Box display="flex" alignItems="center" gap={1}>
                         <CircularProgress size={16} sx={{ color: "white" }} />
                         Creating...
