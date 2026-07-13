@@ -278,10 +278,7 @@ export default function TasksPage() {
           onClose={handleClose}
           defaultStatus={selectedStatus}
           onCreate={async (formData) => {
-            await createTask({
-              ...formData,
-              status: selectedStatus || formData.status,
-            }).unwrap();
+            await createTask(formData).unwrap();
           }}
         />
       </Box>
