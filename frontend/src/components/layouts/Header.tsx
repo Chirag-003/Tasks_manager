@@ -53,7 +53,7 @@ export default function Header() {
         }),
       });
     } catch {}
-    dispatch(api.util.resetApiState());
+    // dispatch(api.util.resetApiState());
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
 

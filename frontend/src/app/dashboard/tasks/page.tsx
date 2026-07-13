@@ -156,14 +156,15 @@ export default function TasksPage() {
           ...newFilters,
         }))
       }
-      onClear={() =>
+      onClear={() => {
         setFilters({
           search: "",
           status: "",
           sprint: "",
           user_id: "",
-        })
-      }
+        });
+        setSearchInput("");
+      }}
     />
   );
 
