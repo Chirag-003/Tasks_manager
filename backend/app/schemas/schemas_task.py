@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, List
+from datetime import datetime
 from app.schemas.schemas_subtasks import SubTaskResponse
 from app.schemas.schemas_comments import CommentResponse, CommentListResponse
 from app.schemas.schemas_users import UserResponse
@@ -33,6 +34,10 @@ class TaskResponse(BaseModel):
     status: StatusEnum  # ✅ required
 
     sprint: str | None = None
+
+    created_at: datetime
+    updated_at: datetime
+
     users: List[UserResponse] = Field(default_factory=list)
 
     subtasks: List[SubTaskResponse] = Field(default_factory=list)

@@ -39,6 +39,8 @@ def create_task_comment(db: Session, task_id: int, data):
         "content": comment.content,
         "task_id": comment.task_id,
         "subtask_id": comment.subtask_id,
+        "created_at": comment.created_at,
+        "updated_at": comment.updated_at,
         "user": {
             "id": user.id,
             "username": user.username,
@@ -85,6 +87,8 @@ def create_subtask_comment(db: Session, subtask_id: int, data):
         "content": comment.content,
         "task_id": comment.task_id,
         "subtask_id": comment.subtask_id,
+        "created_at": comment.created_at,
+        "updated_at": comment.updated_at,
         "user": {
             "id": user.id,
             "username": user.username,
@@ -111,6 +115,8 @@ def get_task_comments(db: Session, task_id: int):
                 "content": comment.content,
                 "task_id": comment.task_id,
                 "subtask_id": comment.subtask_id,
+                "created_at": comment.created_at,
+                "updated_at": comment.updated_at,
                 "user": (
                     {
                         "id": comment.user.id,
@@ -144,6 +150,8 @@ def get_subtask_comments(db: Session, subtask_id: int):
                 "content": comment.content,
                 "task_id": comment.task_id,
                 "subtask_id": comment.subtask_id,
+                "created_at": comment.created_at,
+                "updated_at": comment.updated_at,
                 "user": (
                     {
                         "id": comment.user.id,

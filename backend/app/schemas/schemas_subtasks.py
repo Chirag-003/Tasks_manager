@@ -3,6 +3,7 @@ from typing import Optional, List
 from app.schemas.schemas_comments import CommentResponse, CommentListResponse
 from app.schemas.schemas_users import UserResponse
 from app.schemas.schemas_enums import StatusEnum
+from datetime import datetime
 
 
 class SubTaskBase(BaseModel):
@@ -27,6 +28,10 @@ class SubTaskResponse(BaseModel):
     task_id: int
 
     sprint: str | None = None
+
+    created_at: datetime
+    updated_at: datetime
+
     users: List[UserResponse] = Field(default_factory=list)
 
     comments: CommentListResponse

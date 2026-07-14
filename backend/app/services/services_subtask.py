@@ -78,6 +78,8 @@ def create_subtask(db: Session, task_id: int, subtask_data):
         "status": subtask.status.value,
         "task_id": subtask.task_id,
         "sprint": subtask.task.sprint,
+        "created_at": subtask.created_at,
+        "updated_at": subtask.updated_at,
         "users": [
             {
                 "id": user.id,
@@ -140,6 +142,8 @@ def get_subtasks(
                 "status": subtask.status.value,
                 "task_id": subtask.task_id,
                 "sprint": subtask.task.sprint,
+                "created_at": subtask.created_at,
+                "updated_at": subtask.updated_at,
                 "users": [
                     {
                         "id": user.id,
@@ -171,6 +175,8 @@ def get_subtask_by_id(db: Session, subtask_id: int):
         "status": subtask.status.value,
         "task_id": subtask.task_id,
         "sprint": subtask.task.sprint,
+        "created_at": subtask.created_at,
+        "updated_at": subtask.updated_at,
         "users": [
             {
                 "id": user.id,
@@ -205,6 +211,8 @@ def get_subtasks_by_user(db: Session, user_id: int):
                 "status": subtask.status.value,
                 "task_id": subtask.task_id,
                 "sprint": subtask.task.sprint,
+                "created_at": subtask.created_at,
+                "updated_at": subtask.updated_at,
                 "comments": {
                     "count": len(subtask.comments),
                     "data": [],
@@ -288,6 +296,8 @@ def update_subtask(db: Session, subtask_id: int, subtask_data):
         "status": subtask.status.value,
         "task_id": subtask.task_id,
         "sprint": subtask.task.sprint,
+        "created_at": subtask.created_at,
+        "updated_at": subtask.updated_at,
         "users": [
             {
                 "id": user.id,

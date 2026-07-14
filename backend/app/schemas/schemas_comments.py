@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from .schemas_users import UserResponse
+from datetime import datetime
 
 
 class CommentBase(BaseModel):
@@ -19,6 +20,9 @@ class CommentResponse(CommentBase):
     id: int
     task_id: int | None = None
     subtask_id: int | None = None
+
+    created_at: datetime
+    updated_at: datetime
 
     user: UserResponse | None = None
 
