@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, DateTime
 from sqlalchemy.orm import relationship
-from sqlalchemy import UniqueConstraint
 from app.models.model_subtask_association import user_subtask_association
+from datetime import datetime, UTC
 
 
 from app.db.base import Base
@@ -26,6 +26,20 @@ class SubTask(Base):
     __table_args__ = (
         UniqueConstraint("title", "task_id", name="unique_subtask_per_task"),
     )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
     comments = relationship("Comment", back_populates="subtask", cascade="all, delete")
 
     users = relationship(

@@ -1,9 +1,11 @@
 from sqlalchemy import Column, Integer, String, Text
 from app.db.base import Base
 from sqlalchemy.orm import relationship
-from app.models.model_association import user_task_association
-
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import DateTime
+from datetime import datetime, UTC
+
+from app.models.model_association import user_task_association
 from app.schemas.schemas_enums import StatusEnum
 
 
@@ -23,6 +25,19 @@ class Task(Base):
 
     users = relationship(
         "User", secondary=user_task_association, back_populates="tasks"
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
     )
 
     comments = relationship("Comment", back_populates="task", cascade="all, delete")
