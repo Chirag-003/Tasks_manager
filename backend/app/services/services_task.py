@@ -84,6 +84,8 @@ def get_tasks(
     sprint=None,
     user_id=None,
     search=None,
+    sort_by="created_at",
+    sort_order="desc",
 ):
     # ✅ Base query
     query = db.query(Task)
@@ -100,6 +102,17 @@ def get_tasks(
 
     if search:
         query = query.filter(Task.title.ilike(f"%{search}%"))
+
+    if sort_by == "updated_at":
+        sort_column = Task.updated_at
+    elif sort_by == "title":
+        sort_column = Task.title
+    else:
+        sort_column = Task.created_at
+
+    query = query.order_by(
+        sort_column.asc() if sort_order == "asc" else sort_column.desc()
+    )
 
     # ✅ ✅ Total count
     total = query.count()
@@ -172,7 +185,11 @@ def get_tasks(
                         "created_at": subtask.created_at,
                         "updated_at": subtask.updated_at,
                     }
-                    for subtask in task.subtasks
+                    for subtask in sorted(
+                        task.subtasks,
+                        key=lambda x: x.created_at,
+                        reverse=True,
+                    )
                 ],
                 # ✅ FIXED TASK COMMENTS
                 "comments": {
@@ -438,6 +455,8 @@ def get_kanban_tasks(
     sprint=None,
     user_id=None,
     search=None,
+    sort_by="created_at",
+    sort_order="desc",
     backlog_page: int = 1,
     todo_page: int = 1,
     in_progress_page: int = 1,
@@ -477,6 +496,8 @@ def get_kanban_tasks(
             sprint=sprint,
             user_id=user_id,
             search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
 
         result[status.value] = {

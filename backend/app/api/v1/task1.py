@@ -51,6 +51,14 @@ def get_tasks(
     sprint: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
     search: Optional[str] = Query(default=None),
+    sort_by: str = Query(
+        default="created_at",
+        pattern="^(created_at|updated_at|title)$",
+    ),
+    sort_order: str = Query(
+        default="desc",
+        pattern="^(asc|desc)$",
+    ),
     db: Session = Depends(get_db),
 ):
     # ✅ pagination
@@ -71,6 +79,8 @@ def get_tasks(
         f"{normalize(sprint)}:"
         f"{normalize(user_id)}:"
         f"{normalize(search)}:"
+        f"{sort_by}:"
+        f"{sort_order}:"
         f"{page}:{page_size}"
     )
 
@@ -96,6 +106,8 @@ def get_tasks(
         sprint=sprint,
         user_id=user_id,
         search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
     # ✅ response
@@ -158,6 +170,14 @@ def get_kanban_tasks(
     in_review_page: int = Query(default=1),
     qa_page: int = Query(default=1),
     completed_page: int = Query(default=1),
+    sort_by: str = Query(
+        default="created_at",
+        pattern="^(created_at|updated_at|title)$",
+    ),
+    sort_order: str = Query(
+        default="desc",
+        pattern="^(asc|desc)$",
+    ),
     db: Session = Depends(get_db),
 ):
     return services_task.get_kanban_tasks(
@@ -165,6 +185,8 @@ def get_kanban_tasks(
         sprint=sprint,
         user_id=user_id,
         search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
         backlog_page=backlog_page,
         todo_page=todo_page,
         in_progress_page=in_progress_page,

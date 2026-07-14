@@ -52,6 +52,14 @@ def get_subtasks(
     search: Optional[str] = Query(default=None),
     page: int = Query(default=1),
     page_size: int = Query(default=5),
+    sort_by: str = Query(
+        default="created_at",
+        pattern="^(created_at|updated_at|title)$",
+    ),
+    sort_order: str = Query(
+        default="desc",
+        pattern="^(asc|desc)$",
+    ),
     db: Session = Depends(get_db),
 ):
 
@@ -66,6 +74,8 @@ def get_subtasks(
         f"{normalize(status)}:"
         f"{normalize(user_id)}:"
         f"{normalize(search)}:"
+        f"{sort_by}:"
+        f"{sort_order}:"
         f"{page}:"
         f"{page_size}"
     )
@@ -92,6 +102,8 @@ def get_subtasks(
         search=search,
         skip=(page - 1) * page_size,
         limit=page_size,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
     response = {

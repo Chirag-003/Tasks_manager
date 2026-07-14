@@ -105,6 +105,8 @@ def get_subtasks(
     sprint=None,
     skip: int = 0,
     limit: int = 5,
+    sort_by="created_at",
+    sort_order="desc",
 ):
     # Check if task exists
     task = db.query(Task).filter(Task.id == task_id).first()
@@ -127,6 +129,17 @@ def get_subtasks(
         search = search.strip()
         if search:
             query = query.filter(SubTask.title.ilike(f"%{search}%"))
+
+    if sort_by == "updated_at":
+        sort_column = SubTask.updated_at
+    elif sort_by == "title":
+        sort_column = SubTask.title
+    else:
+        sort_column = SubTask.created_at
+
+    query = query.order_by(
+        sort_column.asc() if sort_order == "asc" else sort_column.desc()
+    )
 
     total_count = query.count()
 
