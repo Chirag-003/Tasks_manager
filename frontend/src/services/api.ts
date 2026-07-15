@@ -125,6 +125,8 @@ export const api = createApi({
         status,
         user_id,
         search,
+        sort_by,
+        sort_order,
         page = 1,
         page_size = 5,
       }) => {
@@ -136,6 +138,14 @@ export const api = createApi({
 
         params.append("page", String(page));
         params.append("page_size", String(page_size));
+
+        if (sort_by) {
+          params.append("sort_by", sort_by);
+        }
+
+        if (sort_order) {
+          params.append("sort_order", sort_order);
+        }
 
         return `/tasks/${task_id}/subtasks?${params.toString()}`;
       },

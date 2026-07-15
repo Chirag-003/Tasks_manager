@@ -24,7 +24,7 @@ import { useState, useEffect } from "react";
 
 import UILoader from "@/components/common/Loader";
 import { useDeleteSubtaskMutation, useGetSubtasksQuery } from "@/services/api";
-
+import SortDropdown, { DEFAULT_SORT, SortValue } from "../common/SortDropdown";
 import FilterMenu from "@/components/common/FilterMenu";
 import { STATUS_CONFIG } from "@/constants/status";
 
@@ -44,12 +44,17 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
     search: "",
   });
 
+  const [sort, setSort] = useState<SortValue>(DEFAULT_SORT);
+
   const [pageSize, setPageSize] = useState(5);
 
   const { data } = useGetSubtasksQuery(
     {
       task_id: taskId,
       ...filters,
+
+      sort_by: sort.sort_by,
+      sort_order: sort.sort_order,
       page: 1,
       page_size: pageSize,
     },
@@ -62,7 +67,7 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
 
   useEffect(() => {
     setPageSize(5);
-  }, [filters, taskId]);
+  }, [filters, taskId, sort]);
 
   const [deleteSubtask] = useDeleteSubtaskMutation();
 
@@ -181,6 +186,8 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
               })
             }
           />
+
+          <SortDropdown value={sort} onChange={setSort} />
         </Box>
       </Box>
 
