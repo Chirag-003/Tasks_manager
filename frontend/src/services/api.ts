@@ -85,22 +85,27 @@ export const api = createApi({
   tagTypes: ["Tasks", "Task", "Users", "Subtasks", "CurrentUser"],
 
   endpoints: (builder) => ({
+    // query
+
     getTasks: builder.query<any, any>({
       query: (filters) => {
         const params = new URLSearchParams();
 
-        // ✅ EXISTING filters (unchanged)
         if (filters?.search) params.append("search", filters.search);
         if (filters?.status) params.append("status", filters.status);
         if (filters?.sprint) params.append("sprint", filters.sprint);
         if (filters?.user_id) params.append("user_id", filters.user_id);
 
-        // ✅ NEW: pagination
         if (filters?.page) params.append("page", filters.page);
         if (filters?.page_size) params.append("page_size", filters.page_size);
 
+        if (filters?.sort_by) params.append("sort_by", filters.sort_by);
+        if (filters?.sort_order)
+          params.append("sort_order", filters.sort_order);
+
         return `/task1/?${params.toString()}`;
       },
+
       providesTags: ["Tasks"],
     }),
 
@@ -279,6 +284,15 @@ export const api = createApi({
 
         if (filters?.user_id) {
           params.append("user_id", filters.user_id);
+        }
+
+        // ✅ ADD THESE
+        if (filters?.sort_by) {
+          params.append("sort_by", filters.sort_by);
+        }
+
+        if (filters?.sort_order) {
+          params.append("sort_order", filters.sort_order);
         }
 
         if (filters?.backlog_page) {

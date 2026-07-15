@@ -8,6 +8,10 @@ import UILoader from "@/components/common/Loader";
 import FilterMenu from "@/components/common/FilterMenu";
 import StatusTabs from "@/components/tasks/StatusTabs";
 import TasksHeader from "@/components/tasks/TaskHeader";
+import SortDropdown, {
+  DEFAULT_SORT,
+  SortValue,
+} from "@/components/common/SortDropdown";
 
 import { useState, useEffect } from "react";
 
@@ -38,6 +42,7 @@ export default function TasksPage() {
     sprint: "",
     user_id: "",
   });
+  const [sort, setSort] = useState<SortValue>(DEFAULT_SORT);
 
   const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState("");
@@ -126,6 +131,8 @@ export default function TasksPage() {
       ...filters,
       page,
       page_size: pageSize,
+      sort_by: sort.sort_by,
+      sort_order: sort.sort_order,
     },
     { skip: !hasToken() },
   );
@@ -167,6 +174,8 @@ export default function TasksPage() {
       }}
     />
   );
+
+  const sortComponent = <SortDropdown value={sort} onChange={setSort} />;
 
   return (
     <>
@@ -211,6 +220,7 @@ export default function TasksPage() {
             onToggleMobileSearch={setShowMobileSearch}
             onCreateTask={() => handleOpen()}
             filterComponent={taskFilters}
+            sortComponent={sortComponent}
           />
           <StatusTabs
             statusTabs={statusTabs}
@@ -226,6 +236,7 @@ export default function TasksPage() {
               tasks={data?.results ?? []}
               grouped
               filters={filters}
+              sort={sort}
               onTaskClick={(task: any) => {
                 setLoadingTaskId(task.id);
                 router.push(`/dashboard/tasks/${task.id}`);
@@ -245,6 +256,7 @@ export default function TasksPage() {
               tasks={data.results}
               grouped={false}
               filters={filters}
+              sort={sort}
               onTaskClick={(task: any) => {
                 setLoadingTaskId(task.id);
                 router.push(`/dashboard/tasks/${task.id}`);

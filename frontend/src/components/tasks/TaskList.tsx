@@ -7,12 +7,15 @@ import UILoader from "../common/Loader";
 import { STATUS_COLUMNS, StatusKey } from "@/constants/status";
 import { useEffect, useState } from "react";
 
+import { SortValue } from "../common/SortDropdown";
+
 type TaskListProps = {
   tasks: any[];
   onTaskClick: (task: any) => void;
   grouped?: boolean;
   onAddTask?: (status?: string) => void;
   filters?: any;
+  sort?: SortValue;
 };
 
 export default function TaskList({
@@ -21,6 +24,7 @@ export default function TaskList({
   grouped = true,
   onAddTask,
   filters,
+  sort,
 }: TaskListProps) {
   const columns = STATUS_COLUMNS;
 
@@ -46,6 +50,10 @@ export default function TaskList({
 
   const { data, isLoading, isFetching, error } = useGetKanbanTasksQuery({
     ...filters,
+
+    sort_by: sort?.sort_by,
+    sort_order: sort?.sort_order,
+
     backlog_page: columnPages.backlog,
     todo_page: columnPages.todo,
     in_progress_page: columnPages.in_progress,
@@ -123,7 +131,7 @@ export default function TaskList({
       qa: [],
       completed: [],
     });
-  }, [filters]);
+  }, [filters, sort]);
 
   if (error) {
     return (

@@ -19,6 +19,7 @@ type Props = {
   onToggleMobileSearch: (show: boolean) => void;
   onCreateTask: () => void;
   filterComponent: React.ReactNode;
+  sortComponent: React.ReactNode;
 };
 
 export default function TasksHeader({
@@ -29,6 +30,7 @@ export default function TasksHeader({
   onToggleMobileSearch,
   onCreateTask,
   filterComponent,
+  sortComponent,
 }: Props) {
   return (
     <Box
@@ -76,6 +78,7 @@ export default function TasksHeader({
             <Button onClick={() => onToggleMobileSearch(false)}>✕</Button>
 
             {filterComponent}
+            {sortComponent}
           </Box>
         ) : (
           <>
@@ -119,6 +122,7 @@ export default function TasksHeader({
               </Button>
 
               {filterComponent}
+              {sortComponent}
             </Box>
           </>
         )
@@ -179,6 +183,7 @@ export default function TasksHeader({
             />
 
             {filterComponent}
+            {sortComponent}
           </Box>
         </>
       )}
