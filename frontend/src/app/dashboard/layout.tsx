@@ -3,7 +3,7 @@
 import { Box } from "@mui/material";
 import Header from "@/components/layouts/Header";
 import Sidebar from "@/components/layouts/SideBar";
-import BottomNav from "@/components/layouts/BottomNav";
+
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -49,9 +49,6 @@ export default function DashboardLayout({
           {children}
         </Box>
       </Box>
-
-      {/* ✅ MOBILE NAV */}
-      <BottomNav />
     </Box>
   );
 }

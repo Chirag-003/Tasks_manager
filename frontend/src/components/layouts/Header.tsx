@@ -5,8 +5,10 @@ import { Box, Typography, Avatar, Menu, MenuItem } from "@mui/material";
 import { Manrope } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import StatusSnackbar from "../common/StatusSnackbar";
 import { useGetCurrentUserQuery, useLogoutUserMutation } from "@/services/api";
+
+import { useMediaQuery } from "@mui/material";
+import MobileDrawer from "./MobileDrawer";
 
 import { useDispatch } from "react-redux";
 import UILoader from "../common/Loader";
@@ -19,6 +21,8 @@ const manrope = Manrope({
 
 export default function Header() {
   const router = useRouter();
+
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   const [logoutUser] = useLogoutUserMutation();
 
@@ -64,7 +68,10 @@ export default function Header() {
       <Box
         sx={{
           height: "52px",
-          px: 4,
+          px: {
+            xs: 1,
+            md: 3,
+          },
 
           display: "flex",
           alignItems: "center",
@@ -76,26 +83,36 @@ export default function Header() {
         }}
       >
         {/* ✅ LOGO */}
-        <Box className={manrope.className}>
-          <Typography
-            sx={{
-              fontSize: "20px",
-              fontWeight: 600,
-              letterSpacing: "-0.3px",
-              color: "#1f2937",
-            }}
-          >
-            Dev
-            <Box
-              component="span"
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          {isMobile && <MobileDrawer />}
+
+          <Box className={manrope.className}>
+            <Typography
               sx={{
-                color: "#2563eb",
-                fontWeight: 700,
+                fontSize: "20px",
+                fontWeight: 600,
+                letterSpacing: "-0.3px",
+                color: "#1f2937",
               }}
             >
-              Track
-            </Box>
-          </Typography>
+              Dev
+              <Box
+                component="span"
+                sx={{
+                  color: "#2563eb",
+                  fontWeight: 700,
+                }}
+              >
+                Track
+              </Box>
+            </Typography>
+          </Box>
         </Box>
 
         {/* ✅ PROFILE (CLICKABLE) */}
