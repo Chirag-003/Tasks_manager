@@ -13,11 +13,13 @@ import {
   DialogContent,
   DialogActions,
   Snackbar, // ✅ NEW
-  Alert, // ✅ NEW
+  Alert,
+  InputAdornment, // ✅ NEW
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import SearchIcon from "@mui/icons-material/Search";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -171,7 +173,20 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
             size="small"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            sx={{ width: 230 }}
+            sx={{ width: 240, mt: 0.5 }}
+            variant="standard"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon
+                    sx={{
+                      fontSize: 16,
+                      color: "#94a3b8",
+                    }}
+                  />
+                </InputAdornment>
+              ),
+            }}
           />
 
           <FilterMenu

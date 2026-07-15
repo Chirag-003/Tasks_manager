@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { IconButton, Menu, MenuItem, ListItemText } from "@mui/material";
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemText,
+  Button,
+} from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import SortIcon from "@mui/icons-material/Sort";
 
@@ -55,16 +61,15 @@ export default function SortDropdown({ value, onChange }: Props) {
 
   return (
     <>
-      <IconButton
+      <Button
         onClick={(e) => setAnchorEl(e.currentTarget)}
-        size="small"
         sx={{
-          border: "1px solid #e5e7eb",
-          borderRadius: 2,
+          minWidth: "auto",
+          p: 1,
         }}
       >
         <SortIcon />
-      </IconButton>
+      </Button>
 
       <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
         {SORT_OPTIONS.map((option) => (

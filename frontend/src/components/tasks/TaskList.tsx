@@ -67,6 +67,8 @@ export default function TaskList({
     }
   }, [isFetching]);
 
+  const [isRefreshingBoard, setIsRefreshingBoard] = useState(false);
+
   const mergeUnique = (oldList: any[] = [], newList: any[] = []) => {
     const map = new Map();
 
@@ -79,6 +81,8 @@ export default function TaskList({
 
   useEffect(() => {
     if (!data) return;
+
+    if (isFetching) return;
 
     setColumnData((prev) => ({
       backlog:
@@ -111,9 +115,12 @@ export default function TaskList({
           ? data.completed.tasks
           : mergeUnique(prev.completed, data.completed.tasks),
     }));
+    setIsRefreshingBoard(false);
   }, [data, columnPages]);
 
   useEffect(() => {
+    setIsRefreshingBoard(true);
+
     setColumnPages({
       backlog: 1,
       todo: 1,
@@ -181,6 +188,9 @@ export default function TaskList({
 
   if (isLoading && !data) {
     return <UILoader type="task" text="Loading board..." />;
+  }
+  if (grouped && isFetching) {
+    return <UILoader type="task" text="Updating board..." />;
   }
 
   return (

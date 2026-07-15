@@ -160,7 +160,7 @@ export default function TasksHeader({
             </Box>
           </Box>
 
-          <Box display="flex" alignItems="center" gap={1.5}>
+          <Box display="flex" alignItems="center" gap={0.5}>
             <TextField
               placeholder="Search task by title..."
               size="small"

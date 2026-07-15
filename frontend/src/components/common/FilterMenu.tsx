@@ -74,7 +74,13 @@ export default function FilterMenu({
 
   return (
     <>
-      <Button onClick={handleOpenFilter}>
+      <Button
+        onClick={handleOpenFilter}
+        sx={{
+          minWidth: "auto",
+          p: 1,
+        }}
+      >
         <TuneIcon />
       </Button>
 
