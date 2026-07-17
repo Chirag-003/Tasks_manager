@@ -4,6 +4,9 @@ from sqlalchemy.orm import relationship
 from app.db.base import Base
 from app.models.model_association import user_task_association
 from app.models.model_subtask_association import user_subtask_association
+from app.models.model_user_role_association import (
+    user_role_association,
+)
 
 
 class User(Base):
@@ -25,4 +28,10 @@ class User(Base):
 
     subtasks = relationship(
         "SubTask", secondary=user_subtask_association, back_populates="users"
+    )
+
+    roles = relationship(
+        "Role",
+        secondary=user_role_association,
+        back_populates="users",
     )
