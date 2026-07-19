@@ -15,6 +15,7 @@ from app.services import services_task
 from app.models.model_task import Task
 from app.models.model_users import User
 from sqlalchemy import distinct
+from app.core.rbac import require_permission
 
 from app.core.redis_client import redis_client
 import json
@@ -255,7 +256,11 @@ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
 
 
 @router.delete("/{task_id}")
-def delete_task(task_id: int, db: Session = Depends(get_db)):
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("task.delete")),
+):
 
     result = services_task.delete_task(db, task_id)
 
