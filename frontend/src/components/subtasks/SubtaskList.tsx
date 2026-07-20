@@ -33,9 +33,16 @@ import { STATUS_CONFIG } from "@/constants/status";
 type Props = {
   taskId: number;
   onAddClick: () => void;
+  canCreateSubtask: boolean;
+  canDeleteSubtask: boolean;
 };
 
-export default function SubtaskList({ taskId, onAddClick }: Props) {
+export default function SubtaskList({
+  taskId,
+  onAddClick,
+  canCreateSubtask,
+  canDeleteSubtask,
+}: Props) {
   const router = useRouter();
 
   const [searchInput, setSearchInput] = useState("");
@@ -160,11 +167,13 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
             Subtasks
           </Typography>
 
-          <Tooltip title="Add subtask">
-            <IconButton size="small" onClick={onAddClick}>
-              <AddIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          {canCreateSubtask && (
+            <Tooltip title="Add subtask">
+              <IconButton size="small" onClick={onAddClick}>
+                <AddIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         <Box display="flex" gap={1}>
@@ -245,17 +254,18 @@ export default function SubtaskList({ taskId, onAddClick }: Props) {
                   size="small"
                   color={statusConfig?.color ?? "default"}
                 />
-
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedId(subtask.id);
-                    setOpenDelete(true);
-                  }}
-                >
-                  <DeleteOutlineIcon fontSize="small" />
-                </IconButton>
+                {canDeleteSubtask && (
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedId(subtask.id);
+                      setOpenDelete(true);
+                    }}
+                  >
+                    <DeleteOutlineIcon fontSize="small" />
+                  </IconButton>
+                )}
               </Box>
             );
           })}

@@ -8,6 +8,10 @@ import UILoader from "@/components/common/Loader";
 import FilterMenu from "@/components/common/FilterMenu";
 import StatusTabs from "@/components/tasks/StatusTabs";
 import TasksHeader from "@/components/tasks/TaskHeader";
+
+import { useGetCurrentUserQuery } from "@/services/api";
+import { hasPermission } from "@/utils/permission";
+
 import SortDropdown, {
   DEFAULT_SORT,
   SortValue,
@@ -35,6 +39,8 @@ export default function TasksPage() {
   const isMobile = useMediaQuery("(max-width:768px)");
 
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+  const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
   const [filters, setFilters] = useState({
     search: "",
@@ -219,6 +225,10 @@ export default function TasksPage() {
             onSearchChange={setSearchInput}
             onToggleMobileSearch={setShowMobileSearch}
             onCreateTask={() => handleOpen()}
+            canCreateTask={hasPermission(
+              currentUser?.permissions,
+              "task.create",
+            )}
             filterComponent={taskFilters}
             sortComponent={sortComponent}
           />
@@ -242,6 +252,10 @@ export default function TasksPage() {
                 router.push(`/dashboard/tasks/${task.id}`);
               }}
               onAddTask={(status) => handleOpen(status)}
+              canCreateTask={hasPermission(
+                currentUser?.permissions,
+                "task.create",
+              )}
             />
           ) : isFetching ? (
             <UILoader type="taskFlat" />
@@ -262,6 +276,10 @@ export default function TasksPage() {
                 router.push(`/dashboard/tasks/${task.id}`);
               }}
               onAddTask={(status) => handleOpen(status)}
+              canCreateTask={hasPermission(
+                currentUser?.permissions,
+                "task.create",
+              )}
             />
           )}
         </Box>

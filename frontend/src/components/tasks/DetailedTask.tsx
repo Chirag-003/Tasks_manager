@@ -28,6 +28,8 @@ import {
 } from "@/services/api";
 
 import CreateSubtaskDialog from "@/components/subtasks/CreateSubtaskDialog";
+import { hasPermission } from "@/utils/permission";
+import { useGetCurrentUserQuery } from "@/services/api";
 
 import AssigneeField from "../common/AssigneeField";
 import StatusField from "../common/StatusField";
@@ -66,6 +68,9 @@ export default function DetailedTask({ task }: Props) {
   const [savedTitle, setSavedTitle] = useState(task.title);
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  const { data: currentUser } = useGetCurrentUserQuery(undefined);
+  const canUpdateTask = hasPermission(currentUser?.permissions, "task.update");
 
   // ✅ SNACKBAR STATE
   const [snackbar, setSnackbar] = useState({
@@ -189,8 +194,16 @@ export default function DetailedTask({ task }: Props) {
 
             {!isEditingTitle ? (
               <Typography
-                onClick={() => setIsEditingTitle(true)}
-                sx={{ fontWeight: 600, fontSize: 18, cursor: "pointer" }}
+                onClick={() => {
+                  if (canUpdateTask) {
+                    setIsEditingTitle(true);
+                  }
+                }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: 18,
+                  cursor: canUpdateTask ? "pointer" : "default",
+                }}
               >
                 {title}
               </Typography>
@@ -235,6 +248,7 @@ export default function DetailedTask({ task }: Props) {
                   entityId={task.id}
                   entityType="task"
                   users={task.users}
+                  disabled={!canUpdateTask}
                 />
               </Row>
 
@@ -243,6 +257,7 @@ export default function DetailedTask({ task }: Props) {
                   entityId={task.id}
                   entityType="task"
                   value={task.status}
+                  disabled={!canUpdateTask}
                 />
               </Row>
 
@@ -264,6 +279,7 @@ export default function DetailedTask({ task }: Props) {
                 entityId={task.id}
                 entityType="task"
                 value={task.description}
+                disabled={!canUpdateTask}
               />
 
               <Divider />
@@ -271,6 +287,14 @@ export default function DetailedTask({ task }: Props) {
               <SubtaskList
                 taskId={task.id}
                 onAddClick={() => setOpenSubtask(true)}
+                canCreateSubtask={hasPermission(
+                  currentUser?.permissions,
+                  "subtask.create",
+                )}
+                canDeleteSubtask={hasPermission(
+                  currentUser?.permissions,
+                  "subtask.delete",
+                )}
               />
 
               <Divider />
@@ -301,23 +325,25 @@ export default function DetailedTask({ task }: Props) {
               entityId={task.id}
               entityType="task"
               rightSlot={
-                <Button
-                  sx={{
-                    textTransform: "capitalize",
-                    height: 40,
-                    flexShrink: 0,
-                    mt: "4px",
-                  }}
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteOutlinedIcon />}
-                  onClick={() => {
-                    setDeleteError("");
-                    setOpenDelete(true);
-                  }}
-                >
-                  Delete Task
-                </Button>
+                hasPermission(currentUser?.permissions, "task.delete") && (
+                  <Button
+                    sx={{
+                      textTransform: "capitalize",
+                      height: 40,
+                      flexShrink: 0,
+                      mt: "4px",
+                    }}
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteOutlinedIcon />}
+                    onClick={() => {
+                      setDeleteError("");
+                      setOpenDelete(true);
+                    }}
+                  >
+                    Delete Task
+                  </Button>
+                )
               }
             />
           </Box>

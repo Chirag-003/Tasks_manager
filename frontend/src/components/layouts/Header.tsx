@@ -63,6 +63,8 @@ export default function Header() {
     return <UILoader type="full" text="Logging out..." />;
   }
 
+  console.log(data);
+
   return (
     <>
       <Box

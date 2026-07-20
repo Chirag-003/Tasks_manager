@@ -14,6 +14,7 @@ type TaskListProps = {
   onTaskClick: (task: any) => void;
   grouped?: boolean;
   onAddTask?: (status?: string) => void;
+  canCreateTask: boolean;
   filters?: any;
   sort?: SortValue;
 };
@@ -23,6 +24,7 @@ export default function TaskList({
   onTaskClick,
   grouped = true,
   onAddTask,
+  canCreateTask,
   filters,
   sort,
 }: TaskListProps) {
@@ -251,17 +253,19 @@ export default function TaskList({
                   </Box>
                 </Box>
 
-                <Box
-                  sx={{
-                    cursor: "pointer",
-                    px: 0.5,
-                    borderRadius: 1,
-                    "&:hover": { backgroundColor: "#e2e8f0" },
-                  }}
-                  onClick={() => onAddTask?.(col.key)}
-                >
-                  +
-                </Box>
+                {canCreateTask && (
+                  <Box
+                    sx={{
+                      cursor: "pointer",
+                      px: 0.5,
+                      borderRadius: 1,
+                      "&:hover": { backgroundColor: "#e2e8f0" },
+                    }}
+                    onClick={() => onAddTask?.(col.key)}
+                  >
+                    +
+                  </Box>
+                )}
               </Box>
             </Box>
 

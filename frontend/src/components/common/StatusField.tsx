@@ -13,9 +13,15 @@ type Props = {
   entityId: number;
   entityType: "task" | "subtask";
   value: string;
+  disabled?: boolean;
 };
 
-export default function StatusField({ entityId, entityType, value }: Props) {
+export default function StatusField({
+  entityId,
+  entityType,
+  value,
+  disabled = false,
+}: Props) {
   const [updateTask] = useUpdateTaskMutation();
   const [updateSubtask] = useUpdateSubtaskMutation();
 
@@ -43,6 +49,7 @@ export default function StatusField({ entityId, entityType, value }: Props) {
       onChange={(e) => handleChange(e.target.value as string)}
       size="small"
       IconComponent={ArrowDropDownIcon}
+      disabled={disabled}
       sx={{
         fontSize: 14,
         textTransform: "capitalize",

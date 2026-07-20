@@ -15,12 +15,14 @@ type Props = {
   entityId: number;
   entityType: "task" | "subtask";
   users: any[];
+  disabled?: boolean;
 };
 
 export default function AssigneeField({
   entityId,
   entityType,
   users: currentUsers,
+  disabled = false,
 }: Props) {
   const { data: users = [] } = useGetUsersQuery();
 
@@ -104,24 +106,25 @@ export default function AssigneeField({
             label={user.username}
             size="small"
             onDelete={() => handleRemoveUser(user.id)}
-            deleteIcon={<CloseIcon />}
+            deleteIcon={!disabled ? <CloseIcon /> : undefined}
           />
         ))}
-
-        <IconButton
-          size="small"
-          onClick={() => setIsOpen((prev) => !prev)}
-          sx={{
-            "&:hover": {
-              backgroundColor: "#f3f4f6",
-            },
-          }}
-        >
-          <AddIcon fontSize="small" />
-        </IconButton>
+        {!disabled && (
+          <IconButton
+            size="small"
+            onClick={() => setIsOpen((prev) => !prev)}
+            sx={{
+              "&:hover": {
+                backgroundColor: "#f3f4f6",
+              },
+            }}
+          >
+            <AddIcon fontSize="small" />
+          </IconButton>
+        )}
       </Box>
 
-      {isOpen && (
+      {!disabled && isOpen && (
         <Paper
           sx={{
             position: "absolute",

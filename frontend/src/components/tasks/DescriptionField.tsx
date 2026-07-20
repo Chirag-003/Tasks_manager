@@ -11,12 +11,14 @@ type Props = {
   entityId: number;
   entityType: "task" | "subtask";
   value: string;
+  disabled: boolean;
 };
 
 export default function DescriptionField({
   entityId,
   entityType,
   value,
+  disabled,
 }: Props) {
   const [updateTask] = useUpdateTaskMutation();
   const [updateSubtask] = useUpdateSubtaskMutation();
@@ -64,14 +66,14 @@ export default function DescriptionField({
         border: "1px solid #e5e7eb",
         borderRadius: 2,
         bgcolor: isEditing ? "#fff" : "#f9fafb",
-        cursor: "pointer",
+        cursor: disabled ? "default" : "pointer",
 
         "&:hover": {
           backgroundColor: !isEditing ? "#f3f4f6" : "#fff",
         },
       }}
       onClick={() => {
-        if (!isEditing) setIsEditing(true);
+        if (!disabled && !isEditing) setIsEditing(true);
       }}
     >
       {!isEditing ? (

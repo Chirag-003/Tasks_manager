@@ -18,6 +18,7 @@ type Props = {
   onSearchChange: (value: string) => void;
   onToggleMobileSearch: (show: boolean) => void;
   onCreateTask: () => void;
+  canCreateTask: boolean;
   filterComponent: React.ReactNode;
   sortComponent: React.ReactNode;
 };
@@ -29,6 +30,7 @@ export default function TasksHeader({
   onSearchChange,
   onToggleMobileSearch,
   onCreateTask,
+  canCreateTask,
   filterComponent,
   sortComponent,
 }: Props) {
@@ -93,27 +95,29 @@ export default function TasksHeader({
                 Tasks
               </Typography>
 
-              <Box
-                onClick={onCreateTask}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 36,
-                  height: 36,
-                  borderRadius: 2,
-                  cursor: "pointer",
-                  color: "#111827",
-                  transition: "all 0.15s ease",
+              {canCreateTask && (
+                <Box
+                  onClick={onCreateTask}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 36,
+                    height: 36,
+                    borderRadius: 2,
+                    cursor: "pointer",
+                    color: "#111827",
+                    transition: "all 0.15s ease",
 
-                  "&:hover": {
-                    backgroundColor: "#f3f4f6",
-                    color: "#2563eb",
-                  },
-                }}
-              >
-                <AddIcon sx={{ fontSize: 20 }} />
-              </Box>
+                    "&:hover": {
+                      backgroundColor: "#f3f4f6",
+                      color: "#2563eb",
+                    },
+                  }}
+                >
+                  <AddIcon sx={{ fontSize: 20 }} />
+                </Box>
+              )}
             </Box>
 
             <Box display="flex" gap={1}>
@@ -138,26 +142,28 @@ export default function TasksHeader({
               Tasks
             </Typography>
 
-            <Box
-              onClick={onCreateTask}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 26,
-                height: 26,
-                borderRadius: "6px",
-                cursor: "pointer",
-                color: "#2563eb",
-                transition: "all 0.15s ease",
+            {canCreateTask && (
+              <Box
+                onClick={onCreateTask}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 26,
+                  height: 26,
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  color: "#2563eb",
+                  transition: "all 0.15s ease",
 
-                "&:hover": {
-                  backgroundColor: "rgba(37, 99, 235, 0.1)",
-                },
-              }}
-            >
-              <AddIcon sx={{ fontSize: 18, fontWeight: 700 }} />
-            </Box>
+                  "&:hover": {
+                    backgroundColor: "rgba(37, 99, 235, 0.1)",
+                  },
+                }}
+              >
+                <AddIcon sx={{ fontSize: 18, fontWeight: 700 }} />
+              </Box>
+            )}
           </Box>
 
           <Box display="flex" alignItems="center" gap={0.5}>

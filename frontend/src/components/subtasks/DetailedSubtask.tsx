@@ -16,6 +16,9 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
+import { hasPermission } from "@/utils/permission";
+import { useGetCurrentUserQuery } from "@/services/api";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -56,6 +59,13 @@ export default function DetailedSubtask({ subtask }: Props) {
   const [updateSubtask] = useUpdateSubtaskMutation();
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  const { data: currentUser } = useGetCurrentUserQuery(undefined);
+
+  const canUpdateSubtask = hasPermission(
+    currentUser?.permissions,
+    "subtask.update",
+  );
 
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
@@ -168,13 +178,15 @@ export default function DetailedSubtask({ subtask }: Props) {
               {!isEditingTitle ? (
                 <Typography
                   onClick={() => {
-                    setIsEditingTitle(true);
-                    setTitle(subtask.title);
+                    if (canUpdateSubtask) {
+                      setIsEditingTitle(true);
+                      setTitle(subtask.title);
+                    }
                   }}
                   sx={{
                     fontWeight: 600,
                     fontSize: 18,
-                    cursor: "pointer",
+                    cursor: canUpdateSubtask ? "pointer" : "default",
                   }}
                 >
                   {title}
@@ -241,6 +253,7 @@ export default function DetailedSubtask({ subtask }: Props) {
                     entityId={subtask.id}
                     entityType="subtask"
                     users={subtask.users}
+                    disabled={!canUpdateSubtask}
                   />
                 </Row>
 
@@ -249,6 +262,7 @@ export default function DetailedSubtask({ subtask }: Props) {
                     entityId={subtask.id}
                     entityType="subtask"
                     value={subtask.status}
+                    disabled={!canUpdateSubtask}
                   />
                 </Row>
 
@@ -282,21 +296,23 @@ export default function DetailedSubtask({ subtask }: Props) {
               entityId={subtask.id}
               entityType="subtask"
               rightSlot={
-                <Button
-                  sx={{
-                    textTransform: "capitalize",
-                    height: "auto",
-                  }}
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteOutlinedIcon />}
-                  onClick={() => {
-                    setDeleteError("");
-                    setOpenDelete(true);
-                  }}
-                >
-                  Delete Subtask
-                </Button>
+                hasPermission(currentUser?.permissions, "subtask.delete") && (
+                  <Button
+                    sx={{
+                      textTransform: "capitalize",
+                      height: "auto",
+                    }}
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteOutlinedIcon />}
+                    onClick={() => {
+                      setDeleteError("");
+                      setOpenDelete(true);
+                    }}
+                  >
+                    Delete Subtask
+                  </Button>
+                )
               }
             />
           </Box>
