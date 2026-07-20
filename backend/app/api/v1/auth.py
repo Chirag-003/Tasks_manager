@@ -51,8 +51,17 @@ def refresh_access_token(data: dict):
 def get_me(
     current_user=Depends(get_current_user),
 ):
+
+    permissions = set()
+
+    for role in current_user.roles:
+        for permission in role.permissions:
+            permissions.add(permission.name)
+
     return {
         "id": current_user.id,
         "username": current_user.username,
         "email": current_user.email,
+        "roles": [role.name for role in current_user.roles],
+        "permissions": list(permissions),
     }

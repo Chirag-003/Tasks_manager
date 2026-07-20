@@ -24,7 +24,11 @@ router = APIRouter()
 
 
 @router.post("/", response_model=TaskResponse)
-def create_task(task: TaskCreate, db: Session = Depends(get_db)):
+def create_task(
+    task: TaskCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("task.create")),
+):
 
     result = services_task.create_task(db, task)
 
@@ -231,7 +235,12 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
 
 
 @router.patch("/{task_id}", response_model=TaskResponse)
-def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
+def update_task(
+    task_id: int,
+    task: TaskUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("task.update")),
+):
 
     result = services_task.update_task(db, task_id, task)
 

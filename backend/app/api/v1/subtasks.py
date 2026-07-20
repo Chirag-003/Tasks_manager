@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi import Query
 from typing import Optional
 
+from app.core.rbac import require_permission
+
 from app.db.session import get_db
 from app.schemas.schemas_subtasks import (
     SubTaskCreate,
@@ -20,7 +22,12 @@ router = APIRouter(
 
 
 @router.post("/tasks/{task_id}/subtasks", response_model=SubTaskResponse)
-def create_subtask(task_id: int, subtask: SubTaskCreate, db: Session = Depends(get_db)):
+def create_subtask(
+    task_id: int,
+    subtask: SubTaskCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("subtask.create")),
+):
 
     result = services_subtask.create_subtask(db, task_id, subtask)
 
@@ -163,7 +170,10 @@ def get_subtask_by_id(subtask_id: int, db: Session = Depends(get_db)):
 
 @router.patch("/subtasks/{subtask_id}", response_model=SubTaskResponse)
 def update_subtask(
-    subtask_id: int, subtask: SubTaskUpdate, db: Session = Depends(get_db)
+    subtask_id: int,
+    subtask: SubTaskUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("subtask.update")),
 ):
 
     result = services_subtask.update_subtask(db, subtask_id, subtask)
@@ -189,7 +199,11 @@ def update_subtask(
 
 
 @router.delete("/subtasks/{subtask_id}")
-def delete_subtask(subtask_id: int, db: Session = Depends(get_db)):
+def delete_subtask(
+    subtask_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("subtask.delete")),
+):
 
     result = services_subtask.delete_subtask(db, subtask_id)
 
