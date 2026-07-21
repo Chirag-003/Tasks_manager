@@ -3,13 +3,14 @@
 import { Box, Typography, Divider, Avatar, Button } from "@mui/material";
 
 import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 import { useGetCurrentUserQuery, useGetUsersQuery } from "@/services/api";
 import { useState } from "react";
 import { hasPermission } from "@/utils/permission";
 
-import ResetPasswordDialog from "@/components/users/ResetPasswordDialog";
 import DeleteUserDialog from "@/components/users/DeleteUserDialog";
+import EditUserDialog from "@/components/users/EditUserDialog";
 
 export default function UsersPage() {
   const { data, isError } = useGetUsersQuery();
@@ -18,6 +19,8 @@ export default function UsersPage() {
   const [openResetDialog, setOpenResetDialog] = useState(false);
 
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
+
+  const [openEditDialog, setOpenEditDialog] = useState(false);
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
@@ -163,26 +166,21 @@ export default function UsersPage() {
                       alignItems: "center",
                     }}
                   >
-                    {hasPermission(
-                      currentUser?.permissions,
-                      "user.reset_password",
-                    ) && (
-                      <Button
-                        variant="outlined"
-                        color="warning"
-                        startIcon={<KeyOutlinedIcon />}
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setOpenResetDialog(true);
-                        }}
-                        sx={{
-                          textTransform: "capitalize",
-                          height: 36,
-                        }}
-                      >
-                        Reset Password
-                      </Button>
-                    )}
+                    <Button
+                      variant="outlined"
+                      startIcon={<EditOutlinedIcon />}
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setOpenEditDialog(true);
+                      }}
+                      sx={{
+                        textTransform: "capitalize",
+                        height: 36,
+                      }}
+                    >
+                      Edit
+                    </Button>
+
                     {hasPermission(
                       currentUser?.permissions,
                       "user.reset_password",
@@ -207,17 +205,18 @@ export default function UsersPage() {
           </Box>
         </Box>
       </Box>
-      <ResetPasswordDialog
-        open={openResetDialog}
-        onClose={() => {
-          setOpenResetDialog(false);
-          setSelectedUser(null);
-        }}
-        user={selectedUser}
-      />
+
       <DeleteUserDialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
+        user={selectedUser}
+      />
+      <EditUserDialog
+        open={openEditDialog}
+        onClose={() => {
+          setOpenEditDialog(false);
+          setSelectedUser(null);
+        }}
         user={selectedUser}
       />
     </>

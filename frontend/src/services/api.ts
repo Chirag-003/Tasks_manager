@@ -358,6 +358,15 @@ export const api = createApi({
       invalidatesTags: ["Users"],
     }),
 
+    updateUser: builder.mutation({
+      query: ({ userId, data }) => ({
+        url: `/users/${userId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+
     // end
   }),
 });
@@ -392,6 +401,7 @@ export const {
   useRegisterUserMutation,
   useLogoutUserMutation,
   useDeleteUserMutation,
+  useUpdateUserMutation,
 
   //extra
   useGetSprintsQuery,

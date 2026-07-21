@@ -9,7 +9,11 @@ from app.core.security import hash_password
 from app.models.model_role import Role
 
 from app.schemas.schemas_users import ResetPasswordRequest
-from app.core.validators import validate_password_strength
+from app.core.validators import (
+    validate_password_strength,
+    validate_email,
+    validate_username,
+)
 
 
 def get_users(db: Session):
@@ -17,24 +21,52 @@ def get_users(db: Session):
 
 
 def update_user(db: Session, user_id: int, user):
-
     db_user = db.query(User).filter(User.id == user_id).first()
 
     if not db_user:
-        raise HTTPException(404, "User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
 
     try:
         update_data = user.dict(exclude_unset=True)
 
-        if "email" in update_data:
+        if "username" in update_data:
+            validate_username(update_data["username"])
+
             existing = (
                 db.query(User)
-                .filter(User.email == update_data["email"], User.id != user_id)
+                .filter(
+                    User.username == update_data["username"],
+                    User.id != user_id,
+                )
                 .first()
             )
 
             if existing:
-                raise HTTPException(400, "Email already exists")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists",
+                )
+
+        if "email" in update_data:
+            validate_email(update_data["email"])
+
+            existing = (
+                db.query(User)
+                .filter(
+                    User.email == update_data["email"],
+                    User.id != user_id,
+                )
+                .first()
+            )
+
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already exists",
+                )
 
         for key, value in update_data.items():
             setattr(db_user, key, value)
@@ -46,11 +78,22 @@ def update_user(db: Session, user_id: int, user):
 
     except IntegrityError:
         db.rollback()
-        raise HTTPException(400, "Email already exists")
 
-    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists",
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception:
         db.rollback()
-        raise HTTPException(500, "Error updating user" or str(e))
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error updating user",
+        )
 
 
 def delete_user(
