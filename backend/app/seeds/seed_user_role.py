@@ -5,22 +5,30 @@ from app.models.model_role import Role
 
 
 def seed_user_roles(db: Session):
+    assignments = [
+        ("Root", "Admin"),
+        ("Login", "Developer"),
+        ("Test", "QA"),
+        ("Manager", "Manager"),
+    ]
 
-    root_user = db.query(User).filter(User.username == "Root").first()
+    for username, role_name in assignments:
+        user = db.query(User).filter(User.username == username).first()
+        role = db.query(Role).filter(Role.name == role_name).first()
 
-    admin_role = db.query(Role).filter(Role.name == "Admin").first()
+        if not user:
+            print(f"❌ User not found: {username}")
+            continue
 
-    if not root_user:
-        print("❌ Root user not found")
-        return
+        if not role:
+            print(f"❌ Role not found: {role_name}")
+            continue
 
-    if not admin_role:
-        print("❌ Admin role not found")
-        return
+        if role not in user.roles:
+            user.roles.append(role)
 
-    if admin_role not in root_user.roles:
-        root_user.roles.append(admin_role)
+        print(f"✅ Assigned {role_name} role to {username}")
 
     db.commit()
 
-    print("✅ Admin role assigned to root user")
+    print("✅ User role seeding completed")

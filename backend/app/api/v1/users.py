@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.schemas_users import UserResponse, UserUpdate
+from app.schemas.schemas_users import UserResponse, UserUpdate, ResetPasswordRequest
 from app.services import (
     services_task,
     services_users as services_user,
@@ -56,3 +56,18 @@ def delete_user(
     current_user=Depends(require_permission("user.delete")),
 ):
     return services_user.delete_user(db, user_id)
+
+
+@router.patch("/users/{user_id}/reset-password")
+def reset_password(
+    user_id: int,
+    data: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("user.reset_password")),
+):
+    return services_user.reset_password(
+        db,
+        user_id,
+        data,
+        current_user,
+    )

@@ -23,6 +23,7 @@ def seed_permissions(db: Session):
         ("user.delete", "Delete users"),
         ("role.manage", "Manage roles"),
         ("permission.manage", "Manage permissions"),
+        ("user.reset_password", "Reset user passwords"),
     ]
 
     for name, description in permissions:

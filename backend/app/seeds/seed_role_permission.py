@@ -27,6 +27,7 @@ def seed_role_permissions(db: Session):
             "user.delete",
             "role.manage",
             "permission.manage",
+            "user.reset_password",
         ],
         "Manager": [
             "task.create",

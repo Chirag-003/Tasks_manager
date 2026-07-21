@@ -339,6 +339,14 @@ export const api = createApi({
       query: () => "/dashboard/stats",
     }),
 
+    resetUserPassword: builder.mutation({
+      query: ({ userId, data }) => ({
+        url: `/users/${userId}/reset-password`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+
     // end
   }),
 });
@@ -364,4 +372,5 @@ export const {
   useGetKanbanTasksQuery,
   useLogoutUserMutation,
   useGetDashboardStatsQuery,
+  useResetUserPasswordMutation,
 } = api;
