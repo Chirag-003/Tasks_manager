@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography, Card, CardContent } from "@mui/material";
-import { useGetUsersQuery, useGetTasksQuery } from "@/services/api";
+import { useGetDashboardStatsQuery } from "@/services/api";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -20,26 +20,9 @@ const STATUS_COLORS = {
 };
 
 export default function DashboardPage() {
-  const {
-    data: users,
-    isLoading: usersLoading,
-    isError: usersError,
-  } = useGetUsersQuery(undefined, {
+  const { data, isLoading, isError } = useGetDashboardStatsQuery(undefined, {
     skip: !hasToken(),
   });
-
-  const {
-    data: tasks,
-    isLoading: tasksLoading,
-    isError: tasksError,
-  } = useGetTasksQuery(
-    {
-      page_size: 2000,
-    },
-    {
-      skip: !hasToken(),
-    },
-  );
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -64,32 +47,18 @@ export default function DashboardPage() {
     }
   }, [searchParams, router]);
 
-  if (usersError || tasksError) {
+  if (isError) {
     return <Typography color="error">Failed to load dashboard data</Typography>;
   }
 
-  if (!users || !tasks || usersLoading || tasksLoading) {
+  if (!data || isLoading) {
     return <UILoader type="subtask" />;
   }
 
-  const taskList = tasks.results ?? [];
-
-  const totalUsers = users.length;
-
-  const totalTasks = taskList.length;
-
-  const ALL_STATUSES = Object.keys(STATUS_CONFIG);
-
-  const statusCount = ALL_STATUSES.reduce(
-    (acc: Record<string, number>, status) => {
-      acc[status] = taskList.filter(
-        (task: any) => task.status === status,
-      ).length;
-
-      return acc;
-    },
-    {},
-  );
+  const totalUsers = data.total_users;
+  const totalTasks = data.total_tasks;
+  const totalSubtasks = data.total_subtasks;
+  const statusCount = data.task_status_counts;
 
   return (
     <>
@@ -130,7 +99,7 @@ export default function DashboardPage() {
             display: "grid",
             gridTemplateColumns: {
               xs: "1fr",
-              sm: "repeat(2, minmax(240px, 320px))",
+              sm: "repeat(3, minmax(240px, 320px))",
             },
             gap: 2,
             mb: 4,
@@ -146,6 +115,12 @@ export default function DashboardPage() {
             label="Total Tasks"
             value={totalTasks}
             color="#22c55e"
+          />
+
+          <DashboardCard
+            label="Total Subtasks"
+            value={totalSubtasks}
+            color="#8b5cf6"
           />
         </Box>
 
@@ -172,7 +147,7 @@ export default function DashboardPage() {
 
           <GridSection>
             {Object.entries(STATUS_CONFIG).map(([status, config]) => {
-              const count = statusCount[status];
+              const count = statusCount[status] ?? 0;
 
               return (
                 <DashboardCard

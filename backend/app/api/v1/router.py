@@ -7,6 +7,7 @@ from app.api.v1.subtasks import router as subtasks_router
 from app.api.v1.comments import router as comments_router
 from app.api.v1.users import router as users_router
 from app.api.v1.auth import router as auth_router
+from app.api.v1.dashboard import router as dashboard_router
 
 router = APIRouter()
 
@@ -38,4 +39,9 @@ router.include_router(
 router.include_router(
     auth_router,
     tags=["Auth"],
+)
+
+router.include_router(
+    dashboard_router,
+    tags=["Dashboard"],
 )

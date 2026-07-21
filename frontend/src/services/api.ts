@@ -335,6 +335,10 @@ export const api = createApi({
       providesTags: ["Tasks"],
     }),
 
+    getDashboardStats: builder.query({
+      query: () => "/dashboard/stats",
+    }),
+
     // end
   }),
 });
@@ -359,4 +363,5 @@ export const {
   useGetCurrentUserQuery,
   useGetKanbanTasksQuery,
   useLogoutUserMutation,
+  useGetDashboardStatsQuery,
 } = api;
