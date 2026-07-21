@@ -7,7 +7,9 @@ import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
 import { useGetCurrentUserQuery, useGetUsersQuery } from "@/services/api";
 import { useState } from "react";
 import { hasPermission } from "@/utils/permission";
+
 import ResetPasswordDialog from "@/components/users/ResetPasswordDialog";
+import DeleteUserDialog from "@/components/users/DeleteUserDialog";
 
 export default function UsersPage() {
   const { data, isError } = useGetUsersQuery();
@@ -16,6 +18,8 @@ export default function UsersPage() {
   const [openResetDialog, setOpenResetDialog] = useState(false);
 
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   if (isError) {
     return (
@@ -152,7 +156,13 @@ export default function UsersPage() {
                   >
                     {user.email}
                   </Typography>
-                  <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      alignItems: "center",
+                    }}
+                  >
                     {hasPermission(
                       currentUser?.permissions,
                       "user.reset_password",
@@ -173,6 +183,21 @@ export default function UsersPage() {
                         Reset Password
                       </Button>
                     )}
+                    {hasPermission(
+                      currentUser?.permissions,
+                      "user.reset_password",
+                    ) && (
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setOpenDeleteDialog(true);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </Box>
                 </Box>
 
@@ -188,6 +213,11 @@ export default function UsersPage() {
           setOpenResetDialog(false);
           setSelectedUser(null);
         }}
+        user={selectedUser}
+      />
+      <DeleteUserDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
         user={selectedUser}
       />
     </>

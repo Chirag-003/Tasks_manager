@@ -55,7 +55,11 @@ def delete_user(
     db: Session = Depends(get_db),
     current_user=Depends(require_permission("user.delete")),
 ):
-    return services_user.delete_user(db, user_id)
+    return services_user.delete_user(
+        db,
+        user_id,
+        current_user,
+    )
 
 
 @router.patch("/users/{user_id}/reset-password")

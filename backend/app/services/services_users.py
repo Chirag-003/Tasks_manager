@@ -6,6 +6,7 @@ from starlette import status
 
 from app.models.model_users import User
 from app.core.security import hash_password
+from app.models.model_role import Role
 
 from app.schemas.schemas_users import ResetPasswordRequest
 from app.core.validators import validate_password_strength
@@ -52,24 +53,66 @@ def update_user(db: Session, user_id: int, user):
         raise HTTPException(500, "Error updating user" or str(e))
 
 
-def delete_user(db: Session, user_id: int):
-
+def delete_user(
+    db: Session,
+    user_id: int,
+    current_user,
+):
     db_user = db.query(User).filter(User.id == user_id).first()
 
     if not db_user:
-        raise HTTPException(404, "User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Cannot delete Root
+    if db_user.username == "Root":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Root user cannot be deleted",
+        )
+
+    # Cannot delete yourself
+    if current_user.id == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot delete your own account",
+        )
+
+    # Cannot delete last admin
+    admin_count = db.query(User).join(User.roles).filter(Role.name == "Admin").count()
+
+    is_admin = any(role.name == "Admin" for role in db_user.roles)
+
+    if is_admin and admin_count <= 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete the last admin user",
+        )
 
     try:
+        # Remove task assignments
         db_user.tasks = []
 
+        # Remove subtask assignments
+        db_user.subtasks = []
+
         db.delete(db_user)
+
         db.commit()
 
-        return {"detail": "User deleted successfully"}
+        return {
+            "detail": "User deleted successfully",
+        }
 
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(500, "Error deleting user: ")
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting user",
+        )
 
 
 def reset_password(

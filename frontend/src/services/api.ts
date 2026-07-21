@@ -345,6 +345,17 @@ export const api = createApi({
         method: "PATCH",
         body: data,
       }),
+
+      invalidatesTags: ["Users"],
+    }),
+
+    deleteUser: builder.mutation<{ detail: string }, number>({
+      query: (userId) => ({
+        url: `/users/${userId}`,
+        method: "DELETE",
+      }),
+
+      invalidatesTags: ["Users"],
     }),
 
     // end
@@ -352,25 +363,37 @@ export const api = createApi({
 });
 
 export const {
+  //task
   useGetTasksQuery,
   useGetTaskByIdQuery,
-  useGetSubtasksQuery,
-  useGetSubtaskByIdQuery,
-  useGetUsersQuery,
   useCreateTaskMutation,
   useDeleteTaskMutation,
   useUpdateTaskMutation,
+  useGetKanbanTasksQuery,
+
+  //subtasks
+  useGetSubtasksQuery,
+  useGetSubtaskByIdQuery,
   useCreateSubtaskMutation,
-  useAddTaskCommentMutation,
-  useAddSubtaskCommentMutation,
   useUpdateSubtaskMutation,
   useDeleteSubtaskMutation,
-  useGetSprintsQuery,
+
+  //comments
+  useAddTaskCommentMutation,
+  useAddSubtaskCommentMutation,
+
+  //users
+  useGetUsersQuery,
+  useGetCurrentUserQuery,
+  useResetUserPasswordMutation,
+
+  //auth
   useLoginUserMutation,
   useRegisterUserMutation,
-  useGetCurrentUserQuery,
-  useGetKanbanTasksQuery,
   useLogoutUserMutation,
+  useDeleteUserMutation,
+
+  //extra
+  useGetSprintsQuery,
   useGetDashboardStatsQuery,
-  useResetUserPasswordMutation,
 } = api;
