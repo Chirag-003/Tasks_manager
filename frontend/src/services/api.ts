@@ -367,6 +367,11 @@ export const api = createApi({
       invalidatesTags: ["Users"],
     }),
 
+    getRoles: builder.query({
+      query: () => "/roles",
+      providesTags: ["Users"],
+    }),
+
     // end
   }),
 });
@@ -395,6 +400,7 @@ export const {
   useGetUsersQuery,
   useGetCurrentUserQuery,
   useResetUserPasswordMutation,
+  useGetRolesQuery,
 
   //auth
   useLoginUserMutation,

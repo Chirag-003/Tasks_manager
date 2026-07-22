@@ -75,3 +75,10 @@ def reset_password(
         data,
         current_user,
     )
+
+
+@router.get("/roles")
+def fetch_roles(
+    db: Session = Depends(get_db), current_user=Depends(require_permission("user.view"))
+):
+    return services_user.get_roles(db)

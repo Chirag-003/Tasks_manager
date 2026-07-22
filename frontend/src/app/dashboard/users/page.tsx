@@ -2,7 +2,7 @@
 
 import { Box, Typography, Divider, Avatar, Button } from "@mui/material";
 
-import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 import { useGetCurrentUserQuery, useGetUsersQuery } from "@/services/api";
@@ -16,7 +16,6 @@ export default function UsersPage() {
   const { data, isError } = useGetUsersQuery();
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [openResetDialog, setOpenResetDialog] = useState(false);
 
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
@@ -38,21 +37,15 @@ export default function UsersPage() {
         sx={{
           height: "100%",
           p: 3,
-          backgroundColor: "#f8fafc",
+          background: "linear-gradient(to bottom, #edeeef, #ffffff)",
           display: "flex",
           flexDirection: "column",
         }}
       >
         {/* HEADER */}
         <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              mb: 0.5,
-            }}
-          >
-            Users
+          <Typography variant="h4" fontWeight={700}>
+            User Management
           </Typography>
 
           <Typography
@@ -61,7 +54,7 @@ export default function UsersPage() {
               fontSize: 14,
             }}
           >
-            Manage and view all registered users
+            Manage user accounts, profile information, and security settings.
           </Typography>
         </Box>
 
@@ -119,7 +112,7 @@ export default function UsersPage() {
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: "80px 1fr 1.5fr 180px",
+                    gridTemplateColumns: "80px 1fr 1.5fr 220px",
                     alignItems: "center",
                     px: 3,
                     py: 1,
@@ -127,6 +120,7 @@ export default function UsersPage() {
 
                     "&:hover": {
                       backgroundColor: "#f8fafc",
+                      boxShadow: "inset 0 0 0 1px #e2e8f0",
                     },
                   }}
                 >
@@ -134,7 +128,9 @@ export default function UsersPage() {
                     sx={{
                       width: 32,
                       height: 32,
-                      bgcolor: "#2563eb",
+                      background: "linear-gradient(135deg, #2563eb, #7c3aed)",
+
+                      boxShadow: "0 6px 16px rgba(37,99,235,0.25)",
                       fontSize: 14,
                       fontWeight: 600,
                     }}
@@ -167,30 +163,62 @@ export default function UsersPage() {
                     }}
                   >
                     <Button
-                      variant="outlined"
                       startIcon={<EditOutlinedIcon />}
                       onClick={() => {
                         setSelectedUser(user);
                         setOpenEditDialog(true);
                       }}
                       sx={{
-                        textTransform: "capitalize",
-                        height: 36,
+                        textTransform: "none",
+                        minWidth: 80,
+                        height: 32,
+
+                        borderRadius: "10px",
+
+                        background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+
+                        color: "#fff",
+
+                        fontWeight: 600,
+
+                        boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
+
+                        "&:hover": {
+                          background:
+                            "linear-gradient(135deg, #1d4ed8, #2563eb)",
+
+                          boxShadow: "0 8px 18px rgba(37,99,235,0.35)",
+                        },
                       }}
                     >
                       Edit
                     </Button>
 
-                    {hasPermission(
-                      currentUser?.permissions,
-                      "user.reset_password",
-                    ) && (
+                    {hasPermission(currentUser?.permissions, "user.delete") && (
                       <Button
-                        variant="outlined"
                         color="error"
+                        variant="outlined"
+                        startIcon={<DeleteOutlineIcon />}
                         onClick={() => {
                           setSelectedUser(user);
                           setOpenDeleteDialog(true);
+                        }}
+                        sx={{
+                          textTransform: "none",
+
+                          minWidth: 80,
+                          height: 32,
+
+                          borderRadius: "10px",
+
+                          borderWidth: "1.5px",
+
+                          fontWeight: 600,
+
+                          "&:hover": {
+                            borderWidth: "1.5px",
+                            backgroundColor: "#fef2f2",
+                          },
                         }}
                       >
                         Delete

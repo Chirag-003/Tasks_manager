@@ -33,6 +33,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useUpdateUserMutation,
   useResetUserPasswordMutation,
+  useGetRolesQuery,
 } from "@/services/api";
 
 import InputField from "@/components/common/InputField";
@@ -57,6 +58,7 @@ const editUserSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
 
   team_name: z.string().optional(),
+  role_id: z.number(),
 });
 
 const resetPasswordSchema = z
@@ -87,6 +89,8 @@ export default function EditUserDialog({ open, onClose, user }: Props) {
   const [updateUser] = useUpdateUserMutation();
   const [resetUserPassword] = useResetUserPasswordMutation();
 
+  const { data: roles } = useGetRolesQuery(undefined);
+
   const {
     control,
     handleSubmit,
@@ -98,6 +102,7 @@ export default function EditUserDialog({ open, onClose, user }: Props) {
       username: "",
       email: "",
       team_name: "",
+      role_id: 0,
     },
   });
 
@@ -130,6 +135,7 @@ export default function EditUserDialog({ open, onClose, user }: Props) {
         username: user.username || "",
         email: user.email || "",
         team_name: user.team_name || "",
+        role_id: user.roles?.[0]?.id ?? 0,
       });
       resetPasswordForm({
         new_password: "",
@@ -333,6 +339,20 @@ export default function EditUserDialog({ open, onClose, user }: Props) {
                       label="Team Name"
                       type="text"
                       icon={<GroupsIcon />}
+                      errors={errors}
+                    />
+                    <InputField
+                      name="role_id"
+                      control={control}
+                      label="Role"
+                      type="select"
+                      required
+                      options={
+                        roles?.map((role: any) => ({
+                          label: role.name,
+                          value: role.id,
+                        })) || []
+                      }
                       errors={errors}
                     />
                   </Box>

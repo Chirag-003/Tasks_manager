@@ -7,7 +7,7 @@ from app.models.model_role import Role
 def seed_user_roles(db: Session):
     assignments = [
         ("Root", "Admin"),
-        ("Login", "Developer"),
+        ("John", "Developer"),
         ("Test", "QA"),
         ("Manager", "Manager"),
     ]

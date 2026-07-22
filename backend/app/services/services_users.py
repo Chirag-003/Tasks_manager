@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from starlette import status
+from sqlalchemy import func
 
 
 from app.models.model_users import User
@@ -17,7 +18,7 @@ from app.core.validators import (
 
 
 def get_users(db: Session):
-    return db.query(User).all()
+    return db.query(User).order_by(func.lower(User.username)).all()
 
 
 def update_user(db: Session, user_id: int, user):
@@ -67,6 +68,28 @@ def update_user(db: Session, user_id: int, user):
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Email already exists",
                 )
+
+        if "role_id" in update_data:
+            role = db.query(Role).filter(Role.id == update_data["role_id"]).first()
+
+            if not role:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Role not found",
+                )
+            is_admin = any(r.name == "Admin" for r in db_user.roles)
+            admin_count = (
+                db.query(User).join(User.roles).filter(Role.name == "Admin").count()
+            )
+            if is_admin and role.name != "Admin" and admin_count <= 1:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cannot remove the last admin user",
+                )
+
+            db_user.roles = [role]
+
+            del update_data["role_id"]
 
         for key, value in update_data.items():
             setattr(db_user, key, value)
@@ -201,3 +224,7 @@ def reset_password(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Errro resetting password",
         )
+
+
+def get_roles(db: Session):
+    return db.query(Role).all()
