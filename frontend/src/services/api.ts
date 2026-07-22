@@ -362,6 +362,15 @@ export const api = createApi({
       providesTags: ["Users"],
     }),
 
+    updateMe: builder.mutation({
+      query: (data) => ({
+        url: "/auth/me",
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["CurrentUser"],
+    }),
+
     // end
   }),
 });
@@ -390,6 +399,7 @@ export const {
   useGetUsersQuery,
   useGetCurrentUserQuery,
   useGetRolesQuery,
+  useUpdateMeMutation,
 
   //auth
   useLoginUserMutation,

@@ -16,3 +16,8 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+class UpdateMeRequest(BaseModel):
+    username: str
+    email: EmailStr

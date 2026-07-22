@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from starlette import status
+from sqlalchemy.exc import IntegrityError
 
 from app.models.model_users import User
 from app.core.security import hash_password, verify_password
@@ -130,3 +131,68 @@ def refresh_access_token(
 
 def logout_user():
     return {"message": "Logged out successfully"}
+
+
+def update_me(
+    db,
+    current_user,
+    payload,
+):
+    validate_username(payload.username)
+    validate_email(payload.email)
+
+    username_exists = (
+        db.query(User)
+        .filter(
+            User.username == payload.username,
+            User.id != current_user.id,
+        )
+        .first()
+    )
+
+    if username_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists",
+        )
+
+    email_exists = (
+        db.query(User)
+        .filter(
+            User.email == payload.email,
+            User.id != current_user.id,
+        )
+        .first()
+    )
+
+    if email_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists",
+        )
+
+    current_user.username = payload.username.strip()
+    current_user.email = payload.email.strip()
+
+    try:
+        db.commit()
+
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username or email already exists",
+        )
+
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error updating profile",
+        )
+
+    db.refresh(current_user)
+
+    return {
+        "message": "Profile updated successfully",
+    }

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 
 from app.db.session import get_db
-from app.schemas.schemas_auth import RegisterRequest, LoginRequest
+from app.schemas.schemas_auth import RegisterRequest, LoginRequest, UpdateMeRequest
 from app.schemas.schemas_users import UserResponse
 from app.services import services_auth
 
@@ -62,6 +62,20 @@ def get_me(
         "id": current_user.id,
         "username": current_user.username,
         "email": current_user.email,
+        "team_name": current_user.team_name,
         "roles": [role.name for role in current_user.roles],
         "permissions": list(permissions),
     }
+
+
+@router.patch("/auth/me")
+def update_me(
+    payload: UpdateMeRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return services_auth.update_me(
+        db,
+        current_user,
+        payload,
+    )
