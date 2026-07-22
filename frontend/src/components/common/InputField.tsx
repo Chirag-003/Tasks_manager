@@ -31,6 +31,8 @@ type InputFieldProps = {
 
   rows?: number;
 
+  placeholder?: string;
+
   onChangeExtra?: () => void;
 
   textFieldProps?: TextFieldProps;
@@ -55,6 +57,8 @@ export default function InputField({
 
   rows = 3,
 
+  placeholder,
+
   onChangeExtra,
 
   textFieldProps,
@@ -71,6 +75,7 @@ export default function InputField({
           {...field}
           value={field.value ?? ""} // ✅ FIX ADDED
           label={label}
+          placeholder={placeholder}
           size="small"
           fullWidth
           required={required}
@@ -100,6 +105,19 @@ export default function InputField({
           }}
           {...textFieldProps}
         >
+          {type === "select" && placeholder && (
+            <MenuItem
+              value={0}
+              disabled
+              sx={{
+                color: "#94a3b8",
+                fontStyle: "italic",
+              }}
+            >
+              {placeholder}
+            </MenuItem>
+          )}
+
           {type === "select" &&
             options.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>

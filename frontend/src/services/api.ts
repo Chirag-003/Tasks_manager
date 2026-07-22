@@ -339,16 +339,6 @@ export const api = createApi({
       query: () => "/dashboard/stats",
     }),
 
-    resetUserPassword: builder.mutation({
-      query: ({ userId, data }) => ({
-        url: `/users/${userId}/reset-password`,
-        method: "PATCH",
-        body: data,
-      }),
-
-      invalidatesTags: ["Users"],
-    }),
-
     deleteUser: builder.mutation<{ detail: string }, number>({
       query: (userId) => ({
         url: `/users/${userId}`,
@@ -399,7 +389,6 @@ export const {
   //users
   useGetUsersQuery,
   useGetCurrentUserQuery,
-  useResetUserPasswordMutation,
   useGetRolesQuery,
 
   //auth

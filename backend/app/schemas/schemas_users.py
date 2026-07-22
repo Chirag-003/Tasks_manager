@@ -18,7 +18,3 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class ResetPasswordRequest(BaseModel):
-    new_password: str

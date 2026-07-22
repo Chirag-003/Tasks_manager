@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Divider, Avatar, Button } from "@mui/material";
+import { Box, Typography, Divider, Avatar, Button, Chip } from "@mui/material";
 
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -11,6 +11,7 @@ import { hasPermission } from "@/utils/permission";
 
 import DeleteUserDialog from "@/components/users/DeleteUserDialog";
 import EditUserDialog from "@/components/users/EditUserDialog";
+import { ROLE_CONFIG } from "@/constants/roles";
 
 export default function UsersPage() {
   const { data, isError } = useGetUsersQuery();
@@ -75,8 +76,8 @@ export default function UsersPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "80px 1fr 1.5fr 180px",
-              px: 3,
+              gridTemplateColumns: "300px 300px 430px 300px",
+              px: 8,
               py: 2,
               borderBottom: "1px solid #e2e8f0",
               backgroundColor: "#f8fafc",
@@ -86,8 +87,8 @@ export default function UsersPage() {
             }}
           >
             <Box>User</Box>
-            <Box>Username</Box>
             <Box>Email</Box>
+            <Box>Role</Box>
             <Box>Actions</Box>
           </Box>
 
@@ -107,129 +108,199 @@ export default function UsersPage() {
               },
             }}
           >
-            {data?.map((user: any) => (
-              <Box key={user.id}>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "80px 1fr 1.5fr 220px",
-                    alignItems: "center",
-                    px: 3,
-                    py: 1,
-                    transition: "all 0.2s ease",
+            {data?.map((user: any) => {
+              const roleName = user.roles?.[0]?.name;
 
-                    "&:hover": {
-                      backgroundColor: "#f8fafc",
-                      boxShadow: "inset 0 0 0 1px #e2e8f0",
-                    },
-                  }}
-                >
-                  <Avatar
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      background: "linear-gradient(135deg, #2563eb, #7c3aed)",
+              const roleConfig = ROLE_CONFIG[roleName] ?? ROLE_CONFIG.default;
 
-                      boxShadow: "0 6px 16px rgba(37,99,235,0.25)",
-                      fontSize: 14,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {user.username?.charAt(0)?.toUpperCase()}
-                  </Avatar>
-
-                  <Typography
-                    sx={{
-                      fontWeight: 600,
-                      color: "#0f172a",
-                    }}
-                  >
-                    {user.username}
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      color: "#64748b",
-                      fontSize: 14,
-                    }}
-                  >
-                    {user.email}
-                  </Typography>
+              return (
+                <Box key={user.id}>
                   <Box
                     sx={{
-                      display: "flex",
-                      gap: 1,
+                      display: "grid",
+                      gridTemplateColumns: "300px 300px 300px 300px",
                       alignItems: "center",
+                      px: 3,
+                      py: 1,
+                      transition: "all 0.2s ease",
+
+                      "&:hover": {
+                        backgroundColor: "#f8fafc",
+                        boxShadow: "inset 0 0 0 1px #e2e8f0",
+                      },
                     }}
                   >
-                    <Button
-                      startIcon={<EditOutlinedIcon />}
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setOpenEditDialog(true);
-                      }}
+                    <Box
                       sx={{
-                        textTransform: "none",
-                        minWidth: 80,
-                        height: 32,
-
-                        borderRadius: "10px",
-
-                        background: "linear-gradient(135deg, #2563eb, #3b82f6)",
-
-                        color: "#fff",
-
-                        fontWeight: 600,
-
-                        boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
-
-                        "&:hover": {
-                          background:
-                            "linear-gradient(135deg, #1d4ed8, #2563eb)",
-
-                          boxShadow: "0 8px 18px rgba(37,99,235,0.35)",
-                        },
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
                       }}
                     >
-                      Edit
-                    </Button>
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          background:
+                            "linear-gradient(135deg, #2563eb, #7c3aed)",
+                          boxShadow: "0 6px 16px rgba(37,99,235,0.25)",
+                          fontSize: 14,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {user.username?.charAt(0)?.toUpperCase()}
+                      </Avatar>
 
-                    {hasPermission(currentUser?.permissions, "user.delete") && (
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                          color: "#0f172a",
+                        }}
+                      >
+                        {user.username}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      sx={{
+                        color: "#64748b",
+                        fontSize: 14,
+                      }}
+                    >
+                      {user.email}
+                    </Typography>
+                    <Box>
+                      {user.roles?.[0]?.name ? (
+                        <Chip
+                          label={roleName}
+                          size="small"
+                          sx={{
+                            width: 100,
+
+                            height: 26,
+                            fontSize: 12,
+                            fontWeight: 600,
+
+                            bgcolor: roleConfig.bg,
+                            color: roleConfig.color,
+
+                            border: `1px solid ${roleConfig.color}20`,
+
+                            justifyContent: "center",
+
+                            "& .MuiChip-label": {
+                              px: 0,
+                              width: "100%",
+                              textAlign: "center",
+                            },
+                          }}
+                        />
+                      ) : (
+                        <Chip
+                          label="Assign Role"
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            width: 110,
+                            cursor: "default",
+
+                            height: 26,
+
+                            color: "#94a3b8",
+                            borderColor: "#cbd5e1",
+
+                            bgcolor: "#f8fafc",
+
+                            "& .MuiChip-label": {
+                              width: "100%",
+                              textAlign: "center",
+                              fontStyle: "italic",
+                            },
+                          }}
+                        />
+                      )}
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        alignItems: "center",
+                        justifySelf: "end",
+                      }}
+                    >
                       <Button
-                        color="error"
-                        variant="outlined"
-                        startIcon={<DeleteOutlineIcon />}
+                        startIcon={<EditOutlinedIcon />}
                         onClick={() => {
                           setSelectedUser(user);
-                          setOpenDeleteDialog(true);
+                          setOpenEditDialog(true);
                         }}
                         sx={{
                           textTransform: "none",
-
                           minWidth: 80,
                           height: 32,
 
                           borderRadius: "10px",
 
-                          borderWidth: "1.5px",
+                          background:
+                            "linear-gradient(135deg, #2563eb, #3b82f6)",
+
+                          color: "#fff",
 
                           fontWeight: 600,
 
+                          boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
+
                           "&:hover": {
-                            borderWidth: "1.5px",
-                            backgroundColor: "#fef2f2",
+                            background:
+                              "linear-gradient(135deg, #1d4ed8, #2563eb)",
+
+                            boxShadow: "0 8px 18px rgba(37,99,235,0.35)",
                           },
                         }}
                       >
-                        Delete
+                        Edit
                       </Button>
-                    )}
-                  </Box>
-                </Box>
 
-                <Divider />
-              </Box>
-            ))}
+                      {hasPermission(
+                        currentUser?.permissions,
+                        "user.delete",
+                      ) && (
+                        <Button
+                          color="error"
+                          variant="outlined"
+                          startIcon={<DeleteOutlineIcon />}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setOpenDeleteDialog(true);
+                          }}
+                          sx={{
+                            textTransform: "none",
+
+                            minWidth: 80,
+                            height: 32,
+
+                            borderRadius: "10px",
+
+                            borderWidth: "1.5px",
+
+                            fontWeight: 600,
+
+                            "&:hover": {
+                              borderWidth: "1.5px",
+                              backgroundColor: "#fef2f2",
+                            },
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Divider />
+                </Box>
+              );
+            })}
           </Box>
         </Box>
       </Box>
