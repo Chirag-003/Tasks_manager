@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { useGetCurrentUserQuery, useUpdateMeMutation } from "@/services/api";
 import { ROLE_CONFIG } from "@/constants/roles";
 import StatusSnackbar from "@/components/common/StatusSnackbar";
+import ChangePasswordDialog from "@/components/users/ChangePasswordDialog";
 
 export default function AccountPage() {
   const { data: user } = useGetCurrentUserQuery(undefined);
@@ -27,6 +28,8 @@ export default function AccountPage() {
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [passwordOpen, setPasswordOpen] = useState(false);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -395,6 +398,7 @@ export default function AccountPage() {
         }}
       >
         <Box
+          onClick={() => setPasswordOpen(true)}
           sx={{
             p: 3,
 
@@ -437,6 +441,10 @@ export default function AccountPage() {
           />
         </Box>
       </Box>
+      <ChangePasswordDialog
+        open={passwordOpen}
+        onClose={() => setPasswordOpen(false)}
+      />
       <StatusSnackbar
         open={snackbar.open}
         message={snackbar.message}

@@ -196,3 +196,37 @@ def update_me(
     return {
         "message": "Profile updated successfully",
     }
+
+
+def change_password(
+    db,
+    current_user,
+    payload,
+):
+    if not verify_password(
+        payload.current_password,
+        current_user.password_hash,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+
+    validate_password_strength(payload.new_password)
+
+    current_user.password_hash = hash_password(payload.new_password)
+
+    try:
+        db.commit()
+
+    except Exception:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error changing password",
+        )
+
+    return {
+        "message": "Password changed successfully",
+    }

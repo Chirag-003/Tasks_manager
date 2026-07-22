@@ -371,6 +371,14 @@ export const api = createApi({
       invalidatesTags: ["CurrentUser"],
     }),
 
+    changePassword: builder.mutation({
+      query: (data) => ({
+        url: "/auth/me/password",
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+
     // end
   }),
 });
@@ -407,6 +415,7 @@ export const {
   useLogoutUserMutation,
   useDeleteUserMutation,
   useUpdateUserMutation,
+  useChangePasswordMutation,
 
   //extra
   useGetSprintsQuery,

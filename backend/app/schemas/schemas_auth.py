@@ -21,3 +21,8 @@ class LoginRequest(BaseModel):
 class UpdateMeRequest(BaseModel):
     username: str
     email: EmailStr
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str

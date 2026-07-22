@@ -3,7 +3,12 @@ from sqlalchemy.orm import Session
 
 
 from app.db.session import get_db
-from app.schemas.schemas_auth import RegisterRequest, LoginRequest, UpdateMeRequest
+from app.schemas.schemas_auth import (
+    RegisterRequest,
+    LoginRequest,
+    UpdateMeRequest,
+    ChangePasswordRequest,
+)
 from app.schemas.schemas_users import UserResponse
 from app.services import services_auth
 
@@ -75,6 +80,19 @@ def update_me(
     current_user=Depends(get_current_user),
 ):
     return services_auth.update_me(
+        db,
+        current_user,
+        payload,
+    )
+
+
+@router.patch("/auth/me/password")
+def change_password(
+    payload: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return services_auth.change_password(
         db,
         current_user,
         payload,
