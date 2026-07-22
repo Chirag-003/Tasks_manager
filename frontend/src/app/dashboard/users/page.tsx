@@ -6,7 +6,9 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 import { useGetCurrentUserQuery, useGetUsersQuery } from "@/services/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { hasPermission } from "@/utils/permission";
 
 import DeleteUserDialog from "@/components/users/DeleteUserDialog";
@@ -16,13 +18,44 @@ import { ROLE_CONFIG } from "@/constants/roles";
 export default function UsersPage() {
   const { data, isError } = useGetUsersQuery();
 
+  const router = useRouter();
+
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  const { data: currentUser } = useGetCurrentUserQuery(undefined);
+  const { data: currentUser, isLoading: isUserLoading } =
+    useGetCurrentUserQuery(undefined);
+
+  const canEditUsers = hasPermission(currentUser?.permissions, "user.update");
+
+  const canDeleteUsers = hasPermission(currentUser?.permissions, "user.delete");
+
+  const canManageUsers = canEditUsers || canDeleteUsers;
+
+  const gridColumns = canManageUsers
+    ? "300px 300px 300px 300px"
+    : "500px 500px 500px";
+
+  useEffect(() => {
+    if (
+      !isUserLoading &&
+      currentUser &&
+      !hasPermission(currentUser.permissions, "user.view")
+    ) {
+      router.replace("/dashboard");
+    }
+  }, [currentUser, isUserLoading, router]);
 
   const [openEditDialog, setOpenEditDialog] = useState(false);
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  if (
+    !isUserLoading &&
+    currentUser &&
+    !hasPermission(currentUser.permissions, "user.view")
+  ) {
+    return null;
+  }
 
   if (isError) {
     return (
@@ -76,8 +109,8 @@ export default function UsersPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "300px 300px 430px 300px",
-              px: 8,
+              gridTemplateColumns: gridColumns,
+              px: 3,
               py: 2,
               borderBottom: "1px solid #e2e8f0",
               backgroundColor: "#f8fafc",
@@ -89,7 +122,7 @@ export default function UsersPage() {
             <Box>User</Box>
             <Box>Email</Box>
             <Box>Role</Box>
-            <Box>Actions</Box>
+            {canManageUsers && <Box>Actions</Box>}
           </Box>
 
           {/* LIST */}
@@ -118,7 +151,7 @@ export default function UsersPage() {
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: "300px 300px 300px 300px",
+                      gridTemplateColumns: gridColumns,
                       alignItems: "center",
                       px: 3,
                       py: 1,
@@ -219,82 +252,81 @@ export default function UsersPage() {
                         />
                       )}
                     </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 1,
-                        alignItems: "center",
-                        justifySelf: "end",
-                      }}
-                    >
-                      <Button
-                        startIcon={<EditOutlinedIcon />}
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setOpenEditDialog(true);
-                        }}
+                    {canManageUsers && (
+                      <Box
                         sx={{
-                          textTransform: "none",
-                          minWidth: 80,
-                          height: 32,
-
-                          borderRadius: "10px",
-
-                          background:
-                            "linear-gradient(135deg, #2563eb, #3b82f6)",
-
-                          color: "#fff",
-
-                          fontWeight: 600,
-
-                          boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
-
-                          "&:hover": {
-                            background:
-                              "linear-gradient(135deg, #1d4ed8, #2563eb)",
-
-                            boxShadow: "0 8px 18px rgba(37,99,235,0.35)",
-                          },
+                          display: "flex",
+                          gap: 1,
+                          alignItems: "center",
                         }}
                       >
-                        Edit
-                      </Button>
+                        {canEditUsers && (
+                          <Button
+                            startIcon={<EditOutlinedIcon />}
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setOpenEditDialog(true);
+                            }}
+                            sx={{
+                              textTransform: "none",
+                              minWidth: 80,
+                              height: 32,
 
-                      {hasPermission(
-                        currentUser?.permissions,
-                        "user.delete",
-                      ) && (
-                        <Button
-                          color="error"
-                          variant="outlined"
-                          startIcon={<DeleteOutlineIcon />}
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setOpenDeleteDialog(true);
-                          }}
-                          sx={{
-                            textTransform: "none",
+                              borderRadius: "10px",
 
-                            minWidth: 80,
-                            height: 32,
+                              background:
+                                "linear-gradient(135deg, #2563eb, #3b82f6)",
 
-                            borderRadius: "10px",
+                              color: "#fff",
 
-                            borderWidth: "1.5px",
+                              fontWeight: 600,
 
-                            fontWeight: 600,
+                              boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
 
-                            "&:hover": {
+                              "&:hover": {
+                                background:
+                                  "linear-gradient(135deg, #1d4ed8, #2563eb)",
+
+                                boxShadow: "0 8px 18px rgba(37,99,235,0.35)",
+                              },
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        )}
+
+                        {canDeleteUsers && (
+                          <Button
+                            color="error"
+                            variant="outlined"
+                            startIcon={<DeleteOutlineIcon />}
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setOpenDeleteDialog(true);
+                            }}
+                            sx={{
+                              textTransform: "none",
+
+                              minWidth: 80,
+                              height: 32,
+
+                              borderRadius: "10px",
+
                               borderWidth: "1.5px",
-                              backgroundColor: "#fef2f2",
-                            },
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </Box>
+
+                              fontWeight: 600,
+
+                              "&:hover": {
+                                borderWidth: "1.5px",
+                                backgroundColor: "#fef2f2",
+                              },
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </Box>
+                    )}
                   </Box>
 
                   <Divider />

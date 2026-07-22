@@ -8,8 +8,13 @@ import DashboardIcon from "@mui/icons-material/DashboardOutlined";
 import TaskIcon from "@mui/icons-material/AssignmentOutlined";
 import PeopleIcon from "@mui/icons-material/PeopleOutline";
 
+import { useGetCurrentUserQuery } from "@/services/api";
+import { hasPermission } from "@/utils/permission";
+
 export default function Sidebar() {
   const pathname = usePathname();
+
+  const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
   const menuItems = [
     {
@@ -22,12 +27,15 @@ export default function Sidebar() {
       href: "/dashboard/tasks",
       icon: <TaskIcon fontSize="small" />,
     },
-    {
+  ];
+
+  if (hasPermission(currentUser?.permissions, "user.view")) {
+    menuItems.push({
       label: "Users",
       href: "/dashboard/users",
       icon: <PeopleIcon fontSize="small" />,
-    },
-  ];
+    });
+  }
 
   return (
     <Box
