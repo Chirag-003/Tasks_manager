@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+
 import {
   Box,
   Typography,
@@ -21,11 +24,9 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import SearchIcon from "@mui/icons-material/Search";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useDeleteSubtaskMutation, useGetSubtasksQuery } from "@/services/api";
 
 import UILoader from "@/components/common/Loader";
-import { useDeleteSubtaskMutation, useGetSubtasksQuery } from "@/services/api";
 import SortDropdown, { DEFAULT_SORT, SortValue } from "../common/SortDropdown";
 import FilterMenu from "@/components/common/FilterMenu";
 import { STATUS_CONFIG } from "@/constants/status";
@@ -43,8 +44,10 @@ export default function SubtaskList({
   canCreateSubtask,
   canDeleteSubtask,
 }: Props) {
+  // Navigation
   const router = useRouter();
 
+  // Subtask List
   const [searchInput, setSearchInput] = useState("");
 
   const [filters, setFilters] = useState({
@@ -54,8 +57,24 @@ export default function SubtaskList({
   });
 
   const [sort, setSort] = useState<SortValue>(DEFAULT_SORT);
-
   const [pageSize, setPageSize] = useState(5);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const trimmed = searchInput.trim();
+
+      setFilters((prev) => ({
+        ...prev,
+        search: trimmed || "",
+      }));
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    setPageSize(5);
+  }, [filters, taskId, sort]);
 
   const { data } = useGetSubtasksQuery(
     {
@@ -74,39 +93,12 @@ export default function SubtaskList({
 
   const subtasks = data?.results ?? [];
 
-  useEffect(() => {
-    setPageSize(5);
-  }, [filters, taskId, sort]);
-
+  // Delete Subtask
   const [deleteSubtask] = useDeleteSubtaskMutation();
-
-  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
-
-  // ✅ DELETE STATE
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState("");
 
-  // ✅ ✅ ✅ NEW SNACKBAR STATE
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-  });
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const trimmed = searchInput.trim();
-
-      setFilters((prev) => ({
-        ...prev,
-        search: trimmed || "",
-      }));
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  // ✅ DELETE FUNCTION (UPDATED WITH SNACKBAR)
   const handleDelete = async () => {
     if (!selectedId) return;
 
@@ -118,7 +110,6 @@ export default function SubtaskList({
       setOpenDelete(false);
       setSelectedId(null);
 
-      // ✅ ✅ ✅ SHOW SUCCESS MESSAGE
       setSnackbar({
         open: true,
         message: "Subtask deleted successfully ",
@@ -133,6 +124,16 @@ export default function SubtaskList({
       setDeleteError(message);
     }
   };
+
+  // Open Subtask
+  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
+
+  // Notification
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
 
   return (
     <Box>

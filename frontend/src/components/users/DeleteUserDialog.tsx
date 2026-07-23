@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 
 import {
   Dialog,
@@ -13,10 +14,7 @@ import {
 
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-import { useState } from "react";
-
 import { useDeleteUserMutation } from "@/services/api";
-
 import StatusSnackbar from "@/components/common/StatusSnackbar";
 
 type Props = {
@@ -26,13 +24,8 @@ type Props = {
 };
 
 export default function DeleteUserDialog({ open, onClose, user }: Props) {
+  // Delete User
   const [deleteUser] = useDeleteUserMutation();
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
 
   const handleDelete = async () => {
     if (!user) return;
@@ -56,6 +49,13 @@ export default function DeleteUserDialog({ open, onClose, user }: Props) {
       });
     }
   };
+
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
 
   return (
     <>

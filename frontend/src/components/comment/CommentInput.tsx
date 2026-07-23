@@ -1,15 +1,13 @@
 "use client";
 
-import { Box, TextField, Button, Avatar, Typography } from "@mui/material";
 import { useState } from "react";
-
+import { Box, TextField, Button, Avatar, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 
 import {
   useAddTaskCommentMutation,
   useAddSubtaskCommentMutation,
 } from "@/services/api";
-
 import { useGetCurrentUserQuery } from "@/services/api";
 
 type Props = {
@@ -23,19 +21,21 @@ export default function CommentInput({
   entityType,
   rightSlot,
 }: Props) {
-  const [text, setText] = useState("");
-
+  // API
   const [addTaskComment, { isLoading: isAddingTask }] =
     useAddTaskCommentMutation();
-
   const [addSubtaskComment, { isLoading: isAddingSubtask }] =
     useAddSubtaskCommentMutation();
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
+  // Comment State
+  const [text, setText] = useState("");
   const [error, setError] = useState("");
 
+  // Derived Data
   const isLoading = isAddingTask || isAddingSubtask;
 
+  // Comment Action
   const handleAddComment = async () => {
     if (!text.trim()) return;
 

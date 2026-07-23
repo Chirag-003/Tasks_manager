@@ -1,12 +1,13 @@
 "use client";
 
-import { Box, Typography, CircularProgress } from "@mui/material";
-import TaskCard from "./TaskCard";
-import { useGetKanbanTasksQuery } from "@/services/api";
-import UILoader from "../common/Loader";
-import { STATUS_COLUMNS, StatusKey } from "@/constants/status";
 import { useEffect, useState } from "react";
+import { Box, Typography } from "@mui/material";
 
+import { useGetKanbanTasksQuery } from "@/services/api";
+import { STATUS_COLUMNS, StatusKey } from "@/constants/status";
+
+import TaskCard from "./TaskCard";
+import UILoader from "../common/Loader";
 import { SortValue } from "../common/SortDropdown";
 
 type TaskListProps = {
@@ -28,6 +29,7 @@ export default function TaskList({
   filters,
   sort,
 }: TaskListProps) {
+  // Task Board View
   const columns = STATUS_COLUMNS;
 
   const [columnPages, setColumnPages] = useState<Record<StatusKey, number>>({
@@ -48,8 +50,6 @@ export default function TaskList({
     completed: [],
   });
 
-  const [loadingColumn, setLoadingColumn] = useState<StatusKey | null>(null);
-
   const { data, isLoading, isFetching, error } = useGetKanbanTasksQuery({
     ...filters,
 
@@ -63,29 +63,28 @@ export default function TaskList({
     qa_page: columnPages.qa,
     completed_page: columnPages.completed,
   });
+
+  // Column Pagination
+  const [loadingColumn, setLoadingColumn] = useState<StatusKey | null>(null);
   useEffect(() => {
     if (!isFetching) {
       setLoadingColumn(null);
     }
   }, [isFetching]);
-
   const [isRefreshingBoard, setIsRefreshingBoard] = useState(false);
 
+  // Board Data Management
   const mergeUnique = (oldList: any[] = [], newList: any[] = []) => {
     const map = new Map();
-
     [...oldList, ...newList].forEach((item) => {
       map.set(item.id, item);
     });
-
     return Array.from(map.values());
   };
 
   useEffect(() => {
     if (!data) return;
-
     if (isFetching) return;
-
     setColumnData((prev) => ({
       backlog:
         columnPages.backlog === 1
@@ -142,6 +141,7 @@ export default function TaskList({
     });
   }, [filters, sort]);
 
+  // Error handling
   if (error) {
     return (
       <Box

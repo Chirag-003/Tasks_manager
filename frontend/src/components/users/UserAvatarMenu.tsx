@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import {
   Avatar,
   Box,
@@ -10,8 +13,6 @@ import {
 } from "@mui/material";
 
 import { Manrope } from "next/font/google";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { useLogoutUserMutation, useGetCurrentUserQuery } from "@/services/api";
 import { hasToken } from "@/utils/auth";
@@ -22,16 +23,16 @@ const manrope = Manrope({
 });
 
 export default function UserAvatarMenu() {
+  // Navigation
   const router = useRouter();
 
+  // User Account
   const { data: user } = useGetCurrentUserQuery(undefined, {
     skip: !hasToken(),
   });
 
-  const [logoutUser] = useLogoutUserMutation();
-
+  // User Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
   const open = Boolean(anchorEl);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -41,6 +42,9 @@ export default function UserAvatarMenu() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  // Logout
+  const [logoutUser] = useLogoutUserMutation();
 
   const handleLogout = async () => {
     handleClose();
@@ -57,6 +61,7 @@ export default function UserAvatarMenu() {
     window.location.replace("/login?status=logout");
   };
 
+  // Error Handling
   if (!user) {
     return null;
   }
@@ -116,12 +121,14 @@ export default function UserAvatarMenu() {
           vertical: "top",
           horizontal: "right",
         }}
-        PaperProps={{
-          sx: {
-            mt: 1,
-            borderRadius: 2,
-            boxShadow: "0px 10px 30px rgba(0,0,0,0.1)",
-            minWidth: 200,
+        slotProps={{
+          paper: {
+            sx: {
+              mt: 1,
+              borderRadius: 2,
+              boxShadow: "0px 10px 30px rgba(0,0,0,0.1)",
+              minWidth: 200,
+            },
           },
         }}
       >

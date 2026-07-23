@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+
 import {
   Box,
   Typography,
@@ -16,26 +20,19 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-import { hasPermission } from "@/utils/permission";
 import { useGetCurrentUserQuery } from "@/services/api";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
 import {
   useDeleteSubtaskMutation,
   useUpdateSubtaskMutation,
 } from "@/services/api";
 
+import { hasPermission } from "@/utils/permission";
+
 import AssigneeField from "../common/AssigneeField";
 import StatusField from "../common/StatusField";
-
-// ✅ ✅ ✅ ONLY ADDED
-import { z } from "zod";
 import CommentList from "../comment/CommentList";
 import CommentInput from "../comment/CommentInput";
 
-// ✅ ✅ ✅ ONLY ADDED
 const titleSchema = z
   .string()
   .trim()
@@ -47,29 +44,33 @@ type Props = {
 };
 
 export default function DetailedSubtask({ subtask }: Props) {
+  // Navigation
   const router = useRouter();
 
+  // API
   const [deleteSubtask] = useDeleteSubtaskMutation();
-
-  const [openDelete, setOpenDelete] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
-
-  const [title, setTitle] = useState(subtask.title);
   const [updateSubtask] = useUpdateSubtaskMutation();
-  const [titleError, setTitleError] = useState("");
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
+  // Permissions
   const canUpdateSubtask = hasPermission(
     currentUser?.permissions,
     "subtask.update",
   );
 
+  const canDeleteSubtask = hasPermission(
+    currentUser?.permissions,
+    "subtask.delete",
+  );
+
+  // Edit Title
+  const [title, setTitle] = useState(subtask.title);
+  const [titleError, setTitleError] = useState("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
 
-    // ✅ ✅ ✅ ONLY UPDATED (ZOD VALIDATION)
     const result = titleSchema.safeParse(trimmed);
 
     if (!result.success) {
@@ -116,7 +117,9 @@ export default function DetailedSubtask({ subtask }: Props) {
     }
   };
 
-  if (!subtask) return null;
+  // Delete Subtask
+  const [openDelete, setOpenDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleDelete = async () => {
     setDeleteError("");
@@ -137,6 +140,9 @@ export default function DetailedSubtask({ subtask }: Props) {
       setDeleteError(message);
     }
   };
+
+  // Error Handling
+  if (!subtask) return null;
 
   return (
     <>
@@ -297,7 +303,7 @@ export default function DetailedSubtask({ subtask }: Props) {
               entityId={subtask.id}
               entityType="subtask"
               rightSlot={
-                hasPermission(currentUser?.permissions, "subtask.delete") && (
+                canDeleteSubtask && (
                   <Button
                     sx={{
                       textTransform: "capitalize",

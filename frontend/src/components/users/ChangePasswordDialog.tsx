@@ -1,5 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Dialog,
   DialogTitle,
@@ -13,12 +18,6 @@ import {
 } from "@mui/material";
 
 import LockResetIcon from "@mui/icons-material/LockReset";
-
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useChangePasswordMutation } from "@/services/api";
 
@@ -55,8 +54,8 @@ const changePasswordSchema = z
 type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
 export default function ChangePasswordDialog({ open, onClose }: Props) {
+  // Change Password
   const [changePassword] = useChangePasswordMutation();
-
   const {
     control,
     handleSubmit,
@@ -69,12 +68,6 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
       new_password: "",
       confirm_password: "",
     },
-  });
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
   });
 
   useEffect(() => {
@@ -114,6 +107,15 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
       });
     }
   };
+
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+
+  // Form configuration
 
   const fields: {
     name: "current_password" | "new_password" | "confirm_password";

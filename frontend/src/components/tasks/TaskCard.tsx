@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   Card,
   CardContent,
@@ -10,7 +12,6 @@ import {
   Stack,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import UILoader from "@/components/common/Loader";
@@ -22,14 +23,16 @@ type TaskCardProps = {
 };
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
-  const [expanded, setExpanded] = useState(false);
+  // Navigation
   const router = useRouter();
 
-  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
-
+  // Task Overview
   const users = task.users || [];
-
   const statusConfig = STATUS_CONFIG[task.status as keyof typeof STATUS_CONFIG];
+
+  // Subtask Management
+  const [expanded, setExpanded] = useState(false);
+  const [loadingSubtaskId, setLoadingSubtaskId] = useState<number | null>(null);
 
   return (
     <>

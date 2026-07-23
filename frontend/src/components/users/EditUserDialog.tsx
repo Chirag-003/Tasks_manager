@@ -1,5 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Dialog,
   DialogTitle,
@@ -17,13 +22,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
 import GroupsIcon from "@mui/icons-material/Groups";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
-
-import { useEffect, useState } from "react";
-
-import { useForm } from "react-hook-form";
-
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useUpdateUserMutation, useGetRolesQuery } from "@/services/api";
 
@@ -52,9 +50,8 @@ const editUserSchema = z.object({
 type EditUserFormData = z.infer<typeof editUserSchema>;
 
 export default function EditUserDialog({ open, onClose, user }: Props) {
+  // Edit User
   const [updateUser] = useUpdateUserMutation();
-
-  const { data: roles } = useGetRolesQuery(undefined);
 
   const {
     control,
@@ -69,12 +66,6 @@ export default function EditUserDialog({ open, onClose, user }: Props) {
       team_name: "",
       role_id: 0,
     },
-  });
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
   });
 
   useEffect(() => {
@@ -111,6 +102,16 @@ export default function EditUserDialog({ open, onClose, user }: Props) {
       });
     }
   };
+
+  // Role Management
+  const { data: roles } = useGetRolesQuery(undefined);
+
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
 
   return (
     <>

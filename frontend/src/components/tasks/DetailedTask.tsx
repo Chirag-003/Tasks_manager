@@ -1,5 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { z } from "zod";
+import UILoader from "../common/Loader";
+
 import {
   Box,
   Typography,
@@ -18,28 +23,22 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 import {
   useCreateSubtaskMutation,
   useDeleteTaskMutation,
   useUpdateTaskMutation,
 } from "@/services/api";
 
-import CreateSubtaskDialog from "@/components/subtasks/CreateSubtaskDialog";
 import { hasPermission } from "@/utils/permission";
 import { useGetCurrentUserQuery } from "@/services/api";
 
+import CreateSubtaskDialog from "@/components/subtasks/CreateSubtaskDialog";
 import AssigneeField from "../common/AssigneeField";
 import StatusField from "../common/StatusField";
 import DescriptionField from "./DescriptionField";
 import SubtaskList from "../subtasks/SubtaskList";
 import CommentList from "../comment/CommentList";
 import CommentInput from "../comment/CommentInput";
-
-import { z } from "zod";
-import UILoader from "../common/Loader";
 
 const titleSchema = z
   .string()
@@ -52,44 +51,20 @@ type Props = {
 };
 
 export default function DetailedTask({ task }: Props) {
+  // Navigation
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [openSubtask, setOpenSubtask] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+  // Permissions
+  const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
-  const [createSubtask] = useCreateSubtaskMutation();
-  const [deleteTask] = useDeleteTaskMutation();
+  // Task Details
+  const canUpdateTask = hasPermission(currentUser?.permissions, "task.update");
   const [updateTask] = useUpdateTaskMutation();
-
   const [title, setTitle] = useState(task.title);
   const [savedTitle, setSavedTitle] = useState(task.title);
   const [titleError, setTitleError] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-
-  const { data: currentUser } = useGetCurrentUserQuery(undefined);
-  const canUpdateTask = hasPermission(currentUser?.permissions, "task.update");
-
-  // ✅ SNACKBAR STATE
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-  });
-
-  // ✅ SHOW SUCCESS ONLY ONCE AFTER REDIRECT
-  useEffect(() => {
-    if (searchParams.get("subtask_deleted") === "true") {
-      setSnackbar({
-        open: true,
-        message: "Subtask deleted successfully ",
-      });
-
-      // remove param after showing
-      router.replace(`/dashboard/tasks/${task.id}`);
-    }
-  }, [searchParams, router, task.id]);
 
   const handleUpdateTitle = async () => {
     const trimmed = title.trim();
@@ -120,11 +95,41 @@ export default function DetailedTask({ task }: Props) {
     }
   };
 
-  if (isDeleting) {
-    return <UILoader type="full" text="Deleting task..." />;
-  }
+  // Subtask Management
+  const [createSubtask] = useCreateSubtaskMutation();
+  const [openSubtask, setOpenSubtask] = useState(false);
 
-  if (!task) return null;
+  const handleCreateSubtask = async (data: any) => {
+    await createSubtask({
+      taskId: task.id,
+      data,
+    }).unwrap();
+  };
+
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
+
+  useEffect(() => {
+    if (searchParams.get("subtask_deleted") === "true") {
+      setSnackbar({
+        open: true,
+        message: "Subtask deleted successfully ",
+      });
+
+      // remove param after showing
+      router.replace(`/dashboard/tasks/${task.id}`);
+    }
+  }, [searchParams, router, task.id]);
+
+  // Task Deletion
+  const [deleteTask] = useDeleteTaskMutation();
+
+  const [openDelete, setOpenDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     setDeleteError("");
@@ -149,12 +154,13 @@ export default function DetailedTask({ task }: Props) {
     }
   };
 
-  const handleCreateSubtask = async (data: any) => {
-    await createSubtask({
-      taskId: task.id,
-      data,
-    }).unwrap();
-  };
+  // Error Handling
+
+  if (isDeleting) {
+    return <UILoader type="full" text="Deleting task..." />;
+  }
+
+  if (!task) return null;
 
   return (
     <>

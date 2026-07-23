@@ -16,28 +16,18 @@ type Option = {
 type InputFieldProps = {
   name: string;
   control: any;
-
   label: string;
-
   type?: "text" | "textarea" | "select" | "password";
   options?: Option[];
-
   icon?: React.ReactNode;
-
   errors?: any;
   extraError?: string;
-
   required?: boolean;
-
   rows?: number;
-
   placeholder?: string;
-
   onChangeExtra?: () => void;
-
   textFieldProps?: TextFieldProps;
-
-  rules?: any; // ✅ ADD THIS
+  rules?: any;
 };
 
 export default function InputField({
@@ -47,23 +37,17 @@ export default function InputField({
 
   type = "text",
   options = [],
-
   icon,
 
   errors,
   extraError,
 
   required = false,
-
   rows = 3,
-
   placeholder,
-
   onChangeExtra,
-
   textFieldProps,
-
-  rules, // ✅ RECEIVE HERE
+  rules,
 }: InputFieldProps) {
   return (
     <Controller

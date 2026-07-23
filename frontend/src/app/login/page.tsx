@@ -3,8 +3,15 @@
 if (typeof window !== "undefined") {
   (window as any).__NEXT_DISABLE_HMR__ = true;
 }
-
 import styles from "./login.module.css";
+
+import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Box,
   Button,
@@ -12,21 +19,14 @@ import {
   Paper,
   CircularProgress,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
 
-import { useDispatch } from "react-redux";
 import { api } from "@/services/api";
+import { useGetCurrentUserQuery, useLoginUserMutation } from "@/services/api";
+
+import { hasToken } from "@/utils/auth";
 
 import InputField from "@/components/common/InputField";
-
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
 import StatusSnackbar from "@/components/common/StatusSnackbar";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { useGetCurrentUserQuery, useLoginUserMutation } from "@/services/api";
-import { hasToken } from "@/utils/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -37,6 +37,11 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  // Navigation
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Form
   const {
     control,
     handleSubmit,
@@ -49,9 +54,8 @@ export default function LoginPage() {
     },
   });
 
-  const router = useRouter();
+  // Authentication
   const dispatch = useDispatch();
-
   const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
 
   const { data: currentUser, isLoading: isUserLoading } =
@@ -59,13 +63,19 @@ export default function LoginPage() {
       skip: !hasToken(),
     });
 
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+
+  // Redirect Effects
   useEffect(() => {
     if (currentUser) {
       router.replace("/dashboard");
     }
   }, [currentUser, router]);
-
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const status = searchParams.get("status");
@@ -80,12 +90,7 @@ export default function LoginPage() {
     }
   }, [searchParams]);
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
-
+  // Form Submission
   const onSubmit = async (data: LoginForm) => {
     try {
       const result = await loginUser(data).unwrap();
@@ -108,6 +113,7 @@ export default function LoginPage() {
     }
   };
 
+  // Loading State
   if (hasToken() && isUserLoading) {
     return <CircularProgress />;
   }

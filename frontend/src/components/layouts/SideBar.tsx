@@ -12,10 +12,13 @@ import { useGetCurrentUserQuery } from "@/services/api";
 import { hasPermission } from "@/utils/permission";
 
 export default function Sidebar() {
+  // Navigation
   const pathname = usePathname();
 
+  // API
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
 
+  // Menu Items
   const menuItems = [
     {
       label: "Dashboard",

@@ -1,14 +1,17 @@
 "use client";
 
-import { Box, Typography, Card, CardContent } from "@mui/material";
-import { useGetDashboardStatsQuery } from "@/services/api";
-import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+
+import { Box, Typography, Card, CardContent } from "@mui/material";
+
+import { useGetDashboardStatsQuery } from "@/services/api";
+
+import StatusSnackbar from "@/components/common/StatusSnackbar";
+import UILoader from "@/components/common/Loader";
 
 import { hasToken } from "@/utils/auth";
-import StatusSnackbar from "@/components/common/StatusSnackbar";
 import { STATUS_CONFIG } from "@/constants/status";
-import UILoader from "@/components/common/Loader";
 
 const STATUS_COLORS = {
   backlog: "#f59e0b",
@@ -20,13 +23,16 @@ const STATUS_COLORS = {
 };
 
 export default function DashboardPage() {
+  // Navigation
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Data Fetching
   const { data, isLoading, isError } = useGetDashboardStatsQuery(undefined, {
     skip: !hasToken(),
   });
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
+  // Notification
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -47,6 +53,7 @@ export default function DashboardPage() {
     }
   }, [searchParams, router]);
 
+  // Error Handling
   if (isError) {
     return <Typography color="error">Failed to load dashboard data</Typography>;
   }
@@ -55,6 +62,7 @@ export default function DashboardPage() {
     return <UILoader type="subtask" />;
   }
 
+  // Derived Data
   const totalUsers = data.total_users;
   const totalTasks = data.total_tasks;
   const totalSubtasks = data.total_subtasks;

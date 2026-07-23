@@ -1,40 +1,47 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { Box, Typography, Divider, Avatar, Button, Chip } from "@mui/material";
 
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 import { useGetCurrentUserQuery, useGetUsersQuery } from "@/services/api";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import { hasPermission } from "@/utils/permission";
 
 import DeleteUserDialog from "@/components/users/DeleteUserDialog";
 import EditUserDialog from "@/components/users/EditUserDialog";
+
 import { ROLE_CONFIG } from "@/constants/roles";
 
 export default function UsersPage() {
-  const { data, isError } = useGetUsersQuery();
-
+  // Navigation
   const router = useRouter();
 
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-
+  // API
+  const { data, isError } = useGetUsersQuery();
   const { data: currentUser, isLoading: isUserLoading } =
     useGetCurrentUserQuery(undefined);
 
+  // Permission
   const canEditUsers = hasPermission(currentUser?.permissions, "user.update");
-
   const canDeleteUsers = hasPermission(currentUser?.permissions, "user.delete");
-
   const canManageUsers = canEditUsers || canDeleteUsers;
 
+  // User Action
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  // Layout
   const gridColumns = canManageUsers
     ? "300px 300px 300px 300px"
     : "500px 500px 500px";
 
+  // Security and Redirects
   useEffect(() => {
     if (
       !isUserLoading &&
@@ -45,10 +52,7 @@ export default function UsersPage() {
     }
   }, [currentUser, isUserLoading, router]);
 
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-
+  // Error Handling
   if (
     !isUserLoading &&
     currentUser &&

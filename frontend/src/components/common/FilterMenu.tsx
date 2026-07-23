@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 import {
   Box,
   Select,
@@ -8,9 +10,8 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import { useState, useEffect } from "react";
 
+import CloseIcon from "@mui/icons-material/Close";
 import TuneIcon from "@mui/icons-material/Tune";
 import Popover from "@mui/material/Popover";
 
@@ -30,8 +31,8 @@ export default function FilterMenu({
   onClear,
   type = "task",
 }: Props) {
+  // PopOver State
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
   const open = Boolean(anchorEl);
 
   const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -42,25 +43,27 @@ export default function FilterMenu({
     setAnchorEl(null);
   };
 
-  // ✅ DEFAULT FILTERS
+  //  DEFAULT FILTERS
   const defaultFilters = {
     status: "",
     user_id: "",
     ...(type === "task" ? { sprint: "" } : {}),
   };
 
-  const [localFilters, setLocalFilters] = useState(filters || defaultFilters);
-
+  // DataFetching
   const { data: users } = useGetUsersQuery();
-
   const { data: sprints } = useGetSprintsQuery(undefined, {
     skip: type !== "task",
   });
 
-  // ✅ SYNC WITH PARENT
+  // Filter State
+  const [localFilters, setLocalFilters] = useState(filters || defaultFilters);
+
   useEffect(() => {
     setLocalFilters(filters || defaultFilters);
   }, [filters]);
+
+  // Filter Action
 
   const handleChange = (key: string, value: any) => {
     const updated = {

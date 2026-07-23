@@ -12,9 +12,13 @@ import TaskIcon from "@mui/icons-material/AssignmentOutlined";
 import PeopleIcon from "@mui/icons-material/PeopleOutline";
 
 export default function MobileDrawer() {
+  // Navigation
   const pathname = usePathname();
+
+  // Drawer State
   const [open, setOpen] = useState(false);
 
+  // Navigation Items
   const items = [
     {
       label: "Dashboard",

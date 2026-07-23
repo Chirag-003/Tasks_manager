@@ -22,19 +22,14 @@ import StatusSnackbar from "@/components/common/StatusSnackbar";
 import ChangePasswordDialog from "@/components/users/ChangePasswordDialog";
 
 export default function AccountPage() {
+  // API
   const { data: user } = useGetCurrentUserQuery(undefined);
-
   const [updateMe, { isLoading }] = useUpdateMeMutation();
 
+  // Profile Editing
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [passwordOpen, setPasswordOpen] = useState(false);
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -42,15 +37,6 @@ export default function AccountPage() {
       setEmail(user.email);
     }
   }, [user]);
-  const [isEditing, setIsEditing] = useState(false);
-
-  if (!user) return null;
-
-  const hasChanges = username !== user.username || email !== user.email;
-
-  const roleName = user.roles?.[0] || "No Role";
-
-  const roleConfig = ROLE_CONFIG[roleName] ?? ROLE_CONFIG.default;
 
   const handleSave = async () => {
     try {
@@ -73,6 +59,24 @@ export default function AccountPage() {
       });
     }
   };
+
+  // Security
+  const [passwordOpen, setPasswordOpen] = useState(false);
+
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+
+  // Guard Cluase
+  if (!user) return null;
+
+  // Derived Values
+  const hasChanges = username !== user.username || email !== user.email;
+  const roleName = user.roles?.[0] || "No Role";
+  const roleConfig = ROLE_CONFIG[roleName] ?? ROLE_CONFIG.default;
 
   return (
     <Box

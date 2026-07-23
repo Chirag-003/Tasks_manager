@@ -1,23 +1,6 @@
 "use client";
-
-import { useGetTasksQuery, useCreateTaskMutation } from "@/services/api";
-
-import TaskList from "@/components/tasks/TaskList";
-import CreateTaskDialog from "@/components/tasks/CreateTaskDialog";
-import UILoader from "@/components/common/Loader";
-import FilterMenu from "@/components/common/FilterMenu";
-import StatusTabs from "@/components/tasks/StatusTabs";
-import TasksHeader from "@/components/tasks/TaskHeader";
-
-import { useGetCurrentUserQuery } from "@/services/api";
-import { hasPermission } from "@/utils/permission";
-
-import SortDropdown, {
-  DEFAULT_SORT,
-  SortValue,
-} from "@/components/common/SortDropdown";
-
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   Box,
@@ -28,19 +11,43 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { STATUS_VALUES } from "@/constants/status";
+import {
+  useGetTasksQuery,
+  useCreateTaskMutation,
+  useGetCurrentUserQuery,
+} from "@/services/api";
+
+import { hasPermission } from "@/utils/permission";
 import { hasToken } from "@/utils/auth";
 
+import TaskList from "@/components/tasks/TaskList";
+import CreateTaskDialog from "@/components/tasks/CreateTaskDialog";
+import StatusTabs from "@/components/tasks/StatusTabs";
+import TasksHeader from "@/components/tasks/TaskHeader";
+
+import FilterMenu from "@/components/common/FilterMenu";
+import UILoader from "@/components/common/Loader";
+import SortDropdown, {
+  DEFAULT_SORT,
+  SortValue,
+} from "@/components/common/SortDropdown";
+
+import { STATUS_VALUES } from "@/constants/status";
+
 export default function TasksPage() {
+  // Navigation
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Responsive
   const isMobile = useMediaQuery("(max-width:768px)");
 
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
-
+  // API
   const { data: currentUser } = useGetCurrentUserQuery(undefined);
+  const [createTask] = useCreateTaskMutation();
+
+  // Search, Filter & Sorting
+  const [searchInput, setSearchInput] = useState("");
 
   const [filters, setFilters] = useState({
     search: "",
@@ -48,30 +55,28 @@ export default function TasksPage() {
     sprint: "",
     user_id: "",
   });
+
   const [sort, setSort] = useState<SortValue>(DEFAULT_SORT);
 
-  const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
-  const [searchInput, setSearchInput] = useState("");
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const trimmed = searchInput.trim();
 
+      setFilters((prev) => ({
+        ...prev,
+        search: trimmed || "",
+      }));
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
+  // Status Navigation
   const statusParam = searchParams.get("status") || "";
 
   const [activeStatus, setActiveStatus] = useState(
     statusParam || (isMobile ? "backlog" : ""),
   );
-
-  const [open, setOpen] = useState(false);
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-  });
-
-  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
-    undefined,
-  );
-
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const statusFromUrl = searchParams.get("status");
@@ -82,6 +87,13 @@ export default function TasksPage() {
       setActiveStatus(isMobile ? "backlog" : "");
     }
   }, [searchParams, isMobile]);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      status: activeStatus,
+    }));
+  }, [activeStatus]);
 
   const handleStatusChange = (status: string) => {
     setActiveStatus(status);
@@ -97,29 +109,40 @@ export default function TasksPage() {
     router.push(`/dashboard/tasks?${params.toString()}`);
   };
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const trimmed = searchInput.trim();
-
-      setFilters((prev) => ({
-        ...prev,
-        search: trimmed || "",
-      }));
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [searchInput]);
-
-  useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      status: activeStatus,
-    }));
-  }, [activeStatus]);
+  // pagination
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     setPage(1);
   }, [filters]);
+
+  // Create Tasks
+  const [open, setOpen] = useState(false);
+
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
+    undefined,
+  );
+
+  const handleOpen = (status?: string) => {
+    setSelectedStatus(status);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedStatus(undefined);
+  };
+
+  //  UI State
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
+
+  // Snackbar Feedback notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
 
   useEffect(() => {
     if (searchParams.get("deleted") === "true") {
@@ -132,6 +155,7 @@ export default function TasksPage() {
     }
   }, [searchParams, router]);
 
+  // Data Fetching
   const { data, isFetching, isError } = useGetTasksQuery(
     {
       ...filters,
@@ -143,20 +167,7 @@ export default function TasksPage() {
     { skip: !hasToken() },
   );
 
-  const [createTask] = useCreateTaskMutation();
-
-  const handleOpen = (status?: string) => {
-    setSelectedStatus(status);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedStatus(undefined);
-  };
-
-  if (isError) return <p>Error fetching tasks</p>;
-
+  // Derived UI
   const statusTabs = isMobile ? STATUS_VALUES : ["", ...STATUS_VALUES];
 
   const taskFilters = (
@@ -182,6 +193,9 @@ export default function TasksPage() {
   );
 
   const sortComponent = <SortDropdown value={sort} onChange={setSort} />;
+
+  // Error handling
+  if (isError) return <p>Error fetching tasks</p>;
 
   return (
     <>

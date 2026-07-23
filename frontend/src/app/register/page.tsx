@@ -1,12 +1,6 @@
 "use client";
-import { useForm } from "react-hook-form";
-import styles from "./register.module.css";
 
-import InputField from "@/components/common/InputField";
-import {
-  getPasswordStrength,
-  getPasswordStrengthLabel,
-} from "@/utils/passwordStrength";
+import styles from "./register.module.css";
 
 import {
   Box,
@@ -15,19 +9,25 @@ import {
   CircularProgress,
   LinearProgress,
 } from "@mui/material";
-
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import {
+  getPasswordStrength,
+  getPasswordStrengthLabel,
+} from "@/utils/passwordStrength";
+import InputField from "@/components/common/InputField";
 import StatusSnackbar from "@/components/common/StatusSnackbar";
+
+import { hasToken } from "@/utils/auth";
 
 import {
   useGetCurrentUserQuery,
   useRegisterUserMutation,
 } from "@/services/api";
-import { hasToken } from "@/utils/auth";
-
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 const registerSchema = z
   .object({
@@ -62,6 +62,10 @@ const registerSchema = z
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  // Navigation
+  const router = useRouter();
+
+  // Form
   const {
     control,
     handleSubmit,
@@ -71,8 +75,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  const router = useRouter();
-
+  // Authentication
   const [registerUser, { isLoading: isRegisterLoading }] =
     useRegisterUserMutation();
 
@@ -81,22 +84,26 @@ export default function RegisterPage() {
       skip: !hasToken(),
     });
 
-  useEffect(() => {
-    if (currentUser) {
-      router.replace("/dashboard");
-    }
-  }, [currentUser, router]);
-
-  const password = watch("password");
-  const passwordStrength = getPasswordStrength(password || "");
-  const strength = getPasswordStrengthLabel(passwordStrength);
-
+  // Notification
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success" as "success" | "error",
   });
 
+  // Password Strength
+  const password = watch("password");
+  const passwordStrength = getPasswordStrength(password || "");
+  const strength = getPasswordStrengthLabel(passwordStrength);
+
+  // Render Effect
+  useEffect(() => {
+    if (currentUser) {
+      router.replace("/dashboard");
+    }
+  }, [currentUser, router]);
+
+  // Form Submission
   const onSubmit = async (data: RegisterForm) => {
     const { confirmPassword, ...payload } = data;
 
@@ -124,6 +131,7 @@ export default function RegisterPage() {
     }
   };
 
+  // Loading State
   if (hasToken() && isUserLoading) {
     return <CircularProgress />;
   }

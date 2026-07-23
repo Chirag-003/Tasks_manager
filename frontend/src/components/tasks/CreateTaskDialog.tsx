@@ -1,5 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Dialog,
   DialogTitle,
@@ -12,16 +17,10 @@ import {
   Grow,
 } from "@mui/material";
 
-import { useState, useEffect } from "react";
-
 import TitleIcon from "@mui/icons-material/Title";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FlagIcon from "@mui/icons-material/Flag";
 import TimelineIcon from "@mui/icons-material/Timeline";
-
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useGetUsersQuery } from "@/services/api";
 
@@ -59,6 +58,7 @@ export default function CreateTaskDialog({
   onCreate,
   defaultStatus,
 }: Props) {
+  // Create Tasks
   const {
     control,
     handleSubmit,
@@ -104,19 +104,6 @@ export default function CreateTaskDialog({
     return () => clearTimeout(timer);
   }, [titleError]);
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
-
-  const { data: users = [] } = useGetUsersQuery();
-
-  const getUserNameById = (id: number) => {
-    const user = users.find((u: any) => u.id === id);
-    return user?.username || "";
-  };
-
   const onSubmit = async (data: TaskFormData) => {
     if (userError) return;
 
@@ -147,6 +134,14 @@ export default function CreateTaskDialog({
     }
   };
 
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+
+  // Form configuration
   const taskFormConfig = [
     {
       name: "title",

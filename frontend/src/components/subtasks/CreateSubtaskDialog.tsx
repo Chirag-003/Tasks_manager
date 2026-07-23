@@ -1,5 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Dialog,
   DialogTitle,
@@ -11,14 +16,8 @@ import {
   Divider,
 } from "@mui/material";
 
-import { useState } from "react";
-
 import TitleIcon from "@mui/icons-material/Title";
 import FlagIcon from "@mui/icons-material/Flag";
-
-import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useGetUsersQuery } from "@/services/api";
 
@@ -27,7 +26,6 @@ import UserField from "../common/UserField";
 import StatusSnackbar from "../common/StatusSnackbar";
 import { STATUS_OPTIONS } from "@/constants/status";
 
-// ✅ SCHEMA
 const subtaskSchema = z.object({
   title: z
     .string()
@@ -41,6 +39,16 @@ const subtaskSchema = z.object({
 type SubtaskFormData = z.infer<typeof subtaskSchema>;
 
 export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
+  // Users
+
+  const { data: users = [] } = useGetUsersQuery();
+
+  const getUserNameById = (id: number) => {
+    const user = users.find((u: any) => u.id === id);
+    return user?.username || "";
+  };
+
+  // Create Subtasks
   const {
     control,
     handleSubmit,
@@ -55,24 +63,9 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
     },
   });
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
-
   const [userError, setUserError] = useState("");
   const [titleError, setTitleError] = useState("");
 
-  const { data: users = [] } = useGetUsersQuery();
-
-  // ✅ map ID -> username
-  const getUserNameById = (id: number) => {
-    const user = users.find((u: any) => u.id === id);
-    return user?.username || "";
-  };
-
-  // ✅ SUBMIT
   const onSubmit = async (data: SubtaskFormData) => {
     if (userError) return;
 
@@ -107,6 +100,15 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
       setTitleError(message);
     }
   };
+
+  // Notification
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+
+  // Form Configuration
 
   const subtaskFormConfig = [
     {

@@ -2,12 +2,12 @@ import { Select, MenuItem } from "@mui/material";
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-import { STATUS_OPTIONS } from "@/constants/status";
-
 import {
   useUpdateTaskMutation,
   useUpdateSubtaskMutation,
 } from "@/services/api";
+
+import { STATUS_OPTIONS } from "@/constants/status";
 
 type Props = {
   entityId: number;
@@ -22,9 +22,11 @@ export default function StatusField({
   value,
   disabled = false,
 }: Props) {
+  // API
   const [updateTask] = useUpdateTaskMutation();
   const [updateSubtask] = useUpdateSubtaskMutation();
 
+  // Status Action
   const handleChange = async (newStatus: string) => {
     try {
       if (entityType === "task") {
