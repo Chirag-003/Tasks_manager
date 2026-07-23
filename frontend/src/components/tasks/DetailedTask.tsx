@@ -220,8 +220,10 @@ export default function DetailedTask({ task }: Props) {
                     setIsEditingTitle(false);
                   }}
                   fullWidth
-                  InputProps={{
-                    disableUnderline: true,
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                    },
                   }}
                 />
 
@@ -331,7 +333,6 @@ export default function DetailedTask({ task }: Props) {
                       textTransform: "capitalize",
                       height: 40,
                       flexShrink: 0,
-                      mt: "4px",
                     }}
                     variant="outlined"
                     color="error"

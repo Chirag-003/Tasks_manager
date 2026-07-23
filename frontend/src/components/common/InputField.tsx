@@ -89,15 +89,15 @@ export default function InputField({
             field.onChange(e);
             onChangeExtra?.();
           }}
-          InputProps={
-            icon
+          slotProps={{
+            input: icon
               ? {
                   startAdornment: (
                     <InputAdornment position="start">{icon}</InputAdornment>
                   ),
                 }
-              : undefined
-          }
+              : undefined,
+          }}
           sx={{
             backgroundColor: "#f9fafb",
             borderRadius: 2,

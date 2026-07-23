@@ -63,17 +63,19 @@ export default function TasksHeader({
               value={searchInput}
               onChange={(e) => onSearchChange(e.target.value)}
               variant="standard"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon
-                      sx={{
-                        fontSize: 16,
-                        color: "#94a3b8",
-                      }}
-                    />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon
+                        sx={{
+                          fontSize: 16,
+                          color: "#94a3b8",
+                        }}
+                      />
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
 
@@ -174,17 +176,19 @@ export default function TasksHeader({
               onChange={(e) => onSearchChange(e.target.value)}
               sx={{ width: 240 }}
               variant="standard"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon
-                      sx={{
-                        fontSize: 16,
-                        color: "#94a3b8",
-                      }}
-                    />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon
+                        sx={{
+                          fontSize: 16,
+                          color: "#94a3b8",
+                        }}
+                      />
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
 

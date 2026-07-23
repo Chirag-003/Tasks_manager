@@ -152,17 +152,21 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
         onClose={onClose}
         fullWidth
         maxWidth="sm"
-        TransitionComponent={Grow}
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: "0px 20px 50px rgba(0,0,0,0.15)",
-          },
+        slots={{
+          transition: Grow,
         }}
-        BackdropProps={{
-          sx: {
-            backdropFilter: "blur(8px)",
-            backgroundColor: "rgba(0,0,0,0.25)",
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 4,
+              boxShadow: "0px 20px 50px rgba(0,0,0,0.15)",
+            },
+          },
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(8px)",
+              backgroundColor: "rgba(0,0,0,0.25)",
+            },
           },
         }}
       >

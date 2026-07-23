@@ -91,13 +91,11 @@ export default function DescriptionField({
           multiline
           fullWidth
           autoFocus
+          minRows={3}
+          maxRows={3}
           value={description}
           onChange={(e) => {
             setDescription(e.target.value);
-
-            const el = e.target as HTMLTextAreaElement;
-            el.style.height = "auto";
-            el.style.height = el.scrollHeight + "px";
           }}
           onBlur={handleSave}
           onKeyDown={(e) => {
@@ -129,8 +127,7 @@ export default function DescriptionField({
               padding: 0,
               fontSize: 14,
               lineHeight: "1.5",
-              resize: "none",
-              overflow: "hidden",
+              resize: "vertical",
             },
           }}
         />

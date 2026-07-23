@@ -141,7 +141,7 @@ export default function CommentInput({
           sx={{
             textTransform: "capitalize",
             height: 40,
-            mt: "4px",
+
             minWidth: 120,
             flexShrink: 0,
           }}

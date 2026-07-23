@@ -29,7 +29,6 @@ import {
 
 import AssigneeField from "../common/AssigneeField";
 import StatusField from "../common/StatusField";
-import CommentsField from "../comment/CommentField";
 
 // ✅ ✅ ✅ ONLY ADDED
 import { z } from "zod";
@@ -212,8 +211,10 @@ export default function DetailedSubtask({ subtask }: Props) {
                     setIsEditingTitle(false);
                   }}
                   fullWidth
-                  InputProps={{
-                    disableUnderline: true,
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                    },
                   }}
                   sx={{
                     fontSize: 18,

@@ -12,9 +12,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Snackbar, // ✅ NEW
+  Snackbar,
   Alert,
-  InputAdornment, // ✅ NEW
+  InputAdornment,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -184,17 +184,19 @@ export default function SubtaskList({
             onChange={(e) => setSearchInput(e.target.value)}
             sx={{ width: 240, mt: 0.5 }}
             variant="standard"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon
-                    sx={{
-                      fontSize: 16,
-                      color: "#94a3b8",
-                    }}
-                  />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon
+                      sx={{
+                        fontSize: 16,
+                        color: "#94a3b8",
+                      }}
+                    />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 

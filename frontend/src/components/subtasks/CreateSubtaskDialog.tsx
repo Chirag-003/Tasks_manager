@@ -152,10 +152,12 @@ export default function CreateSubtaskDialog({ open, onClose, onCreate }: any) {
         onClose={onClose}
         fullWidth
         maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: "0px 20px 50px rgba(0,0,0,0.15)",
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 4,
+              boxShadow: "0px 20px 50px rgba(0,0,0,0.15)",
+            },
           },
         }}
       >

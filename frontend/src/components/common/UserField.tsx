@@ -32,34 +32,40 @@ export default function UserField({ name, control }: Props) {
             size="small"
             value={field.value || []}
             onChange={field.onChange}
-            SelectProps={{
-              multiple: true,
-              MenuProps: {
-                PaperProps: {
-                  sx: {
-                    maxHeight: 260,
-                    mt: 1,
-                    borderRadius: 2,
-                    p: 1,
-                  },
-                },
-                MenuListProps: {
-                  sx: {
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 1,
-                  },
-                },
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <GroupIcon fontSize="small" />
+                  </InputAdornment>
+                ),
               },
-              renderValue: (selected) =>
-                (selected as number[]).map(getUserNameById).join(", "),
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <GroupIcon fontSize="small" />
-                </InputAdornment>
-              ),
+
+              select: {
+                multiple: true,
+
+                MenuProps: {
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 260,
+                      mt: 1,
+                      borderRadius: 2,
+                      p: 1,
+                    },
+                  },
+
+                  MenuListProps: {
+                    sx: {
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 1,
+                    },
+                  },
+                },
+
+                renderValue: (selected) =>
+                  (selected as number[]).map(getUserNameById).join(", "),
+              },
             }}
             sx={{
               backgroundColor: "#f9fafb",
