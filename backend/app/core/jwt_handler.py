@@ -1,8 +1,8 @@
-from jose import jwt, JWTError
 from datetime import UTC, datetime, timedelta
-from fastapi import HTTPException, status
 
 from app.core.config import settings
+from fastapi import HTTPException, status
+from jose import JWTError, jwt
 
 
 def create_access_token(data: dict):

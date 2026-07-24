@@ -1,10 +1,11 @@
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, List
 from datetime import datetime
-from app.schemas.schemas_subtasks import SubTaskResponse
-from app.schemas.schemas_comments import CommentResponse, CommentListResponse
-from app.schemas.schemas_users import UserResponse
+from typing import List
+
+from app.schemas.schemas_comments import CommentListResponse
 from app.schemas.schemas_enums import StatusEnum
+from app.schemas.schemas_subtasks import SubTaskResponse
+from app.schemas.schemas_users import UserResponse
+from pydantic import BaseModel, Field
 
 
 class TaskBase(BaseModel):

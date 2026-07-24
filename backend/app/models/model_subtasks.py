@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, DateTime
-from sqlalchemy.orm import relationship
-from app.models.model_subtask_association import user_subtask_association
-from datetime import datetime, UTC
-
+from datetime import UTC, datetime
 
 from app.db.base import Base
+from app.models.model_subtask_association import user_subtask_association
 from app.schemas.schemas_enums import StatusEnum
+from sqlalchemy import Column, DateTime
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy.orm import relationship
 
 
 class SubTask(Base):

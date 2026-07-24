@@ -1,13 +1,11 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from app.models.model_subtasks import SubTask
 from app.models.model_task import Task
 from app.models.model_users import User
 from app.schemas.schemas_enums import StatusEnum
-
-from sqlalchemy import or_
+from fastapi import HTTPException
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 
 def create_subtask(db: Session, task_id: int, subtask_data):
@@ -64,7 +62,7 @@ def create_subtask(db: Session, task_id: int, subtask_data):
             status_code=400, detail="Subtask with this title already exists"
         )
 
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise HTTPException(status_code=500, detail="Error creating subtask")
 
@@ -295,7 +293,7 @@ def update_subtask(db: Session, subtask_id: int, subtask_data):
             detail="Subtask with this title already exists for this task",
         )
 
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise HTTPException(status_code=500, detail="Error updating subtask")
 

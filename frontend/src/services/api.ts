@@ -85,7 +85,7 @@ export const api = createApi({
   tagTypes: ["Tasks", "Task", "Users", "Subtasks", "CurrentUser"],
 
   endpoints: (builder) => ({
-    // query
+    // Tasks
 
     getTasks: builder.query<any, any>({
       query: (filters) => {
@@ -114,10 +114,41 @@ export const api = createApi({
       providesTags: (_result, _error, id) => [{ type: "Task", id }],
     }),
 
-    getUsers: builder.query<any, void>({
-      query: () => "/users",
-      providesTags: ["Users"],
+    createTask: builder.mutation<any, any>({
+      query: (taskData) => ({
+        url: "/task1/",
+        method: "POST",
+        body: taskData,
+      }),
+      invalidatesTags: ["Tasks"], // ✅ AUTO REFRESH TASKS
     }),
+
+    deleteTask: builder.mutation({
+      query: (taskId) => ({
+        url: `/task1/${taskId}`,
+        method: "DELETE",
+      }),
+
+      invalidatesTags: (_result, _error, taskId) => [
+        "Tasks",
+        { type: "Task", id: taskId },
+      ],
+    }),
+
+    updateTask: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/task1/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+
+      invalidatesTags: (_result, _error, { id }) => [
+        "Tasks",
+        { type: "Task", id },
+      ],
+    }),
+
+    // Subtasks
 
     getSubtasks: builder.query<any, any>({
       query: ({
@@ -157,46 +188,6 @@ export const api = createApi({
       providesTags: ["Subtasks"],
     }),
 
-    // ✅ CREATE TASK
-    createTask: builder.mutation<any, any>({
-      query: (taskData) => ({
-        url: "/task1/",
-        method: "POST",
-        body: taskData,
-      }),
-      invalidatesTags: ["Tasks"], // ✅ AUTO REFRESH TASKS
-    }),
-
-    deleteTask: builder.mutation({
-      query: (taskId) => ({
-        url: `/task1/${taskId}`,
-        method: "DELETE",
-      }),
-
-      invalidatesTags: (_result, _error, taskId) => [
-        "Tasks",
-        { type: "Task", id: taskId },
-      ],
-    }),
-
-    updateTask: builder.mutation({
-      query: ({ id, data }) => ({
-        url: `/task1/${id}`,
-        method: "PATCH",
-        body: data,
-      }),
-
-      invalidatesTags: (_result, _error, { id }) => [
-        "Tasks",
-        { type: "Task", id },
-      ],
-    }),
-
-    getSprints: builder.query<string[], void>({
-      query: () => "/task1/sprints",
-    }),
-
-    // ✅ CREATE SUBTASK
     createSubtask: builder.mutation<any, { taskId: number; data: any }>({
       query: ({ taskId, data }) => ({
         url: `/tasks/${taskId}/subtasks`,
@@ -223,7 +214,50 @@ export const api = createApi({
       invalidatesTags: ["Subtasks", "Tasks"],
     }),
 
-    // ✅ ADD TASK COMMENT
+    getKanbanTasks: builder.query<any, any>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+        if (filters?.search) {
+          params.append("search", filters.search);
+        }
+        if (filters?.sprint) {
+          params.append("sprint", filters.sprint);
+        }
+        if (filters?.user_id) {
+          params.append("user_id", filters.user_id);
+        }
+        if (filters?.sort_by) {
+          params.append("sort_by", filters.sort_by);
+        }
+        if (filters?.sort_order) {
+          params.append("sort_order", filters.sort_order);
+        }
+        if (filters?.backlog_page) {
+          params.append("backlog_page", filters.backlog_page);
+        }
+        if (filters?.todo_page) {
+          params.append("todo_page", filters.todo_page);
+        }
+        if (filters?.in_progress_page) {
+          params.append("in_progress_page", filters.in_progress_page);
+        }
+        if (filters?.in_review_page) {
+          params.append("in_review_page", filters.in_review_page);
+        }
+        if (filters?.qa_page) {
+          params.append("qa_page", filters.qa_page);
+        }
+        if (filters?.completed_page) {
+          params.append("completed_page", filters.completed_page);
+        }
+        return `/task1/kanban?${params.toString()}`;
+      },
+
+      providesTags: ["Tasks"],
+    }),
+
+    // Comments
+
     addTaskComment: builder.mutation({
       query: ({ taskId, data }) => ({
         url: `/tasks/${taskId}/comments`,
@@ -247,7 +281,8 @@ export const api = createApi({
       invalidatesTags: ["Subtasks"],
     }),
 
-    // ✅ LOGIN
+    // AUTH
+
     loginUser: builder.mutation({
       query: (data) => ({
         url: "/auth/login",
@@ -280,63 +315,28 @@ export const api = createApi({
       providesTags: ["CurrentUser"],
     }),
 
-    getKanbanTasks: builder.query<any, any>({
-      query: (filters) => {
-        const params = new URLSearchParams();
-
-        if (filters?.search) {
-          params.append("search", filters.search);
-        }
-
-        if (filters?.sprint) {
-          params.append("sprint", filters.sprint);
-        }
-
-        if (filters?.user_id) {
-          params.append("user_id", filters.user_id);
-        }
-
-        // ✅ ADD THESE
-        if (filters?.sort_by) {
-          params.append("sort_by", filters.sort_by);
-        }
-
-        if (filters?.sort_order) {
-          params.append("sort_order", filters.sort_order);
-        }
-
-        if (filters?.backlog_page) {
-          params.append("backlog_page", filters.backlog_page);
-        }
-
-        if (filters?.todo_page) {
-          params.append("todo_page", filters.todo_page);
-        }
-
-        if (filters?.in_progress_page) {
-          params.append("in_progress_page", filters.in_progress_page);
-        }
-
-        if (filters?.in_review_page) {
-          params.append("in_review_page", filters.in_review_page);
-        }
-
-        if (filters?.qa_page) {
-          params.append("qa_page", filters.qa_page);
-        }
-
-        if (filters?.completed_page) {
-          params.append("completed_page", filters.completed_page);
-        }
-
-        return `/task1/kanban?${params.toString()}`;
-      },
-
-      providesTags: ["Tasks"],
+    updateMe: builder.mutation({
+      query: (data) => ({
+        url: "/auth/me",
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["CurrentUser"],
     }),
 
-    getDashboardStats: builder.query({
-      query: () => "/dashboard/stats",
+    changePassword: builder.mutation({
+      query: (data) => ({
+        url: "/auth/me/password",
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+
+    // User
+
+    getUsers: builder.query<any, void>({
+      query: () => "/users",
+      providesTags: ["Users"],
     }),
 
     deleteUser: builder.mutation<{ detail: string }, number>({
@@ -357,29 +357,22 @@ export const api = createApi({
       invalidatesTags: ["Users"],
     }),
 
+    // Extras
+
+    getSprints: builder.query<string[], void>({
+      query: () => "/task1/sprints",
+    }),
+
+    getDashboardStats: builder.query({
+      query: () => "/dashboard/stats",
+    }),
+
     getRoles: builder.query({
       query: () => "/roles",
       providesTags: ["Users"],
     }),
 
-    updateMe: builder.mutation({
-      query: (data) => ({
-        url: "/auth/me",
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: ["CurrentUser"],
-    }),
-
-    changePassword: builder.mutation({
-      query: (data) => ({
-        url: "/auth/me/password",
-        method: "PATCH",
-        body: data,
-      }),
-    }),
-
-    // end
+    // END
   }),
 });
 
@@ -403,12 +396,6 @@ export const {
   useAddTaskCommentMutation,
   useAddSubtaskCommentMutation,
 
-  //users
-  useGetUsersQuery,
-  useGetCurrentUserQuery,
-  useGetRolesQuery,
-  useUpdateMeMutation,
-
   //auth
   useLoginUserMutation,
   useRegisterUserMutation,
@@ -416,6 +403,12 @@ export const {
   useDeleteUserMutation,
   useUpdateUserMutation,
   useChangePasswordMutation,
+
+  //users
+  useGetUsersQuery,
+  useGetCurrentUserQuery,
+  useGetRolesQuery,
+  useUpdateMeMutation,
 
   //extra
   useGetSprintsQuery,

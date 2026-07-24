@@ -1,12 +1,9 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
-
 from app.db.base import Base
 from app.models.model_association import user_task_association
 from app.models.model_subtask_association import user_subtask_association
-from app.models.model_user_role_association import (
-    user_role_association,
-)
+from app.models.model_user_role_association import user_role_association
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 
 class User(Base):

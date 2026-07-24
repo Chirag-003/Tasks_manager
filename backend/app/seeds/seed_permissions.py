@@ -1,6 +1,5 @@
-from sqlalchemy.orm import Session
-
 from app.models.model_permission import Permission
+from sqlalchemy.orm import Session
 
 
 def seed_permissions(db: Session):

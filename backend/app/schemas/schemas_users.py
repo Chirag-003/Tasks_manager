@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr
 from app.schemas.schemas_roles import RoleResponse
+from pydantic import BaseModel, EmailStr
 
 
 class UserUpdate(BaseModel):

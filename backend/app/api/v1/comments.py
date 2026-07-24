@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
+from app.core.rbac import require_permission
 from app.db.session import get_db
 from app.schemas.schemas_comments import CommentCreate, CommentResponse
 from app.services import services_comment
-from app.core.rbac import require_permission
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["Comments"])
 

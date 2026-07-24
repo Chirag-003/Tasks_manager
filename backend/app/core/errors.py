@@ -1,6 +1,6 @@
 from fastapi import Request, status
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse
 
 
 # ✅ Handle normal Python exceptions

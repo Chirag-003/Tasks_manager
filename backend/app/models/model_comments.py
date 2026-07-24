@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from app.db.base import Base
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 
 class Comment(Base):

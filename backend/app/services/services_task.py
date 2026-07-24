@@ -1,16 +1,10 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-
 from app.models.model_task import Task
 from app.models.model_users import User
-
-
-from sqlalchemy.exc import IntegrityError
-
 from app.schemas.schemas_enums import StatusEnum
-
-
+from fastapi import HTTPException
 from sqlalchemy import func  # ✅ ADD THIS IMPORT
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 
 def create_task(db: Session, task):
@@ -400,7 +394,7 @@ def delete_task(db: Session, task_id: int):
             status_code=400, detail="Cannot delete task with existing subtasks"
         )
 
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise HTTPException(status_code=500, detail="Error deleting task")
 

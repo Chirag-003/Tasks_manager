@@ -1,7 +1,6 @@
+from app.core.config import settings  # ✅ import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from app.core.config import settings  # ✅ import settings
 
 # ✅ use DATABASE_URL from config
 engine = create_engine(settings.DATABASE_URL)

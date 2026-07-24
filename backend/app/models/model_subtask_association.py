@@ -1,5 +1,5 @@
-from sqlalchemy import Table, Column, Integer, ForeignKey
 from app.db.base import Base
+from sqlalchemy import Column, ForeignKey, Integer, Table
 
 user_subtask_association = Table(
     "user_subtask_association",

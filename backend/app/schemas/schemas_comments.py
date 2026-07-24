@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
-from .schemas_users import UserResponse
 from datetime import datetime
+from typing import List
+
+from pydantic import BaseModel, Field
+
+from .schemas_users import UserResponse
 
 
 class CommentBase(BaseModel):

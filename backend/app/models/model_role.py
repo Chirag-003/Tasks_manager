@@ -1,15 +1,8 @@
+from app.db.base import Base
+from app.models.model_role_permission_association import role_permission_association
+from app.models.model_user_role_association import user_role_association
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-
-from app.db.base import Base
-
-from app.models.model_role_permission_association import (
-    role_permission_association,
-)
-
-from app.models.model_user_role_association import (
-    user_role_association,
-)
 
 
 class Role(Base):

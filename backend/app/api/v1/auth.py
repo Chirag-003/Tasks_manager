@@ -1,19 +1,15 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
-
+from app.core.dependencies import get_current_user
 from app.db.session import get_db
 from app.schemas.schemas_auth import (
-    RegisterRequest,
-    LoginRequest,
-    UpdateMeRequest,
     ChangePasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    UpdateMeRequest,
 )
 from app.schemas.schemas_users import UserResponse
 from app.services import services_auth
-
-
-from app.core.dependencies import get_current_user
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 

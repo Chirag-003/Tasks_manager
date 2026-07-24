@@ -1,6 +1,5 @@
-from sqlalchemy import Table, Column, Integer, ForeignKey
-
 from app.db.base import Base
+from sqlalchemy import Column, ForeignKey, Integer, Table
 
 role_permission_association = Table(
     "role_permissions",

@@ -1,22 +1,19 @@
-from sqlalchemy.orm import Session
-from fastapi import HTTPException
-
-from starlette import status
-from sqlalchemy.exc import IntegrityError
-
-from app.models.model_users import User
-from app.core.security import hash_password, verify_password
 from app.core.jwt_handler import (
     create_access_token,
     create_refresh_token,
     decode_refresh_token,
 )
-
+from app.core.security import hash_password, verify_password
 from app.core.validators import (
     validate_email,
-    validate_username,
     validate_password_strength,
+    validate_username,
 )
+from app.models.model_users import User
+from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+from starlette import status
 
 
 def create_user(db: Session, email: str, username: str, password: str):

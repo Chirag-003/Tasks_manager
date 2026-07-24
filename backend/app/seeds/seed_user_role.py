@@ -1,7 +1,6 @@
-from sqlalchemy.orm import Session
-
-from app.models.model_users import User
 from app.models.model_role import Role
+from app.models.model_users import User
+from sqlalchemy.orm import Session
 
 
 def seed_user_roles(db: Session):

@@ -1,7 +1,6 @@
-from fastapi import Depends, HTTPException, status
-
 from app.core.dependencies import get_current_user
 from app.core.permission import has_permission
+from fastapi import Depends, HTTPException, status
 
 
 def require_permission(permission_name: str):

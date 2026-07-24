@@ -1,22 +1,7 @@
-from fastapi import FastAPI
-
-from fastapi import Depends
-
-from app.core.dependencies import get_current_user
-
-
 from app.api.v1.router import router as v1_router
-
-from app.core.errors import (
-    global_exception_handler,
-    http_exception_handler,
-)
+from app.core.errors import global_exception_handler, http_exception_handler
+from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
-
-from app.models import model_task
-from app.models import model_subtasks
-
-
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Task Management API", version="1.0.0")

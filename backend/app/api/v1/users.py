@@ -1,15 +1,10 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
+from app.core.rbac import require_permission
 from app.db.session import get_db
 from app.schemas.schemas_users import UserResponse, UserUpdate
-from app.services import (
-    services_task,
-    services_users as services_user,
-    services_subtask,
-)
-
-from app.core.rbac import require_permission
+from app.services import services_subtask, services_task
+from app.services import services_users as services_user
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 

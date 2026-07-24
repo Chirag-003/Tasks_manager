@@ -1,8 +1,7 @@
-from sqlalchemy import func
-
-from app.models.model_users import User
-from app.models.model_task import Task
 from app.models.model_subtasks import SubTask
+from app.models.model_task import Task
+from app.models.model_users import User
+from sqlalchemy import func
 
 
 def get_dashboard_stats(db):

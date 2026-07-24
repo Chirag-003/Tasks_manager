@@ -1,24 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+import json
 from typing import Optional
 
+from app.core.rbac import require_permission
+from app.core.redis_client import redis_client
 from app.db.session import get_db
+from app.models.model_task import Task
+from app.schemas.schemas_enums import StatusEnum
 from app.schemas.schemas_task import (
     KanbanResponse,
     TaskCreate,
-    TaskUpdate,
     TaskResponse,
+    TaskUpdate,
 )
-from app.schemas.schemas_enums import StatusEnum
-
 from app.services import services_task
-from app.models.model_task import Task
-from app.models.model_users import User
-from sqlalchemy import distinct
-from app.core.rbac import require_permission
-
-from app.core.redis_client import redis_client
-import json
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -151,7 +147,7 @@ def get_sprints(db: Session = Depends(get_db)):
             redis_client.delete(cache_key)
 
     # ✅ DB query (middleware will handle errors)
-    sprints = db.query(Task.sprint).filter(Task.sprint != None).distinct().all()
+    sprints = db.query(Task.sprint).filter(Task.sprint.isnot(None)).distinct().all()
     sprint_list = [s[0] for s in sprints if s[0]]
 
     # ✅ safe cache write

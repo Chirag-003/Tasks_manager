@@ -1,11 +1,10 @@
+from app.core.redis_client import redis_client
+from app.models.model_comments import Comment
+from app.models.model_subtasks import SubTask
+from app.models.model_task import Task
+from app.models.model_users import User
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-
-from app.models.model_comments import Comment
-from app.models.model_task import Task
-from app.models.model_subtasks import SubTask
-from app.models.model_users import User
-from app.core.redis_client import redis_client
 
 
 def create_task_comment(db: Session, task_id: int, data):
@@ -24,7 +23,7 @@ def create_task_comment(db: Session, task_id: int, data):
 
     try:
         db.commit()
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise HTTPException(status_code=500, detail="Error creating comment")
 

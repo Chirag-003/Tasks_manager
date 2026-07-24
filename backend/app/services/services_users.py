@@ -1,20 +1,11 @@
-from sqlalchemy.orm import Session
-from fastapi import HTTPException
-from sqlalchemy.exc import IntegrityError
-from starlette import status
-from sqlalchemy import func
-
-
-from app.models.model_users import User
-from app.core.security import hash_password
+from app.core.validators import validate_email, validate_username
 from app.models.model_role import Role
-
-
-from app.core.validators import (
-    validate_password_strength,
-    validate_email,
-    validate_username,
-)
+from app.models.model_users import User
+from fastapi import HTTPException
+from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+from starlette import status
 
 
 def get_users(db: Session):

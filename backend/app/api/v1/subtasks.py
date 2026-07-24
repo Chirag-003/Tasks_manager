@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from fastapi import Query
+import json
 from typing import Optional
 
 from app.core.rbac import require_permission
-
+from app.core.redis_client import redis_client
 from app.db.session import get_db
 from app.schemas.schemas_subtasks import (
     SubTaskCreate,
@@ -13,8 +11,8 @@ from app.schemas.schemas_subtasks import (
     SubTaskUpdate,
 )
 from app.services import services_subtask
-from app.core.redis_client import redis_client
-import json
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
 
 router = APIRouter(
     tags=["Subtasks"],
